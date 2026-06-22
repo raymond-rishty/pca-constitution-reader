@@ -250,11 +250,93 @@ def _strip_quote(block, body):
     rest = block[cut:].lstrip(" .,;:­\n")
     return rest if len(rest) > 20 else block
 
+def _desplit(s):
+    """Rejoin the handful of OCR word-splits that are never valid unsplit (o f -> of, etc.).
+    Restricted to bigrams whose split form is never a real token, so this can't merge words
+    across a legitimate boundary. 'o f' alone accounts for ~3700 occurrences."""
+    s = re.sub(r"\bo f\b", "of", s)
+    s = re.sub(r"(?<=[.!?] )O f\b", "Of", s)   # sentence-initial -> keep the capital
+    s = re.sub(r"\bO f\b", "of", s)            # "Word O f God" -> "Word of God"
+    s = re.sub(r"\bI f\b", "If", s)            # sentence-initial "If" (~110x)
+    s = re.sub(r"\bi f\b", "if", s)
+    s = re.sub(r"\bfo r\b", "for", s)
+    s = re.sub(r"\bi t\b", "it", s)
+    s = re.sub(r"\bM r\b", "Mr", s)
+    return s
+
+def _clean_para(p):
+    p = re.sub(r"­\s*", "", p)                  # rejoin soft-hyphen line breaks
+    p = re.sub(r"\s+", " ", p).strip()
+    return _desplit(re.sub(r"^[.\s]+", "", p))
+
+# Running page-heads the OCR interleaved into the prose. Anchored full-line so a head is dropped
+# whether it stands alone (its own paragraph) or got joined onto adjacent text by the para builder;
+# never matches the same words inside a real sentence.
+_HEADS = (r"FORM OF GOVER+NMENT|RULES OF DISCIPLINE|RULES FOR ASSEMBLY OPERATIONS?|"
+          r"OPERATING MANUAL FOR STANDING JUDICIAL COMMISSION|DIRECTORY FOR THE WORSHIP OF GOD|"
+          r"CORPORATE BYLAWS|PROCEDURES FOR PRESBYTERY JUDICIAL COMMISSIONS|"
+          r"SUGGESTED FORMS FOR (?:USE IN CONNECTION WITH THE )?RULES OF DISCIPLINE|"
+          r"BIBLICAL CONFLICT RESOLUTION|PRELIMINARY PRINCIPLES|CONSTITUTION DEFINED")
+COMMENTARY_SKIP = re.compile(
+    r"(^§?\s*[0-9lIO]+\s*[-–]\s*[0-9lIO]+\s*$)|(^\d{1,3}$)|(^(PART|CHAPTER)\b)|"
+    r"(COMMENTARY O[NF] THE BOOK)|(^(?:" + _HEADS + r")\s*$)", re.I)
+
+def build_front_commentary(txt, bodies):
+    """Smith comments on the Preface before Chapter 1, but the chapter parser starts at the first
+    'l-l.' marker and drops everything before it. Recover the Preliminary Principles: the section
+    intro (origins) -> pref-2, and each numbered principle's commentary -> PP-1..PP-8 (quoted
+    provision stripped exactly as for chapter sections)."""
+    lines = txt.splitlines()
+    def find(pred, start=0):
+        for i in range(start, len(lines)):
+            if pred(lines[i]):
+                return i
+        return -1
+    head = lambda l: l.strip() == "PREFACE TO THE BOOK OF CHURCH ORDER"
+    s0 = find(head, find(head) + 1)                                 # body heading (1st hit is the TOC)
+    s2 = find(lambda l: l.strip() == "II. PRELIMINARY PRINCIPLES", s0) if s0 >= 0 else -1
+    s3 = find(lambda l: l.strip() == "III. THE CONSTITUTION DEFINED", s2) if s2 >= 0 else -1
+    if s2 < 0 or s3 < 0:
+        return {}
+    sec2 = lines[s2 + 1:s3]
+    def paras_of(seg):
+        out, para = [], []
+        for ln in seg:
+            t = ln.strip()
+            if not t:
+                if para: out.append(" ".join(para)); para = []
+                continue
+            if COMMENTARY_SKIP.search(t): continue
+            para.append(t)
+        if para: out.append(" ".join(para))
+        return [c for c in (_clean_para(p) for p in out) if len(c) > 1]
+    mk = re.compile(r"^\s*([1-8])\.(?:\s|$)")
+    marks, expect = [], 1
+    for i, ln in enumerate(sec2):
+        m = mk.match(ln)
+        if m and int(m.group(1)) == expect:
+            marks.append((expect, i)); expect += 1
+    if len(marks) != 8:
+        return {}
+    out = {}
+    intro = " ".join(paras_of(sec2[:marks[0][1]]))                  # origins prose (one OCR paragraph)
+    intro = re.split(r"\s+The Presbyterian Church in America, in setting forth the form", intro)[0].strip()
+    if len(intro) > 20:
+        out["pref-2"] = [intro]
+    for j, (n, i) in enumerate(marks):
+        nxt = marks[j + 1][1] if j + 1 < len(marks) else len(sec2)
+        full = "\n\n".join(paras_of(sec2[i:nxt]))
+        joined = _strip_quote(full, bodies.get(f"PP-{n}", ""))
+        cps = [p.strip() for p in joined.split("\n\n") if len(p.strip()) > 1]
+        if cps:
+            out[f"PP-{n}"] = cps
+    return out
+
 def build_commentary():
     txt = subprocess.run(["pdftotext", COMMENTARY_PDF, "-"], capture_output=True, text=True).stdout
     norm = lambda t: t.replace("l", "1").replace("I", "1").replace("O", "0")
     mark = re.compile(r"^\s*([0-9lIO]{1,2})\s*[-–]\s*([0-9lIO]{1,2})\s*\.+")   # marker may sit alone on its line
-    skip = re.compile(r"(^§?\s*[0-9lIO]+\s*[-–]\s*[0-9lIO]+\s*$)|(^\d{1,3}$)|(^(PART|CHAPTER)\b)|(COMMENTARY ON THE BOOK)", re.I)
+    skip = COMMENTARY_SKIP
     comm, cur, lastC, lastS, paras, para = {}, None, 0, 0, [], []
     def end_para():
         if para: paras.append(" ".join(para)); para.clear()
@@ -278,8 +360,8 @@ def build_commentary():
         para.append(t)
     flush()
     bodies = _bco_bodies()
-    clean = lambda p: re.sub(r"^[.\s]+", "", re.sub(r"\s+", " ", re.sub(r"­\s*", "", p)).strip())
-    out = {}
+    clean = _clean_para
+    out = dict(build_front_commentary(txt, bodies))   # Preface (Preliminary Principles) before Chapter 1
     for r, ps in comm.items():
         body = bodies.get(r, "")
         full = "\n\n".join(clean(p) for p in ps)
