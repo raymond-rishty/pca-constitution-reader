@@ -1,0 +1,4 @@
+# Copyrighted, explicitly "sole use, not for distribution" — never push the commentary pack
+content/packs/
+__pycache__/
+*.pyc

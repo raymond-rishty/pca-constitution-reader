@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCA Constitution — design prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..600&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ───────────────────────── design tokens ───────────────────────── */
+  :root{
+    --paper:#fbf9f6; --paper-2:#f2efe8; --ink:#1b1c1c; --ink-soft:#44474d;
+    --muted:#797269; --line:#e4ded2; --line-2:#cfc7b8;
+    --navy:#1a2b48; --navy-deep:#031632;        /* structure / authority */
+    --accent:#6e2b2b; --accent-soft:#f1e4e1; --accent-ink:#5a2222;   /* GA apparatus / interaction */
+    --serif:"EB Garamond","Iowan Old Style",Palatino,Georgia,serif;
+    --sans:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --measure:35rem;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper); color:var(--ink); font-family:var(--serif); -webkit-font-smoothing:antialiased; line-height:1.65; font-size:1.06rem; overflow-wrap:break-word}   /* long tokens wrap instead of overflowing */
+
+  /* ───────────────────────── header ───────────────────────── */
+  header{position:sticky; top:0; z-index:30; background:rgba(251,249,246,.93);
+    backdrop-filter:saturate(1.2) blur(6px); border-bottom:1px solid var(--line); font-family:var(--sans)}
+  .bar{max-width:1180px; margin:0 auto; padding:11px 22px; display:flex; align-items:center; gap:20px}
+  .brand{font-family:var(--serif); font-weight:600; font-size:1.15rem; letter-spacing:.01em; white-space:nowrap; cursor:pointer; background:none; border:none; color:var(--navy); padding:0; min-width:0; overflow:hidden; text-overflow:ellipsis}
+  .brand .pca{color:var(--accent)}
+  nav.books{display:flex; gap:2px; margin-left:6px}
+  nav.books button{font:inherit; font-size:.82rem; color:var(--ink-soft); background:none; border:none; cursor:pointer; padding:6px 11px; border-radius:2px; letter-spacing:.02em}
+  nav.books button:hover{background:var(--paper-2); color:var(--ink)}
+  nav.books button[aria-current="true"]{background:var(--accent-soft); color:var(--accent-ink); font-weight:600}
+  .spacer{flex:1}
+  .search-btn{font:inherit; font-size:.82rem; color:var(--muted); background:var(--paper-2); border:1px solid var(--line); border-radius:2px; padding:7px 12px; cursor:pointer; display:flex; gap:9px; align-items:center}
+  .search-btn:hover{border-color:var(--line-2); color:var(--ink-soft)}
+  .kbd{font-size:.7rem; border:1px solid var(--line-2); border-radius:2px; padding:1px 5px; background:#fff; color:var(--muted)}
+  /* mobile chrome (shown only ≤880px) */
+  .hamburger{display:none; font-size:1.3rem; background:none; border:none; color:var(--navy); cursor:pointer; padding:2px 6px; line-height:1}
+  .search-btn .mag{display:none}
+  .mobile-menu{display:none}
+  .botnav{display:none}
+
+  /* ───────────────────────── 3-column layout (reading) ───────────────────────── */
+  .shell{max-width:1180px; margin:0 auto; display:grid; grid-template-columns:200px minmax(0,1fr) 76px; align-items:start}
+  aside.rail{position:sticky; top:54px; align-self:start; padding:30px 14px 60px 22px; font-family:var(--sans)}
+  .rail .crumb{font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:0 0 12px}
+  .rail .rail-back{display:inline-block; font-size:.78rem; color:var(--accent); text-decoration:none; margin:0 0 16px; cursor:pointer}
+  .rail .rail-back:hover{text-decoration:underline}
+  .rail ol{list-style:none; margin:0; padding:0}
+  .rail a{display:block; text-decoration:none; color:var(--ink-soft); font-size:.84rem; padding:5px 9px; border-radius:2px; border-left:2px solid transparent; cursor:pointer}
+  .rail a:hover{background:var(--paper-2); color:var(--ink)}
+  .rail a.here{color:var(--accent-ink); border-left-color:var(--accent); font-weight:600; background:var(--accent-soft)}
+  .rail .sub a{font-size:.8rem; color:var(--muted); padding:3px 9px}
+  .rail .sub a:hover{color:var(--ink-soft)}
+  .rail .sub a.here{color:var(--accent-ink); border-left-color:var(--accent); font-weight:600; background:var(--accent-soft)}
+  /* catechism long-scroll movement headings */
+  .cat-movement{font-family:var(--sans); font-size:.76rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent-ink); border-bottom:1px solid var(--line); padding-bottom:8px; margin:40px 0 24px; scroll-margin-top:90px}
+  .prov.q{margin-bottom:18px}
+  /* catechism sticky current-question bar */
+  .cat-sticky{position:sticky; top:52px; z-index:5; background:rgba(251,249,246,.95); backdrop-filter:blur(4px); border-bottom:1px solid var(--line); font-family:var(--sans); font-size:.74rem; color:var(--muted); padding:7px 2px; margin:0 0 18px; display:flex; gap:10px; align-items:baseline}
+  .cat-sticky .cs-q{color:var(--navy); font-weight:600; letter-spacing:.02em}
+  .cat-sticky .cs-m{margin-left:auto; font-style:italic}
+  /* reading-density toggle */
+  .density{display:flex; width:fit-content; margin:0 auto 24px; border:1px solid var(--line); border-radius:2px; overflow:hidden; font-family:var(--sans)}
+  .density button{font:inherit; font-size:.74rem; color:var(--ink-soft); background:var(--paper); border:none; border-left:1px solid var(--line); padding:6px 12px; cursor:pointer}
+  .density button:first-child{border-left:none}
+  .density button[aria-pressed="true"]{background:var(--navy); color:#fff}
+  .cat-compact .prov.q{margin-bottom:9px}
+  .cat-compact .prov.q .body{font-size:1.05rem}
+  .cat-compact .prov.q .ans{font-size:.98rem}
+  .cat-compact .cat-movement{margin:24px 0 14px}
+  .cat-list .prov.q{margin-bottom:5px}
+  .cat-list .prov.q .ans, .cat-list .prov.q .pf-toggle, .cat-list .prov.q .proofs{display:none}
+  .cat-list .prov.q.expanded .ans{display:block}
+  .cat-list .prov.q .body{cursor:pointer}
+
+  main{padding:34px 8px 120px; min-width:0}
+  .doc{max-width:var(--measure); margin:0 auto}
+  .doc .kicker{font-family:var(--sans); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0 0 8px}
+  .doc h1{font-weight:600; font-size:2.1rem; line-height:1.18; margin:0 0 6px; letter-spacing:-.01em; color:var(--navy)}
+  .doc .subtitle{font-style:italic; color:var(--ink-soft); margin:0 0 36px; font-size:1.1rem}
+  .read-back{font-family:var(--sans); font-size:.8rem; color:var(--accent); text-decoration:none; cursor:pointer; display:inline-block; margin:0 0 18px}
+  .read-back:hover{text-decoration:underline}
+  /* reading-view chapter titles are centered like a printed page */
+  body[data-view="read"] .doc .kicker,
+  body[data-view="read"] .doc h1,
+  body[data-view="read"] .doc .subtitle{text-align:center}
+
+  /* BCO part tabs */
+  .parts{display:flex; flex-wrap:wrap; gap:5px; margin:0 0 26px; font-family:var(--sans)}
+  .parts button{font:inherit; font-size:.77rem; color:var(--ink-soft); background:var(--paper-2); border:1px solid var(--line); border-radius:2px; padding:5px 11px; cursor:pointer}
+  .parts button:hover{border-color:var(--line-2)}
+  .parts button[aria-current="true"]{background:var(--accent-soft); color:var(--accent-ink); border-color:var(--line-2); font-weight:600}
+  .advisory-note{font-family:var(--sans); font-size:.81rem; color:var(--ink-soft); background:var(--paper-2); border-left:3px solid var(--line-2); border-radius:0 2px 2px 0; padding:10px 14px; margin:0 0 26px; line-height:1.5}
+  .ptag{font-family:var(--sans); font-size:.61rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; padding:1px 7px; border-radius:2px; vertical-align:3px; margin:0 0 0 5px; white-space:nowrap}
+  /* Directory for Worship: binding (constitutional) sections get a navy authority bar + tint + label;
+     advisory sections stay plain (the chapter note + this contrast carry the distinction) */
+  .ptag.bind{font-family:var(--sans); font-size:.62rem; font-weight:700; letter-spacing:.16em; color:var(--navy); background:none; padding:0; margin:0 0 0 4px}
+  .prov.binding{border-left:3px solid var(--navy); background:rgba(26,43,72,.04); padding:8px 12px 8px 15px; border-radius:0 2px 2px 0}
+
+  /* provisions */
+  .prov{position:relative; margin:0 0 24px; scroll-margin-top:70px}
+  .prov .body{font-size:1.22rem; line-height:1.72}
+  .prov .n{font-weight:600; color:var(--navy); text-decoration:none; cursor:pointer; border-bottom:1px dotted transparent; padding-bottom:1px}
+  .prov .n:hover{border-bottom-color:var(--accent)}
+  .sig-inline{display:none; align-items:center; gap:5px; font-family:var(--sans); font-size:.68rem; color:var(--accent); background:var(--accent-soft); border-radius:2px; padding:1px 9px 1px 7px; text-decoration:none; line-height:1.7; margin:0 4px; vertical-align:2px; white-space:nowrap}
+  .sig-inline .dot{width:6px; height:6px; border-radius:50%; background:var(--accent)}
+  .prov.q .n{display:block; margin-bottom:3px; color:var(--navy); font-style:normal; font-size:1.15rem}
+  .prov.q .ans{display:block}
+  .prov.q .ans::before{content:"A. "; font-variant:small-caps; color:var(--muted)}
+
+  sup.pf{color:var(--accent); font-size:.7em; cursor:pointer; font-family:var(--sans); padding:0 1px}
+  .proofs{font-family:var(--sans); font-size:.82rem; color:var(--ink-soft); margin-top:7px; padding:9px 12px; background:var(--paper-2); border-radius:2px; display:none}
+  .proofs.open{display:block}
+  .proofs b{color:var(--accent-ink); font-weight:600}
+  .pf-toggle{font-family:var(--sans); font-size:.74rem; color:var(--muted); cursor:pointer; margin-top:5px; display:inline-block; border-bottom:1px dotted var(--line-2)}
+  .pf-toggle:hover{color:var(--accent)}
+  /* two-stage proof texts: references shown, full verse text on demand */
+  .pf-more{display:inline-block; margin-top:9px; font-size:.74rem; color:var(--accent); background:none; border:none; cursor:pointer; padding:0; font-family:var(--sans); border-bottom:1px dotted var(--line-2)}
+  .pf-more:hover{color:var(--accent-ink)}
+  .pf-verses{display:none; margin-top:9px; padding-top:9px; border-top:1px solid var(--line); line-height:1.55}
+  .pf-verses.open{display:block}
+  .pf-verses .v{margin:5px 0}
+  .pf-verses .vref{color:var(--navy); font-weight:600}
+  /* visible keyboard focus */
+  .prov .n:focus-visible, .dtab:focus-visible, .fchip:focus-visible, .pg:focus-visible,
+  .entry:focus-visible, .toc a:focus-visible, .copy-cite:focus-visible, .density button:focus-visible{outline:2px solid var(--navy); outline-offset:2px; border-radius:1px}
+
+  /* margin signals (absolutely placed at each provision's offset) */
+  .gutter{position:relative; padding:0 14px 0 0; font-family:var(--sans); min-height:1px}
+  .sig{position:absolute; left:0; text-align:left; cursor:pointer; text-decoration:none; font-size:.74rem; color:var(--muted); white-space:nowrap; transition:color .12s}
+  .sig .dot{display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; vertical-align:middle; background:var(--accent); opacity:.85}
+  .sig.empty .dot{background:none; border:1.5px solid var(--line-2); width:6px; height:6px}
+  .sig.empty{color:var(--line-2)}
+  .sig:hover{color:var(--accent)}
+  .sig:hover .dot{opacity:1; box-shadow:0 0 0 4px var(--accent-soft)}
+
+  /* ───────────────────────── landing views (home + component) ───────────────────────── */
+  body[data-view="home"] aside.rail, body[data-view="home"] .gutter,
+  body[data-view="component"] aside.rail, body[data-view="component"] .gutter{display:none}
+  body[data-view="home"] .shell, body[data-view="component"] .shell{grid-template-columns:minmax(0,1fr)}
+  body:not([data-view="read"]) .doc{max-width:none}
+  body:not([data-view="read"]) main{padding-top:54px}
+  .landing{max-width:48rem; margin:0 auto}
+
+  /* home (title page) */
+  .home-eyebrow{font-family:var(--sans); font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0 0 6px; text-align:center}
+  .home-title{font-weight:600; font-size:2.6rem; line-height:1.16; letter-spacing:-.015em; margin:0 auto; text-align:center; color:var(--navy); max-width:16ch}
+  /* icon-led component entries (Stitch landing) */
+  .hentries{margin-top:10px}
+  .hentry{display:block; text-decoration:none; color:inherit; text-align:center; padding:28px 0; cursor:pointer; border-top:1px solid var(--line)}
+  .hentry:first-child{border-top:none}
+  .hicon{display:block; color:var(--navy); margin:0 auto 12px}
+  .hicon svg{width:30px; height:30px; display:block; margin:0 auto}
+  .hname{display:block; font-size:1.55rem; font-weight:600; color:var(--navy); line-height:1.2}
+  .hentry:hover .hname{color:var(--accent)}
+  .hdesc{display:block; font-family:var(--sans); font-size:.86rem; color:var(--muted); margin-top:7px}
+  .home-rule{width:54px; height:2px; background:var(--accent); opacity:.6; margin:22px auto}
+  .home-lede{font-size:1.12rem; color:var(--ink-soft); line-height:1.65; max-width:36rem; margin:0 auto 8px; text-align:center}
+  .home-meta{font-family:var(--sans); font-size:.8rem; color:var(--muted); text-align:center; margin:18px 0 46px}
+  .home-subordinate{font-style:italic; color:var(--ink-soft); text-align:center; max-width:30rem; margin:0 auto 28px; font-size:1.08rem; line-height:1.5}
+  .home-jump{display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; max-width:32rem; margin:4px auto 46px; font-family:var(--sans); font-size:.9rem; color:var(--muted); background:var(--paper-2); border:1px solid var(--line); border-radius:2px; padding:13px 15px; cursor:pointer; text-align:left}
+  .home-jump:hover{border-color:var(--navy); color:var(--ink-soft)}
+  .home-jump .mag{color:var(--accent); font-size:1rem}
+  .division{margin:0 0 38px}
+  .division-h{font-family:var(--sans); font-size:.76rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-ink); border-bottom:1px solid var(--line); padding-bottom:8px; margin:0 0 4px; font-weight:600}
+  .entry{display:flex; align-items:baseline; gap:18px; padding:18px 6px; border-bottom:1px solid var(--line); text-decoration:none; color:inherit; cursor:pointer; transition:background .12s}
+  .entry:hover{background:var(--paper-2)}
+  .entry-abbr{font-weight:600; color:var(--accent); font-size:1rem; width:46px; flex:none; letter-spacing:.02em}
+  .entry-main{flex:1}
+  .entry-name{display:block; font-size:1.2rem; font-weight:600}
+  .entry-tag{display:block; font-style:italic; color:var(--ink-soft); font-size:.98rem; margin-top:2px}
+  .entry-stat{font-family:var(--sans); font-size:.76rem; color:var(--muted); white-space:nowrap; flex:none}
+  .entry .go{color:var(--line-2); font-size:1.1rem; margin-left:4px}
+  .entry:hover .go{color:var(--accent)}
+
+  /* component (part title page) */
+  .back{font-family:var(--sans); font-size:.8rem; color:var(--accent); text-decoration:none; cursor:pointer; display:inline-block; margin:0 0 22px}
+  .back:hover{text-decoration:underline}
+  .comp-eyebrow{font-family:var(--sans); font-size:.74rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 6px}
+  .comp-title{font-weight:600; font-size:2.1rem; line-height:1.15; margin:0 0 12px; letter-spacing:-.01em}
+  .comp-lede{font-size:1.08rem; color:var(--ink-soft); line-height:1.6; max-width:38rem; margin:0 0 14px}
+  .comp-meta{font-family:var(--sans); font-size:.8rem; color:var(--muted); margin:0 0 6px}
+  .comp-note{font-family:var(--sans); font-size:.8rem; font-style:italic; color:var(--muted); margin:14px 0 0; padding:10px 14px; background:var(--paper-2); border-radius:2px; line-height:1.5}
+  .toc-h{font-family:var(--sans); font-size:.76rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-ink); border-bottom:1px solid var(--line); padding-bottom:8px; margin:40px 0 6px; font-weight:600}
+  .toc{list-style:none; margin:0 0 10px; padding:0; columns:2; column-gap:34px}
+  .toc.one{columns:1}
+  .toc li{break-inside:avoid; margin:0}
+  .toc a{display:flex; gap:12px; align-items:baseline; padding:8px 8px; border-radius:2px; text-decoration:none; color:inherit; cursor:pointer}
+  .toc a:hover{background:var(--paper-2)}
+  .toc .tn{font-family:var(--sans); font-size:.78rem; color:var(--navy); min-width:2.2em; font-variant-numeric:tabular-nums; flex:none}
+  .toc .tt{flex:1; font-size:.98rem}
+  .toc .tcount{font-family:var(--sans); font-size:.68rem; color:var(--muted)}
+  .toc .sample{font-family:var(--sans); font-size:.6rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--accent-ink); background:var(--accent-soft); border-radius:2px; padding:1px 5px; align-self:center}
+  .part-block{margin:0 0 26px}
+  .part-block h3{font-weight:600; font-size:1.25rem; margin:0 0 2px}
+  .part-block .prange{font-family:var(--sans); font-size:.78rem; color:var(--muted); margin:0 0 8px}
+
+  /* ───────────────────────── drawer ───────────────────────── */
+  .overlay{position:fixed; inset:0; background:rgba(42,38,32,.28); opacity:0; pointer-events:none; transition:opacity .2s; z-index:40}
+  .overlay.show{opacity:1; pointer-events:auto}
+  .drawer{position:fixed; top:0; right:0; height:100%; width:404px; max-width:92vw; background:var(--paper); border-left:1px solid var(--line-2); box-shadow:-14px 0 40px rgba(42,38,32,.13); transform:translateX(100%); transition:transform .24s cubic-bezier(.4,0,.2,1); z-index:41; display:flex; flex-direction:column; font-family:var(--sans)}
+  .drawer.show{transform:translateX(0)}
+  .drawer .handle{display:none}
+  .drawer .dhead{padding:20px 22px 16px; border-bottom:1px solid var(--line)}
+  .drawer .eyebrow{font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+  .drawer .ref{font-family:var(--serif); font-size:1.6rem; font-weight:600; color:var(--navy); margin:2px 0 8px}
+  .drawer .quote{font-family:var(--serif); font-style:italic; color:var(--ink-soft); font-size:.98rem; line-height:1.5}
+  .drawer .x{position:absolute; top:16px; right:16px; border:none; background:none; font-size:1.3rem; color:var(--muted); cursor:pointer; line-height:1; padding:4px}
+  .drawer .x:hover{color:var(--ink)}
+  .dbody{overflow:auto; padding:8px 22px 40px}
+  .count{font-size:.78rem; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin:18px 0 8px}
+  .grp{border-bottom:1px solid var(--line)}
+  .grp summary{list-style:none; cursor:pointer; padding:11px 2px; display:flex; align-items:center; gap:9px; font-size:.92rem}
+  .grp summary::-webkit-details-marker{display:none}
+  .grp summary .tw{color:var(--muted); font-size:.75rem; transition:transform .15s}
+  .grp[open] summary .tw{transform:rotate(90deg)}
+  .grp .tag{font-size:.66rem; font-weight:600; text-transform:uppercase; letter-spacing:.03em; padding:2px 7px; border-radius:2px}
+  .t-case{background:#f6dfe2; color:#7a2230}
+  .t-ov{background:#e0eede; color:#2f5130}
+  .t-inq{background:#dde7f1; color:#28486a}
+  .t-rpr{background:#f4e6d6; color:#7a4a12}
+  .grp summary .lbl{flex:1}
+  .grp summary .num{color:var(--muted); font-variant-numeric:tabular-nums}
+  .grp .items{padding:0 2px 12px 30px}
+  .grp .items a{display:block; text-decoration:none; color:var(--ink-soft); font-size:.85rem; padding:6px 0; border-top:1px solid var(--line); line-height:1.4}
+  .grp .items a:first-child{border-top:none}
+  .grp .items a:hover{color:var(--accent)}
+  .grp .items .yr{color:var(--muted); font-variant-numeric:tabular-nums; margin-right:6px}
+  .grp .items .out{display:inline-block; margin-left:6px; font-size:.72rem; color:var(--muted)}
+  .grp .items .arr{float:right; color:var(--line-2)}
+  .grp .items a:hover .arr{color:var(--accent)}
+  .amend{margin-top:18px}
+  .amend summary{cursor:pointer; font-size:.85rem; color:var(--ink-soft); list-style:none; padding:9px 0}
+  .amend summary::-webkit-details-marker{display:none}
+  .amend .body{font-size:.83rem; color:var(--ink-soft); padding:4px 0 8px; line-height:1.55}
+  .amend .body .row{padding:6px 0; border-top:1px solid var(--line)}
+  .empty-note{font-size:.85rem; color:var(--muted); font-style:italic; padding:16px 0; line-height:1.5; font-family:var(--sans)}
+  /* notes (authored) — visually distinct from citations (derived) */
+  .notes{margin-top:20px; border-top:1px solid var(--line); padding-top:6px}
+  .note-tag{font-size:.6rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); background:#eceadf; border:1px solid var(--line-2); border-radius:2px; padding:1px 6px; margin-left:7px; vertical-align:1px}
+  .note{background:var(--paper-2); border-left:3px solid var(--line-2); border-radius:0 2px 2px 0; padding:9px 12px; margin:8px 0; font-size:.86rem; color:var(--ink); line-height:1.5; font-family:var(--sans)}
+  .note-meta{font-family:var(--sans); font-size:.68rem; color:var(--muted); margin-bottom:3px}
+  .note-empty{font-size:.82rem; color:var(--muted); font-style:italic; margin:8px 0}
+  .note-del{float:right; border:none; background:none; color:var(--line-2); cursor:pointer; font-size:.78rem; padding:0 2px; line-height:1}
+  .note-del:hover{color:var(--accent)}
+  .note-add{margin-top:10px}
+  .note-input{width:100%; font-family:var(--sans); font-size:.86rem; border:1px solid var(--line-2); border-radius:2px; padding:8px; resize:vertical; color:var(--ink); background:var(--paper); box-sizing:border-box}
+  .note-input:focus{outline:none; border-color:var(--navy)}
+  .note-save{margin-top:6px; font-family:var(--sans); font-size:.78rem; color:#fff; background:var(--navy); border:none; border-radius:2px; padding:6px 12px; cursor:pointer}
+  .note-save:hover{background:var(--navy-deep)}
+  /* packs & notes panel */
+  .packs{padding:0}
+  .packs-head{display:flex; align-items:center; justify-content:space-between; padding:15px 20px; border-bottom:1px solid var(--line); font-family:var(--serif); font-weight:600; color:var(--navy); font-size:1.05rem}
+  .packs-head .x{border:none; background:none; font-size:1.2rem; color:var(--muted); cursor:pointer}
+  .packs-body{padding:14px 20px 18px}
+  .pack-row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--line)}
+  .pack-row b{font-family:var(--sans); font-size:.92rem; color:var(--ink)}
+  .pack-sub{display:block; font-family:var(--sans); font-size:.74rem; color:var(--muted); margin-top:2px}
+  .pack-btn{font-family:var(--sans); font-size:.78rem; color:var(--navy); background:none; border:1px solid var(--line-2); border-radius:2px; padding:6px 12px; cursor:pointer; white-space:nowrap}
+  .pack-btn:hover{border-color:var(--navy); background:rgba(26,43,72,.04)}
+  .pack-btn.import{display:block; width:100%; margin-top:14px; background:var(--navy); color:#fff; border-color:var(--navy); padding:9px}
+  .packs-note{font-family:var(--sans); font-size:.74rem; color:var(--muted); line-height:1.5; margin-top:14px}
+  /* dossier: authority line + copy-citation + tabs + scaling (summary/histogram/filter/sort) */
+  .dmeta{margin-top:12px; display:flex; gap:8px; align-items:center}
+  .copy-cite{font-family:var(--sans); font-size:.75rem; color:var(--navy); background:none; border:1px solid var(--line-2); border-radius:2px; padding:5px 10px; cursor:pointer}
+  .copy-cite:hover{border-color:var(--navy); background:rgba(26,43,72,.04)}
+  .auth-pill{font-family:var(--sans); font-size:.62rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border-radius:2px}
+  .auth-pill.binding{color:#fff; background:var(--navy)}
+  .auth-pill.advisory{color:var(--muted); border:1px solid var(--line-2)}
+  .dtabs{display:flex; flex-wrap:wrap; border-bottom:1px solid var(--line); margin:4px 0 14px; position:sticky; top:0; background:var(--paper); z-index:2}
+  .dtab{font-family:var(--sans); font-size:.82rem; color:var(--muted); background:none; border:none; border-bottom:2px solid transparent; padding:10px 13px; cursor:pointer; margin-bottom:-1px}
+  .dtab:hover{color:var(--ink-soft)}
+  .dtab.on{color:var(--navy); border-bottom-color:var(--navy); font-weight:600}
+  .dsum{font-size:.86rem; color:var(--ink-soft); line-height:1.5; margin:0 0 12px}
+  .dsum b{color:var(--navy)}
+  .histo{display:flex; flex-direction:column; gap:4px; margin:0 0 16px; padding:11px 13px; background:var(--paper-2); border-radius:2px}
+  .histo .hcap{font-family:var(--sans); font-size:.64rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:3px}
+  .hbar{display:flex; align-items:center; gap:8px; font-family:var(--sans); font-size:.7rem; color:var(--muted)}
+  .hbar .hd{width:30px; flex:none; text-align:right; font-variant-numeric:tabular-nums}
+  .hbar .hbarfill{height:8px; background:var(--accent); opacity:.5; border-radius:1px; min-width:2px}
+  .fchips{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:0 0 14px}
+  .fchip{font-family:var(--sans); font-size:.74rem; color:var(--ink-soft); background:var(--paper-2); border:1px solid var(--line); border-radius:2px; padding:4px 9px; cursor:pointer}
+  .fchip:hover{border-color:var(--line-2)}
+  .fchip.on{background:var(--navy); color:#fff; border-color:var(--navy)}
+  .sortbtn{margin-left:auto; font-family:var(--sans); font-size:.73rem; color:var(--muted); background:none; border:none; cursor:pointer}
+  .sortbtn:hover{color:var(--accent)}
+  .cgrp{margin:0 0 16px}
+  .cgrp-h{display:flex; align-items:center; gap:9px; margin:0 0 4px}
+  .cgrp-h .cgrp-n{color:var(--muted); font-family:var(--sans); font-size:.74rem; font-variant-numeric:tabular-nums}
+  .cite{display:block; text-decoration:none; color:var(--ink-soft); font-size:.86rem; padding:7px 0; border-top:1px solid var(--line); line-height:1.45}
+  .cite:first-of-type{border-top:none}
+  .cite:hover{color:var(--accent)}
+  .cite .yr{color:var(--muted); font-variant-numeric:tabular-nums; margin-right:8px; font-family:var(--sans); font-size:.78rem}
+  .cite .out{display:inline-block; margin-left:6px; font-size:.74rem; color:var(--muted)}
+  .cite .arr{float:right; color:var(--line-2)}
+  .cite:hover .arr{color:var(--accent)}
+  .histtab .hrow{padding:8px 0; border-top:1px solid var(--line); font-size:.86rem; color:var(--ink-soft); line-height:1.5}
+  .histtab .hrow:first-child{border-top:none}
+  .histtab .hrow b{color:var(--navy)}
+  .hnote{font-size:.76rem; color:var(--muted); font-style:italic; margin-top:12px; font-family:var(--sans)}
+  /* commentary (Morton Smith) — BCO dossier tab */
+  .commentary p{font-family:var(--sans); font-size:.88rem; line-height:1.6; color:var(--ink-soft); margin:0 0 11px}
+  .cattrib{font-family:var(--sans); font-size:.72rem; color:var(--muted); margin-top:14px; border-top:1px solid var(--line); padding-top:10px}
+  /* Scripture proofs — Westminster dossier tab (settled text in serif, clause-tied refs in sans/accent) */
+  .proofs-view p{font-family:var(--serif); font-size:1.02rem; line-height:1.65; color:var(--ink); margin:0 0 10px}
+  .proofs-view .pref{font-family:var(--sans); font-size:.78em; color:var(--accent); padding:0 1px}
+
+  /* ───────────────────────── ⌘K palette ───────────────────────── */
+  .pal-wrap{position:fixed; inset:0; z-index:50; display:none; align-items:flex-start; justify-content:center; background:rgba(42,38,32,.3); padding-top:14vh}
+  .pal-wrap.show{display:flex}
+  .pal{width:540px; max-width:92vw; background:var(--paper); border:1px solid var(--line-2); border-radius:2px; box-shadow:0 24px 60px rgba(42,38,32,.3); overflow:hidden; font-family:var(--sans)}
+  .pal input{width:100%; border:none; padding:17px 20px; font-size:1.05rem; background:none; color:var(--ink); outline:none; font-family:var(--serif)}
+  .pal .hits{border-top:1px solid var(--line); max-height:50vh; overflow:auto}
+  .pal .hit{padding:11px 20px; display:flex; gap:12px; align-items:baseline; cursor:pointer; border-bottom:1px solid var(--line)}
+  .pal .hit:hover,.pal .hit.sel{background:var(--accent-soft)}
+  .pal .hit .ref{font-family:var(--serif); font-weight:600; color:var(--navy); min-width:74px}
+  .pal .hit .txt{color:var(--ink-soft); font-size:.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .pal .foot{padding:8px 20px; font-size:.74rem; color:var(--muted); display:flex; gap:16px; border-top:1px solid var(--line)}
+
+  /* ───────────────────────── footer pager (sequential nav) ───────────────────────── */
+  .pager{display:flex; align-items:stretch; gap:10px; margin:56px 0 0; border-top:1px solid var(--line); padding-top:20px; font-family:var(--sans)}
+  .pg{flex:1; min-width:0; text-decoration:none; color:var(--ink-soft); display:flex; align-items:center; gap:11px; padding:12px 14px; border:1px solid var(--line); border-radius:2px; cursor:pointer; background:var(--paper); transition:border-color .12s,background .12s}
+  .pg:hover{border-color:var(--line-2); background:var(--paper-2)}
+  .pg.next{justify-content:flex-end; text-align:right}
+  .pg .chev{font-size:1.3rem; color:var(--muted); flex:none; line-height:1}
+  .pg:hover .chev{color:var(--accent)}
+  .pg .pgwrap{display:flex; flex-direction:column; min-width:0}
+  .pg .pl{font-size:.71rem; color:var(--accent); letter-spacing:.04em}
+  .pg .pt{font-size:.92rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .pg.pos{flex:none; align-items:center; justify-content:center; color:var(--muted); font-size:.77rem; font-variant-numeric:tabular-nums; border:none; background:none; cursor:default; padding:0 4px}
+  .pg.disabled{justify-content:center; color:var(--muted)}
+  .swipe-hint{display:none}
+  @keyframes turn{from{opacity:.3} to{opacity:1}}
+  @keyframes bump{25%{transform:translateX(9px)} 70%{transform:translateX(-4px)} 100%{transform:none}}
+  .doc.turn{animation:turn .2s ease}
+  .doc.bump{animation:bump .26s ease}
+
+  /* ───────────────────────── responsive ───────────────────────── */
+  @media(max-width:880px){
+    .shell{display:block; max-width:100%}            /* no grid on mobile — rail/gutter are hidden anyway */
+    main{display:block; width:100%; max-width:100%; min-width:0; padding:24px 18px 140px}
+    .doc{max-width:100%}                              /* hard-cap the reading column to the viewport */
+    body[data-view="read"] aside.rail, .gutter{display:none}
+    .sig-inline{display:inline-flex}
+    .home-title{font-size:2rem}
+    .toc{columns:1}
+    .pg .pl{font-size:.66rem}
+    .swipe-hint{display:block; text-align:center; font-size:.72rem; color:var(--muted); margin:14px 0 0; font-family:var(--sans)}
+    .drawer{top:auto; bottom:0; left:0; right:0; width:100%; max-width:100%; height:auto; max-height:86vh; border-left:none; border-top:1px solid var(--line-2); border-radius:2px 2px 0 0; box-shadow:0 -16px 44px rgba(42,38,32,.20); transform:translateY(101%); padding-bottom:env(safe-area-inset-bottom)}
+    .drawer.show{transform:translateY(0)}
+    .drawer .handle{display:block; width:38px; height:4px; border-radius:2px; background:var(--line-2); margin:9px auto 0; flex:none}
+    .drawer .dhead{padding-top:12px}
+    .drawer .x{top:12px}
+  }
+
+  /* mobile navigation chrome */
+  @media(max-width:880px){
+    .bar{gap:10px; padding:11px 14px}
+    nav.books{display:none}
+    .hamburger{display:block}
+    .search-btn{border:none; background:none; padding:6px 4px; color:var(--navy)}
+    .search-btn .sb-text, .search-btn .kbd{display:none}
+    .search-btn .mag{display:inline; font-size:1.25rem}
+    .mobile-menu.open{display:block; position:fixed; top:50px; left:0; right:0; z-index:29; background:var(--paper); border-bottom:1px solid var(--line-2); box-shadow:0 14px 26px rgba(27,28,28,.13)}
+    .mm-item{display:block; width:100%; text-align:left; font-family:var(--serif); font-size:1.05rem; color:var(--ink); background:none; border:none; border-top:1px solid var(--line); padding:14px 22px; cursor:pointer}
+    .mm-item:first-child{border-top:none; color:var(--navy); font-weight:600}
+    .botnav{display:flex; position:fixed; bottom:0; left:0; right:0; z-index:38; background:var(--paper); border-top:1px solid var(--line-2); justify-content:space-around; padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
+    .bn{display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; color:var(--muted); font-family:var(--sans); font-size:.66rem; cursor:pointer; padding:4px 14px}
+    .bn svg{width:22px; height:22px}
+    .bn:hover, .bn.on{color:var(--navy)}
+  }
+</style>
+</head>
+<body data-view="home">
+
+<header>
+  <div class="bar">
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+    <button class="brand" id="brand"><span class="pca">PCA</span> Constitution</button>
+    <nav class="books" id="books">
+      <button data-book="wcf">Confession</button>
+      <button data-book="wlc">Larger Cat.</button>
+      <button data-book="wsc">Shorter Cat.</button>
+      <button data-book="bco">Book of Church Order</button>
+    </nav>
+    <span class="spacer"></span>
+    <button class="search-btn" id="openPal"><span class="mag">⌕</span><span class="sb-text">Jump to a provision…</span> <span class="kbd">⌘K</span></button>
+    <button class="search-btn" id="openPacks" title="Packs & notes" aria-label="Packs and notes"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l8 4-8 4-8-4 8-4z"/><path d="M4 12l8 4 8-4"/></svg></button>
+  </div>
+</header>
+
+<!-- mobile book menu (hamburger target) -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mm-item" data-home>Home — The PCA Constitution</button>
+  <button class="mm-item" data-book="wcf">Westminster Confession of Faith</button>
+  <button class="mm-item" data-book="wlc">Westminster Larger Catechism</button>
+  <button class="mm-item" data-book="wsc">Westminster Shorter Catechism</button>
+  <button class="mm-item" data-book="bco">Book of Church Order</button>
+</div>
+
+<div class="shell">
+  <aside class="rail" id="rail"></aside>
+  <main><div class="doc" id="doc"></div></main>
+  <div class="gutter" id="gutter"></div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dRef" aria-hidden="true">
+  <div class="handle"></div>
+  <div class="dhead">
+    <button class="x" id="closeDrawer" aria-label="Close">✕</button>
+    <div class="eyebrow" id="dEyebrow"></div>
+    <div class="ref" id="dRef"></div>
+    <div class="quote" id="dQuote"></div>
+    <div class="dmeta" id="dMeta"></div>
+  </div>
+  <div class="dbody" id="dBody"></div>
+</aside>
+
+<!-- mobile bottom navigation -->
+<nav class="botnav" aria-label="Primary">
+  <button class="bn" data-bn="library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5h6v14H4zM10 5h4v14h-4zM14 6l4-1 2 13-4 1z"/></svg><span>Library</span></button>
+  <button class="bn" data-bn="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="6"/><line x1="20" y1="20" x2="16" y2="16"/></svg><span>Search</span></button>
+  <button class="bn" data-bn="contents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="7" x2="20" y2="7"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="17" x2="20" y2="17"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg><span>Contents</span></button>
+</nav>
+
+<!-- packs & notes panel -->
+<div class="pal-wrap" id="packWrap">
+  <div class="pal packs">
+    <div class="packs-head"><span>Packs &amp; Notes</span><button class="x" id="packClose" aria-label="Close">✕</button></div>
+    <div class="packs-body" id="packsBody"></div>
+  </div>
+</div>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+
+<div class="pal-wrap" id="palWrap">
+  <div class="pal">
+    <input id="palInput" placeholder="Type a reference (24-1) or a phrase (chief end)…" autocomplete="off">
+    <div class="hits" id="palHits"></div>
+    <div class="foot"><span><span class="kbd">↑↓</span> navigate</span><span><span class="kbd">↵</span> open</span><span><span class="kbd">esc</span> close</span></div>
+  </div>
+</div>
+
+<script src="content/wsc.js"></script>
+<script src="content/wlc.js"></script>
+<script src="content/wcf.js"></script>
+<script src="content/bco.js"></script>
+<script src="content/proofs.js"></script>
+<script>
+/* ══════════ CONTENT: real where sourced (window.WSC), placeholder elsewhere ══════════ */
+const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.";
+const SHORT_LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.";
+// curated opening questions (the rest are generated placeholders in the long scroll)
+const CAT_CURATED = {
+  "Q.1":{q:"What is the chief end of man?", body:`Man's chief end is to glorify God,<sup class="pf" data-pf="a">a</sup> and to enjoy him for ever.<sup class="pf" data-pf="b">b</sup>`, proofs:`<b>a</b> 1 Cor. 10:31; Rom. 11:36.&nbsp;&nbsp; <b>b</b> Ps. 73:25–28.`,
+    verses:`<div class="v"><span class="vref">1 Cor. 10:31</span> — Whether therefore ye eat, or drink, or whatsoever ye do, do all to the glory of God.</div><div class="v"><span class="vref">Ps. 73:25–26</span> — Whom have I in heaven but thee? … God is the strength of my heart, and my portion for ever.</div>`},
+  "Q.2":{q:"What rule hath God given to direct us how we may glorify and enjoy him?", body:`The Word of God, which is contained in the Scriptures of the Old and New Testaments, is the only rule to direct us how we may glorify and enjoy him.<sup class="pf" data-pf="a">a</sup>`, proofs:`<b>a</b> 2 Tim. 3:16; Eph. 2:20.`,
+    verses:`<div class="v"><span class="vref">2 Tim. 3:16</span> — All scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction…</div>`},
+  "Q.3":{q:"What do the Scriptures principally teach?", body:`The Scriptures principally teach what man is to believe concerning God, and what duty God requires of man.`},
+};
+
+const COMPONENTS = {
+  wcf:{abbr:"WCF", mode:"paged", name:"Westminster Confession of Faith", division:"doctrinal",
+    tag:"The church's confession of what the Scriptures teach.",
+    lede:"The Confession sets out, in thirty-three chapters, the system of doctrine the Scriptures teach — in the PCA's received (American) revision, each clause supported by Scripture proof-texts.",
+    meta:"33 chapters · American revision · Scripture proof-texts"},
+  wlc:{abbr:"WLC", mode:"scroll", name:"Westminster Larger Catechism", division:"doctrinal",
+    tag:"The fuller catechism — for exposition and teaching.",
+    lede:"One hundred ninety-six questions and answers, expounding the faith more fully than the Shorter Catechism — long used for preaching and instruction.",
+    meta:"196 questions & answers · Scripture proof-texts"},
+  wsc:{abbr:"WSC", mode:"scroll", name:"Westminster Shorter Catechism", division:"doctrinal",
+    tag:"The concise catechism — for learning by heart.",
+    lede:"One hundred seven questions and answers, composed to be committed to memory — the most widely learned summary of the faith in the Presbyterian tradition.",
+    meta:"107 questions & answers · Scripture proof-texts"},
+  bco:{abbr:"BCO", mode:"paged", name:"Book of Church Order", division:"order",
+    tag:"How the church is governed, disciplined, and led in worship.",
+    lede:"The Constitution's governmental standard, in three parts: the Form of Government, the Rules of Discipline, and the Directory for the Worship of God.",
+    meta:"3 parts · Form of Government · Rules of Discipline · Directory for Worship"},
+};
+
+/* WCF chapter titles (standard 33) */
+const WCF_CH = [
+  "Of the Holy Scripture","Of God, and of the Holy Trinity","Of God's Eternal Decree","Of Creation",
+  "Of Providence","Of the Fall of Man, of Sin, and of the Punishment thereof","Of God's Covenant with Man",
+  "Of Christ the Mediator","Of Free Will","Of Effectual Calling","Of Justification","Of Adoption",
+  "Of Sanctification","Of Saving Faith","Of Repentance unto Life","Of Good Works",
+  "Of the Perseverance of the Saints","Of the Assurance of Grace and Salvation","Of the Law of God",
+  "Of Christian Liberty, and Liberty of Conscience","Of Religious Worship, and the Sabbath Day",
+  "Of Lawful Oaths and Vows","Of the Civil Magistrate","Of Marriage and Divorce","Of the Church",
+  "Of the Communion of Saints","Of the Sacraments","Of Baptism","Of the Lord's Supper","Of Church Censures",
+  "Of Synods and Councils","Of the State of Men after Death, and of the Resurrection of the Dead",
+  "Of the Last Judgment"
+];
+/* catechisms divide into three classic movements */
+const WSC_SECTIONS = [["1","3","Man's chief end, and the rule God has given"],["4","38","What man is to believe concerning God"],["39","107","The duty God requires of man"]];
+const WLC_SECTIONS = [["1","5","Man's chief end, and the rule God has given"],["6","90","What man is to believe concerning God"],["91","196","The duty God requires of man"]];
+/* BCO parts (chapter lists illustrative in this prototype) */
+const BCO_PARTS = [
+  {key:"fog", name:"Form of Government", range:"Chapters 1–26",
+    chapters:[[1,"Preliminary Principles"],[7,"Church Officers"],[13,"The Presbytery"],[24,"Election of Elders & Deacons","24"],[25,"Organizing a Church"]]},
+  {key:"rod", name:"Rules of Discipline", range:"Chapters 27–46",
+    chapters:[[27,"The Nature of Discipline"],[31,"Process: Its Nature and Parties","31"],[34,"Cases Without Process"],[42,"References & Appeals"]]},
+  {key:"dow", name:"Directory for the Worship of God", range:"Chapters 47–63",
+    note:"Mixed authority: most chapters are an approved guide (not binding); some are constitutional. The Preface draws the line.",
+    chapters:[[47,"The Principles of Worship"],[51,"The Sanctification of the Lord's Day","51"],[56,"The Administration of Baptism"],[58,"The Lord's Supper"]]},
+];
+
+/* the reading SPINE — the ordered sequence prev/next/swipe walks within each component.
+   WCF = 33 chapters; catechisms = thematic question-groups; BCO = its chapters flowed across all 3 parts. */
+const SPINE = {
+  wcf: WCF_CH.map((t,i)=>({ch:String(i+1), title:t})),
+  wsc: WSC_SECTIONS.map(([a,b,t])=>({qStart:a, qEnd:b, title:t})),
+  wlc: WLC_SECTIONS.map(([a,b,t])=>({qStart:a, qEnd:b, title:t})),
+  bco: (window.BCO_ORDER
+    ? window.BCO_ORDER.map(id=>({part:window.BCO[id].part, ch:id, title:window.BCO[id].title, vacated:window.BCO[id].vacated}))
+    : BCO_PARTS.flatMap(p=>p.chapters.map(ch=>({part:p.key, ch:String(ch[0]), title:ch[1], partName:p.name})))),
+};
+
+/* dossiers (drive the margin counts); refs not listed → empty state */
+const DOSSIER = {
+  "24-1":{quote:"Those who have been called to office in the church…", cases:11, ov:18, inq:5, rpr:30,
+    amend:[{ga:"16th (1988)", n:"Renumbering within Ch. 24."},{ga:"39th (2011)", n:"Amended re: term eldership."}]},
+  "24-2":{quote:"Ruling elders and deacons, being chosen by the people…", cases:0, ov:1, inq:0, rpr:3, amend:[]},
+  "24-4":{quote:"At a congregational meeting called for that purpose…", cases:1, ov:0, inq:0, rpr:2, amend:[]},
+  "31-2":{quote:"Process against an offender shall not commence unless…", cases:3, ov:1, inq:1, rpr:0,
+    amend:[{ga:"35th (2007)", n:"Clarified the timing of process."}]},
+  "31-5":{quote:"It is the duty of all church Sessions and Presbyteries…", cases:1, ov:0, inq:0, rpr:0, amend:[]},
+  "51-2":{quote:"The Lord's Day, being the Christian Sabbath…", cases:0, ov:0, inq:1, rpr:0, amend:[]},
+  "21.1":{quote:"The light of nature showeth that there is a God…", cases:0, ov:0, inq:0, rpr:1, amend:[]},
+  "Q.1":{quote:"Man's chief end is to glorify God, and to enjoy him for ever.", cases:0, ov:0, inq:1, rpr:1, amend:[]},
+};
+
+/* user-authored notes (distinct from derived citations) — keyed by the same provision ref */
+const NOTES = {
+  "Q.1":[{who:"You", when:"Apr 2026", text:"WLC Q.1 gives the fuller treatment of “enjoy him for ever.” Cross-reference for the membership class."}],
+  "24-1":[{who:"You", when:"Mar 2026", text:"Note the link to BCO 21 on the manner of ordination."}],
+};
+
+/* ── notes + content packs: persistence (localStorage) + portable import/export ── */
+window.BCO_COMMENTARY = window.BCO_COMMENTARY || {};   // commentary now arrives via an imported pack, not the bundle
+let COMMENTARY_LABEL = "Commentary";
+const PACK_FORMAT = "pca-constitution-pack";
+(function restore(){                                   // durable when served; file:// may not persist (export files cover that)
+  try{ const n=localStorage.getItem("pcacon.notes"); if(n){ const o=JSON.parse(n); Object.keys(NOTES).forEach(k=>delete NOTES[k]); Object.assign(NOTES, o); } }catch(e){}
+  try{ const c=localStorage.getItem("pcacon.commentary"); if(c){ const o=JSON.parse(c); window.BCO_COMMENTARY=o.entries||{}; COMMENTARY_LABEL=o.label||COMMENTARY_LABEL; } }catch(e){}
+})();
+const saveNotes = ()=>{ try{ localStorage.setItem("pcacon.notes", JSON.stringify(NOTES)); }catch(e){} };
+const saveCommentary = ()=>{ try{ localStorage.setItem("pcacon.commentary", JSON.stringify({label:COMMENTARY_LABEL, entries:window.BCO_COMMENTARY})); }catch(e){} };
+const noteDate = ()=>{ try{ return new Date().toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}); }catch(e){ return ""; } };
+function packDownload(name, obj){ const u=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:"application/json"})); const a=document.createElement("a"); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u); }
+function exportNotes(){ packDownload("pca-constitution-notes.json", {format:PACK_FORMAT, version:1, kind:"notes", label:"My notes", exported:noteDate(), entries:NOTES}); }
+function importPack(obj){
+  if(!obj || obj.format!==PACK_FORMAT) throw new Error("Not a PCA Constitution pack file.");
+  const entries=obj.entries||{}, n=Object.keys(entries).length;
+  if(obj.kind==="notes"){                              // merge (non-destructive), dedup by text
+    for(const ref in entries){ const have=NOTES[ref]||(NOTES[ref]=[]); const seen=new Set(have.map(x=>x.text)); (entries[ref]||[]).forEach(x=>{ if(!seen.has(x.text)) have.push(x); }); }
+    saveNotes();
+  } else if(obj.kind==="commentary"){
+    window.BCO_COMMENTARY=entries; COMMENTARY_LABEL=obj.label||"Commentary"; saveCommentary();
+  } else throw new Error("Unsupported pack kind: "+obj.kind);
+  return {kind:obj.kind, n};
+}
+
+/* curated chapters with real-feeling text (others are generated lorem) */
+const CURATED = {
+  "wcf:21":{kicker:"Westminster Confession of Faith", title:"Chapter 21",
+    subtitle:"Of Religious Worship, and the Sabbath Day",
+    provs:[
+      {ref:"21.1", body:`The light of nature showeth that there is a God, who hath lordship and sovereignty over all;<sup class="pf" data-pf="a">a</sup> but the acceptable way of worshipping the true God is instituted by Himself.<sup class="pf" data-pf="b">b</sup>`,
+        proofs:`<b>a</b> Rom. 1:20; Ps. 19:1–4.&nbsp;&nbsp; <b>b</b> Deut. 12:32; Matt. 15:9.`,
+        verses:`<div class="v"><span class="vref">Rom. 1:20</span> — For the invisible things of him from the creation of the world are clearly seen, being understood by the things that are made…</div><div class="v"><span class="vref">Deut. 12:32</span> — What thing soever I command you, observe to do it: thou shalt not add thereto, nor diminish from it.</div>`},
+      {ref:"21.5", body:`The reading of the Scriptures with godly fear; the sound preaching, and conscionable hearing of the Word;<sup class="pf" data-pf="a">a</sup> the singing of psalms with grace in the heart.`,
+        proofs:`<b>a</b> Acts 15:21; 2 Tim. 4:2; James 1:22.`},
+    ]},
+  "bco:fog:24":{kicker:"Book of Church Order · Form of Government", title:"Chapter 24",
+    subtitle:"The Election, Ordination, and Installation of Ruling Elders and Deacons",
+    railSub:["24-1","24-2","24-3","24-4","24-5"],
+    provs:[
+      {ref:"24-1", body:`Those who have been called to office in the church are to be inducted by the ordination of a court. ${LOREM}`},
+      {ref:"24-2", body:`Ruling elders and deacons, being chosen by the people, ${LOREM}`},
+      {ref:"24-3", body:`Before any election shall take place, the Session shall determine the number of officers to be elected. ${LOREM}`},
+      {ref:"24-4", body:`At a congregational meeting called for that purpose, ${LOREM}`},
+      {ref:"24-5", body:`In every case the man elected must signify his acceptance of the office before being ordained. ${LOREM}`},
+    ]},
+  "bco:rod:31":{kicker:"Book of Church Order · Rules of Discipline", title:"Chapter 31",
+    subtitle:"Of Process, Its Nature and the Parties to It",
+    railSub:["31-1","31-2","31-5"],
+    provs:[
+      {ref:"31-1", body:`Discipline is the exercise of authority given the church by the Lord Jesus Christ. ${LOREM}`},
+      {ref:"31-2", body:`Process against an offender shall not commence unless some person undertakes to make out the charge. ${LOREM}`},
+      {ref:"31-5", body:`It is the duty of all church Sessions and Presbyteries to exercise care over those subject to their authority. ${LOREM}`},
+    ]},
+  "bco:dow:51":{kicker:"Book of Church Order · Directory for the Worship of God", title:"Chapter 51",
+    subtitle:"The Sanctification of the Lord's Day",
+    advisoryNote:`The Directory for the Worship of God is <b>mixed in authority</b>. Most of it is an approved guide — the mind of the Church, but not binding. Certain chapters (e.g. on the sacraments) are <b>constitutional and have the force of law</b>. Each provision is marked; the precise line is drawn by the BCO Preface.`,
+    railSub:["51-1","51-2","51-3"],
+    provs:[
+      {ref:"51-1", con:false, body:`It is the duty of every person to remember the Lord's Day and to prepare for it. ${LOREM}`},
+      {ref:"51-2", con:false, body:`The Lord's Day, being the Christian Sabbath, is to be kept holy unto the Lord. ${LOREM}`},
+      {ref:"51-3", con:true,  body:`The ordinary public worship of God requires that the people gather. ${LOREM}`},
+    ]},
+};
+
+const dossierFor = r => DOSSIER[r] || {quote:"", cases:0, ov:0, inq:0, rpr:0, amend:[]};
+const total = d => d.cases + d.ov + d.inq + d.rpr;
+
+// proof texts: references shown by default, full verse text on demand (two-stage)
+function proofsBlock(o){
+  if(!o.proofs) return '';
+  return `<span class="pf-toggle" role="button" tabindex="0">proof texts ▾</span><div class="proofs"><div class="pf-refs">${o.proofs}</div>`
+    + (o.verses ? `<button class="pf-more">Show full text ▾</button><div class="pf-verses">${o.verses}</div>` : '')
+    + `</div>`;
+}
+// accessible attributes for a provision's drill-in trigger (the number)
+function nAttrs(refLabel, n){
+  return `role="button" tabindex="0" aria-label="${refLabel}${n>0?` — ${n} GA action${n>1?'s':''}, open citations and notes`:` — open citations and notes`}"`;
+}
+
+let view = "home";
+let current = "bco";   // current component (for drawer labelling)
+let cur = {book:"bco", o:{}};   // current reading location (for prev/next/swipe)
+
+/* Directory for Worship authority note (BCO Preface / 3rd-GA statement) */
+const DFW_NOTE = `The Directory for Worship is an approved guide and should be taken seriously as the mind of the Church agreeable to the Standards. However, it does not have the force of law and is not to be considered obligatory in all its parts. <b>BCO 56, 57 and 58</b> and <b>BCO 59-3</b> have been given full constitutional authority; sections with the force of law are marked <b>[ BINDING ]</b>.`;
+
+/* ───────────── chapter builder (real content from window.WCF/BCO, else placeholder) ───────────── */
+function buildChapter(book, o){
+  // o: {part, ch, title}  OR  {qStart, qEnd, title}  (catechism)
+  if(book==="wcf"){
+    if(window.WCF && window.WCF[o.ch]){
+      const wc = window.WCF[o.ch];
+      // demo proofs/verses (until a real proof-text source) — from the curated ch.21 sample, keyed by ref
+      const demo = {}; ((CURATED["wcf:21"]||{}).provs||[]).forEach(p=>{ if(p.proofs) demo[p.ref]={proofs:p.proofs, verses:p.verses}; });
+      return {kicker:COMPONENTS.wcf.name, title:"Chapter "+o.ch, subtitle:wc.title,
+        railSub:wc.sections.map(s=>s.ref),
+        provs:wc.sections.map(s=>Object.assign({ref:s.ref, body:s.body}, demo[s.ref]||{}))};
+    }
+    const key = "wcf:"+o.ch;
+    if(CURATED[key]) return CURATED[key];
+    return {kicker:COMPONENTS.wcf.name, title:"Chapter "+o.ch, subtitle:o.title,
+      railSub:[o.ch+".1",o.ch+".2",o.ch+".3"],
+      provs:[1,2,3].map(i=>({ref:o.ch+"."+i, body:LOREM}))};
+  }
+  if(book==="wsc"||book==="wlc"){
+    const c = "wsc:Qsample";
+    if(o.qStart==="1"){ // curated opening of the catechism
+      return {kicker:COMPONENTS[book].name, title:"Questions "+o.qStart+"–"+o.qEnd, subtitle:o.title, q:true,
+        railSub:["Q.1","Q.2","Q.3"],
+        provs:[
+          {ref:"Q.1", q:"What is the chief end of man?", body:`Man's chief end is to glorify God,<sup class="pf" data-pf="a">a</sup> and to enjoy him for ever.<sup class="pf" data-pf="b">b</sup>`,
+            proofs:`<b>a</b> 1 Cor. 10:31; Rom. 11:36.&nbsp;&nbsp; <b>b</b> Ps. 73:25–28.`},
+          {ref:"Q.2", q:"What rule hath God given to direct us how we may glorify and enjoy him?", body:`The Word of God, which is contained in the Scriptures of the Old and New Testaments, is the only rule to direct us.<sup class="pf" data-pf="a">a</sup>`,
+            proofs:`<b>a</b> 2 Tim. 3:16; Eph. 2:20.`},
+          {ref:"Q.3", q:"What do the Scriptures principally teach?", body:`The Scriptures principally teach what man is to believe concerning God, and what duty God requires of man.`},
+        ]};
+    }
+    return {kicker:COMPONENTS[book].name, title:"Questions "+o.qStart+"–"+o.qEnd, subtitle:o.title, q:true,
+      railSub:["Q."+o.qStart,"Q."+(+o.qStart+1),"Q."+(+o.qStart+2)],
+      provs:[0,1,2].map(i=>({ref:"Q."+(+o.qStart+i), q:"[Question "+(+o.qStart+i)+"]", body:LOREM}))};
+  }
+  // bco — real text from window.BCO
+  if(window.BCO && window.BCO[o.ch]){
+    const bc = window.BCO[o.ch];
+    const PN = {fog:"Form of Government", rod:"Rules of Discipline", dow:"Directory for the Worship of God"}[bc.part];
+    const isChapter = !!PN;
+    const kicker = isChapter ? "Book of Church Order · "+PN : (bc.part==='appx' ? "Book of Church Order · Appendices" : "Book of Church Order");
+    const title = isChapter ? "Chapter "+o.ch : bc.title;
+    const subtitle = isChapter ? bc.title : "";
+    if(bc.vacated) return {kicker, title, subtitle, railSub:[], provs:[{ref:null, body:"This chapter has been vacated."}]};
+    const provs = (bc.paras||[]).map(p=>({ref:null, body:p}))
+      .concat((bc.sections||[]).map(s=>Object.assign({ref:s.ref, body:s.body}, bc.part==='dow' ? {con:!!s.binding} : {})));
+    return {kicker, title, subtitle, advisoryNote: bc.part==='dow' ? DFW_NOTE : undefined,
+      railSub: (bc.sections||[]).map(s=>s.ref), provs};
+  }
+  const key = "bco:"+o.part+":"+o.ch;
+  if(CURATED[key]) return CURATED[key];
+  const partName = (BCO_PARTS.find(p=>p.key===o.part)||{}).name;
+  return {kicker:"Book of Church Order · "+partName, title:"Chapter "+o.ch, subtitle:o.title,
+    railSub:[o.ch+"-1",o.ch+"-2",o.ch+"-3"],
+    provs:[1,2,3].map(i=>({ref:o.ch+"-"+i, body:LOREM}))};
+}
+
+/* ───────────── views ───────────── */
+function setView(v){ view=v; document.body.dataset.view=v; }
+
+const HOME_ICONS = {
+  wcf:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="3" width="14" height="18"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>`,
+  wlc:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 6c-2.2-1.4-4.8-1.6-7.5-1.1v13.2C7.2 17.5 9.8 17.7 12 19c2.2-1.3 4.8-1.5 7.5-1V4.9C16.8 4.4 14.2 4.6 12 6z"/><line x1="12" y1="6" x2="12" y2="19"/></svg>`,
+  wsc:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 7c-1.8-1.1-3.8-1.3-6-.9v11c2.2-.4 4.2-.2 6 .9 1.8-1.1 3.8-1.3 6-.9v-11c-2.2-.4-4.2-.2-6 .9z"/><line x1="12" y1="7" x2="12" y2="18"/></svg>`,
+  bco:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><line x1="12" y1="4" x2="12" y2="20"/><line x1="7" y1="20" x2="17" y2="20"/><path d="M12 5 5.5 7.5M12 5l6.5 2.5"/><path d="M5.5 7.5 3 13a2.5 2.5 0 0 0 5 0z"/><path d="M18.5 7.5 16 13a2.5 2.5 0 0 0 5 0z"/></svg>`,
+};
+const HOME_DESC = {
+  wcf:"The foundational doctrinal standard.",
+  wlc:"The fuller exposition, for teaching and study.",
+  wsc:"Concise instruction, for learning by heart.",
+  bco:"Government, Discipline, and Worship.",
+};
+function showHome(){
+  setView("home"); current="bco";
+  document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', false));
+  const entry = k => {
+    const c = COMPONENTS[k];
+    return `<a class="hentry" data-book="${k}"><span class="hicon">${HOME_ICONS[k]}</span><span class="hname">${c.name}</span><span class="hdesc">${HOME_DESC[k]}</span></a>`;
+  };
+  document.getElementById('doc').innerHTML = `<div class="landing home">
+    <p class="home-eyebrow">The Standards of the</p>
+    <h1 class="home-title">The Constitution of the Presbyterian Church in America</h1>
+    <div class="home-rule"></div>
+    <p class="home-subordinate">Subject to and subordinate to the Scriptures of the Old and New Testaments, the inerrant Word of God.</p>
+    <button class="home-jump" id="homeJump"><span><span class="mag">⌕</span>&nbsp; Jump to a reference — WCF 21.5, BCO 24-1, WSC Q.1…</span> <span class="kbd">⌘K</span></button>
+    <div class="hentries">${entry('wcf')}${entry('wlc')}${entry('wsc')}${entry('bco')}</div>
+  </div>`;
+  window.scrollTo(0,0);
+}
+
+function showComponent(book){
+  setView("component"); current=book;
+  document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', b.dataset.book===book));
+  const c = COMPONENTS[book];
+  let toc = '';
+  if(book==="wcf"){
+    toc = `<h2 class="toc-h">Contents</h2><ol class="toc">` + WCF_CH.map((t,i)=>{
+      const n=i+1, sample = (n===21 && !window.WCF);
+      return `<li><a data-book="wcf" data-ch="${n}" data-title="${t}"><span class="tn">${n}</span><span class="tt">${t}</span>${sample?'<span class="sample">sample</span>':''}</a></li>`;
+    }).join('') + `</ol>`;
+  } else if(book==="wsc"||book==="wlc"){
+    const secs = book==="wsc"?WSC_SECTIONS:WLC_SECTIONS;
+    toc = `<h2 class="toc-h">Movements</h2><ol class="toc one">`
+      + `<li><a data-book="${book}" data-qstart="1" data-qend="${book==='wsc'?107:196}" data-title="From the beginning"><span class="tn">Q1</span><span class="tt">Read from the beginning</span></a></li>`
+      + secs.map(([a,b,t])=>
+        `<li><a data-book="${book}" data-qstart="${a}" data-qend="${b}" data-title="${t}"><span class="tn">Q${a}–${b}</span><span class="tt">${t}</span></a></li>`
+      ).join('') + `</ol>`;
+  } else if(window.BCO){ // bco — real TOC: front matter, the three parts, appendices
+    const GROUPS = [['front','Preface & Principles'],['fog','Form of Government'],['rod','Rules of Discipline'],['dow','Directory for the Worship of God'],['appx','Appendices']];
+    toc = GROUPS.map(([key,label])=>{
+      const ids = window.BCO_ORDER.filter(id=>window.BCO[id].part===key);
+      if(!ids.length) return '';
+      const numbered = key==='fog'||key==='rod'||key==='dow';
+      const range = numbered ? `<p class="prange">Chapters ${ids[0]}–${ids[ids.length-1]}${key==='dow'?' · mixed authority (binding sections marked)':''}</p>` : '';
+      return `<div class="part-block"><h3>${label}</h3>${range}
+        <ol class="toc one">${ids.map(id=>{ const bc=window.BCO[id];
+          return `<li><a data-book="bco" data-ch="${id}"><span class="tn">${numbered?id:''}</span><span class="tt">${bc.title||'(Vacated)'}</span>${bc.vacated?'<span class="sample">vacated</span>':''}</a></li>`;
+        }).join('')}</ol></div>`;
+    }).join('');
+  } else { // bco fallback (illustrative)
+    toc = BCO_PARTS.map(p=>`<div class="part-block">
+      <h3>${p.name}</h3><p class="prange">${p.range}${p.note?` — <em>${p.note}</em>`:''}</p>
+      <ol class="toc one">${p.chapters.map(ch=>{
+        const sample = ch[2];
+        return `<li><a data-book="bco" data-part="${p.key}" data-ch="${ch[0]}" data-title="${ch[1]}"><span class="tn">${ch[0]}</span><span class="tt">${ch[1]}</span>${sample?'<span class="sample">sample</span>':''}</a></li>`;
+      }).join('')}</ol></div>`).join('');
+  }
+  document.getElementById('doc').innerHTML = `<div class="landing component">
+    <a class="back" data-home>‹ The PCA Constitution</a>
+    <p class="comp-eyebrow">${c.division==='doctrinal'?'Doctrinal Standard':'Church Order'}</p>
+    <h1 class="comp-title">${c.name}</h1>
+    <p class="comp-lede">${c.lede}</p>
+    <p class="comp-meta">${c.meta}</p>
+    ${toc}
+    <p class="comp-note">${
+      (book==='bco'&&window.BCO)
+      ? 'Full Book of Church Order — for personal study only (© PCA; not for redistribution). The Directory for Worship marks its binding (constitutional) sections.'
+      : ((book==='wsc'&&window.WSC)||(book==='wlc'&&window.WLC)||(book==='wcf'&&window.WCF))
+      ? 'Full text — public-domain OPC edition (the standard the PCA has adopted). Scripture proof texts are pending a proof-text source (WCF 21 shows a sample).'
+      : c.mode==='scroll'
+      ? 'Design prototype — placeholder text. The catechism opens as one long-scrolling page; every question is individually anchored and deep-linkable.'
+      : 'Design prototype — text is placeholder and the chapter list is illustrative. The chapter marked “sample” opens a live reading view.'}</p>
+  </div>`;
+  window.scrollTo(0,0);
+}
+
+/* route to the right renderer based on the component's reading mode */
+function openTarget(book, o){
+  o = o || {};
+  if(COMPONENTS[book].mode==='scroll') renderCatechism(book, o.anchor || (o.qStart!=null ? 'Q.'+o.qStart : null));
+  else showChapter(book, o);
+}
+function markBook(book){ document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', b.dataset.book===book)); }
+
+/* ── catechism: one long-scroll page, every question anchored & deep-linkable ── */
+function renderCatechism(book, anchor){
+  setView("read"); current=book; cur={book, mode:'scroll'};
+  markBook(book);
+  const c = COMPONENTS[book];
+  const DATA = (book==='wsc' && window.WSC) ? window.WSC : (book==='wlc' && window.WLC) ? window.WLC : null;   // real content where sourced
+  const N = DATA ? DATA.length : (book==='wsc' ? 107 : 196);
+  const secs = book==='wsc' ? WSC_SECTIONS : WLC_SECTIONS;
+  const startTitle = {}; secs.forEach(([a,b,t])=>startTitle[+a]=t);
+  // rail = movement jump-index (scrollspy-highlighted)
+  document.getElementById('rail').innerHTML =
+    `<a class="rail-back" data-book="${book}">‹ ${c.abbr} contents</a><p class="crumb">Movements</p><ol class="sub">` +
+    secs.map(([a,b,t])=>`<li><a data-spy="Q.${a}" href="#p-Q.${a}">Q${a}–${b}</a></li>`).join('') + `</ol>`;
+  // doc = whole catechism
+  let doc = `<a class="read-back" data-book="${book}">‹ ${c.name}</a><p class="kicker">${c.name}</p>`
+    + `<h1>${book==='wsc'?'Shorter':'Larger'} Catechism</h1><p class="subtitle">${c.tag}</p>`
+    + `<div class="density" role="group" aria-label="Reading density">`
+    +   `<button data-density="comfortable" aria-pressed="true">Comfortable</button>`
+    +   `<button data-density="compact" aria-pressed="false">Compact</button>`
+    +   `<button data-density="list" aria-pressed="false">Question list</button></div>`
+    + `<div class="cat-sticky" id="catSticky"><span class="cs-q">Q. 1</span><span class="cs-m">${secs[0][2]}</span></div>`;
+  let gut = '';
+  for(let i=1;i<=N;i++){
+    if(startTitle[i]) doc += `<h2 class="cat-movement" id="m-${i}">${startTitle[i]}</h2>`;
+    const ref = "Q."+i, k = CAT_CURATED[ref], real = DATA ? DATA[i-1] : null;
+    const d = dossierFor(ref), n = total(d);
+    const rl = book.toUpperCase()+' '+ref;
+    const inline = n>0 ? `<a class="sig-inline" data-ref="${ref}" aria-hidden="true" tabindex="-1"><span class="dot"></span>${n}</a>` : '';
+    const qText = real ? real.q : (k ? k.q : '[Question '+i+']');
+    const aText = real ? real.a : (k ? k.body : SHORT_LOREM);
+    doc += `<div class="prov q" id="p-${ref}"><span class="body"><a class="n" data-ref="${ref}" ${nAttrs(rl,n)}>${ref}</a>${inline} ${qText}</span><span class="ans">${aText}</span></div>`;
+    gut += n>0
+      ? `<a class="sig" data-ref="${ref}" aria-hidden="true" tabindex="-1" title="${n} GA actions cite ${ref}"><span class="dot"></span>${n}</a>`
+      : `<a class="sig empty" data-ref="${ref}" aria-hidden="true" tabindex="-1" title="No GA actions on file"><span class="dot"></span></a>`;
+  }
+  const other = book==='wsc' ? 'wlc' : 'wsc';
+  doc += `<nav class="pager">`
+    + `<a class="pg prev pgnav" data-book="${book}" data-contents><span class="chev">‹</span><span class="pgwrap"><span class="pl">Back to</span><span class="pt">Contents</span></span></a>`
+    + `<span class="pg pos">${N} questions</span>`
+    + `<a class="pg next pgnav" data-book="${other}" data-contents><span class="pgwrap"><span class="pl">Also</span><span class="pt">${other==='wlc'?'Larger':'Shorter'} Catechism</span></span><span class="chev">›</span></a>`
+    + `</nav>`;
+  const docEl = document.getElementById('doc');
+  docEl.className = 'doc cat-comfortable';
+  docEl.innerHTML = doc;
+  document.getElementById('gutter').innerHTML = gut;
+  alignGutter();
+  // deep-link: jump to the requested question and reflect it in the URL
+  if(anchor && document.getElementById('p-'+anchor)){
+    document.getElementById('p-'+anchor).scrollIntoView({block:'start'});
+    history.replaceState(null,'','#p-'+anchor);
+  } else { window.scrollTo(0,0); }
+  docEl.classList.remove('turn'); void docEl.offsetWidth; docEl.classList.add('turn');
+}
+
+/* locate a spec within its component's spine */
+function spineIndex(book, o){
+  const s = SPINE[book]; if(!s) return -1;
+  if(o.qStart!=null) return s.findIndex(x=>x.qStart===String(o.qStart));
+  return s.findIndex(x=>x.ch===String(o.ch) && (o.part==null || x.part===o.part));
+}
+/* build one prev/next pager link from a spine entry */
+function pgLink(kind, book, sp){
+  const isQ = sp.qStart!=null;
+  const data = isQ
+    ? `data-qstart="${sp.qStart}" data-qend="${sp.qEnd}" data-title="${sp.title}"`
+    : `${sp.part?`data-part="${sp.part}" `:''}data-ch="${sp.ch}" data-title="${sp.title}"`;
+  const num = isQ ? `Q ${sp.qStart}–${sp.qEnd}` : (/^\d/.test(String(sp.ch)) ? `Ch. ${sp.ch}` : '');
+  const wrap = `<span class="pgwrap"><span class="pl">${num}</span><span class="pt">${sp.title}</span></span>`;
+  return kind==='prev'
+    ? `<a class="pg prev pgnav" data-book="${book}" ${data}><span class="chev">‹</span>${wrap}</a>`
+    : `<a class="pg next pgnav" data-book="${book}" ${data}>${wrap}<span class="chev">›</span></a>`;
+}
+/* move one step along the spine; bounce at component edges */
+function goRelative(dir){
+  if(view!=='read' || cur.mode==='scroll') return;   // catechisms scroll; they don't page
+  if(document.getElementById('drawer').classList.contains('show')) return;
+  const s = SPINE[cur.book], i = spineIndex(cur.book, cur.o), j = i + dir;
+  if(i<0 || j<0 || j>=s.length){ bounce(dir); return; }
+  showChapter(cur.book, s[j]);
+}
+function bounce(){
+  const d = document.getElementById('doc');
+  d.classList.remove('bump'); void d.offsetWidth; d.classList.add('bump');
+}
+
+function showChapter(book, o){
+  setView("read"); current=book; cur={book,o};
+  document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', b.dataset.book===book));
+  const ch = buildChapter(book, o);
+  const c = COMPONENTS[book];
+  // rail
+  let rail = `<a class="rail-back" data-book="${book}">‹ ${c.abbr} contents</a><p class="crumb">${ch.title}</p>`;
+  if(ch.railSub && ch.railSub.length) rail += `<ol class="sub">` + ch.railSub.map(r=>`<li><a href="#p-${r}">${r}</a></li>`).join('') + `</ol>`;
+  document.getElementById('rail').innerHTML = rail;
+  // doc
+  let doc = `<a class="read-back" data-book="${book}">‹ ${c.name}</a>`
+    + `<p class="kicker">${ch.kicker}</p><h1>${ch.title}</h1>`
+    + (ch.subtitle ? `<p class="subtitle">${ch.subtitle}</p>` : '')
+    + (ch.advisoryNote ? `<div class="advisory-note">${ch.advisoryNote}</div>` : '');
+  let gut = '';
+  ch.provs.forEach(p=>{
+    if(!p.ref){ doc += `<div class="prov prose"><span class="body">${p.body}</span></div>`; return; }  // prose (front/appendix)
+    const d = dossierFor(p.ref), n = total(d);
+    const rl = (book==='bco'?'BCO ':book.toUpperCase()+' ')+p.ref;
+    const inline = n>0 ? `<a class="sig-inline" data-ref="${p.ref}" aria-hidden="true" tabindex="-1"><span class="dot"></span>${n}</a>` : '';
+    const tag = (p.con===true)?`<span class="ptag bind">[ BINDING ]</span>`:'';
+    if(ch.q){
+      doc += `<div class="prov q" id="p-${p.ref}"><span class="body"><a class="n" data-ref="${p.ref}" ${nAttrs(rl,n)}>${p.ref}</a>${inline}${tag} ${p.q}</span><span class="ans">${p.body}</span></div>`;
+    } else {
+      doc += `<div class="prov${p.con===true?' binding':''}" id="p-${p.ref}"><span class="body"><a class="n" data-ref="${p.ref}" ${nAttrs(rl,n)}>${p.ref}.</a>${inline}${tag} ${p.body}</span></div>`;
+    }
+    gut += n>0
+      ? `<a class="sig" data-ref="${p.ref}" aria-hidden="true" tabindex="-1" title="${n} GA actions cite ${p.ref}"><span class="dot"></span>${n}</a>`
+      : `<a class="sig empty" data-ref="${p.ref}" aria-hidden="true" tabindex="-1" title="No GA actions on file"><span class="dot"></span></a>`;
+  });
+  // footer pager (sequential nav) — flows across BCO parts, stops at component edges
+  const s = SPINE[book], i = spineIndex(book, o);
+  const prev = i>0 ? s[i-1] : null, next = (i>=0 && i<s.length-1) ? s[i+1] : null;
+  doc += `<nav class="pager">`
+    + (prev ? pgLink('prev', book, prev) : `<a class="pg prev disabled pgnav" data-book="${book}" data-contents>‹ Contents</a>`)
+    + `<span class="pg pos">${i>=0?i+1:'—'} / ${s.length}</span>`
+    + (next ? pgLink('next', book, next) : `<a class="pg next disabled pgnav" data-book="${book}" data-contents>Contents ›</a>`)
+    + `</nav><p class="swipe-hint">Swipe ‹ › to turn the page</p>`;
+
+  const docEl = document.getElementById('doc');
+  docEl.className = 'doc';   // clear any catechism density class
+  docEl.innerHTML = doc;
+  document.getElementById('gutter').innerHTML = gut;
+  window.scrollTo(0,0);
+  alignGutter();
+  // gentle page-turn fade
+  docEl.classList.remove('turn'); void docEl.offsetWidth; docEl.classList.add('turn');
+}
+
+function alignGutter(){
+  const shell = document.querySelector('.shell');
+  if(!shell || view!=="read") return;
+  const base = shell.getBoundingClientRect().top + window.scrollY;
+  document.querySelectorAll('.gutter .sig').forEach(sig=>{
+    const prov = document.getElementById('p-' + sig.dataset.ref);
+    if(prov) sig.style.top = (prov.getBoundingClientRect().top + window.scrollY - base) + 'px';
+  });
+}
+window.addEventListener('resize', alignGutter);
+window.addEventListener('load', alignGutter);
+
+/* scrollspy: highlight the movement currently at the top of the catechism scroll */
+window.addEventListener('scroll', ()=>{
+  if(view!=='read' || cur.mode!=='scroll') return;
+  let active = null;
+  document.querySelectorAll('.cat-movement').forEach(h=>{ if(h.getBoundingClientRect().top < 120) active = h.id.slice(2); });
+  document.querySelectorAll('.rail .sub a').forEach(a=>a.classList.toggle('here', active!=null && a.dataset.spy==='Q.'+active));
+  // sticky current-question indicator
+  const sticky = document.getElementById('catSticky');
+  if(sticky){
+    let curRef = null;
+    document.querySelectorAll('.prov.q').forEach(p=>{ if(p.getBoundingClientRect().top < 88) curRef = p.id.slice(2); });
+    if(curRef){
+      sticky.querySelector('.cs-q').textContent = curRef.replace('.', '. ');
+      const num = +curRef.replace('Q.',''); const secs = cur.book==='wsc'?WSC_SECTIONS:WLC_SECTIONS;
+      let mv = secs[0][2]; secs.forEach(([a,b,t])=>{ if(num>=+a) mv=t; });
+      sticky.querySelector('.cs-m').textContent = mv;
+    }
+  }
+}, {passive:true});
+
+/* open a chapter from a clicked element's dataset */
+function openFromEl(el){
+  const book = el.dataset.book;
+  if(el.dataset.qstart) openTarget(book, {qStart:el.dataset.qstart, qEnd:el.dataset.qend, title:el.dataset.title});
+  else openTarget(book, {part:el.dataset.part, ch:el.dataset.ch, title:el.dataset.title});
+}
+
+/* ───────────── drawer (provision dossier) ───────────── */
+// authority for DfW provisions (binding = constitutional; advisory = not binding)
+const AUTH = {"51-1":"advisory","51-2":"advisory","51-3":"binding","58-4":"binding"};
+// sample citation pools (year, label, outcome) — cycled & spread across decades for the demo
+const CITES = {
+  case:[[2019,"Smith v. Presbytery of the SE","sustained"],[2012,"Re: officer election","dismissed"],[2004,"Appeal of procedural irregularities","sustained"],[1996,"Complaint re: nomination","denied"]],
+  ov:[[2024,"Amend 24-1 re: term eldership","answered by ref"],[2018,"Clarify the notice period","adopted"],[2011,"From Calvary Presbytery","negative"],[2002,"Re: ordination procedure","referred"],[1989,"From Heritage Presbytery","carried over"]],
+  inq:[[2018,"CCB — meaning of ‘inducted’","advice given"],[2007,"CCB — quorum for election","advice given"]],
+  rpr:[[2016,"Westminster Pby — no record of election","satisfactory"],[2013,"Calvary Pby — incomplete exam","satisfactory"],[2009,"Heritage Pby — call not minuted","raised"],[2001,"Grace Pby — no congregational vote","satisfactory"]],
+};
+const TYPE_META = {case:["t-case","Judicial cases"], ov:["t-ov","Overtures"], inq:["t-inq","Inquiries"], rpr:["t-rpr","RPR exceptions"]};
+function citeRows(type, n){
+  const pool = CITES[type]||[], out=[];
+  for(let i=0;i<n;i++){ const s=pool[i%pool.length]; out.push({type, year:s[0]-Math.floor(i/pool.length)*7, label:s[1], outcome:s[2]}); }
+  return out;
+}
+function histogram(rows){
+  const dec={}; rows.forEach(r=>{ const d=Math.floor(r.year/10)*10; dec[d]=(dec[d]||0)+1; });
+  const ds=Object.keys(dec).map(Number).sort((a,b)=>a-b); if(!ds.length) return '';
+  const max=Math.max(...ds.map(d=>dec[d]));
+  return `<div class="histo"><p class="hcap">GA citations by decade</p>` + ds.map(d=>
+    `<div class="hbar"><span class="hd">${String(d).slice(2)}s</span><span class="hbarfill" style="width:${Math.round(dec[d]/max*100)}%"></span><span>${dec[d]}</span></div>`).join('') + `</div>`;
+}
+function notesBlock(ref){
+  const list = NOTES[ref] || [];
+  const items = list.length
+    ? list.map((nt,i)=>`<div class="note"><div class="note-meta">${nt.who} · ${nt.when}<button class="note-del" data-i="${i}" aria-label="Delete note">✕</button></div>${nt.text}</div>`).join('')
+    : `<p class="note-empty">No notes yet.</p>`;
+  return `<div class="notes"><p class="count">Notes <span class="note-tag">private</span></p>${items}
+    <div class="note-add"><textarea class="note-input" rows="2" placeholder="Add a note…"></textarea><button class="note-save">Save note</button></div></div>`;
+}
+
+let drawerRef=null, dTab='cit', dFilter='all', dSort='desc';
+function renderDrawer(){
+  const ref=drawerRef, d=dossierFor(ref), n=total(d);
+  const refLabel=(current==='bco'?'BCO ':current.toUpperCase()+' ')+ref;
+  document.getElementById('dEyebrow').textContent = COMPONENTS[current].name;
+  document.getElementById('dRef').textContent = refLabel;
+  document.getElementById('dQuote').textContent = d.quote ? `“${d.quote}”` : '';
+  const auth = AUTH[ref];
+  document.getElementById('dMeta').innerHTML =
+    (auth ? `<span class="auth-pill ${auth}">${auth==='binding'?'Binding · constitutional':'Advisory'}</span>` : '')
+    + `<button class="copy-cite" data-cite="${refLabel}">⧉ Copy citation</button>`;
+  const counts={case:d.cases, ov:d.ov, inq:d.inq, rpr:d.rpr};
+  const hasHist = d.amend && d.amend.length;
+  const comm = (current==='bco' && window.BCO_COMMENTARY) ? window.BCO_COMMENTARY[ref] : null;
+  const PRF = {wcf:window.WCF_PROOFS, wlc:window.WLC_PROOFS, wsc:window.WSC_PROOFS}[current];
+  const proofs = PRF ? PRF[ref] : null;
+  const tab=(k,label)=>`<button class="dtab${dTab===k?' on':''}" data-tab="${k}">${label}</button>`;
+  let body = `<div class="dtabs">${tab('cit','Citations'+(n?` (${n})`:''))}${proofs?tab('proofs','Proofs'):''}${comm?tab('comm','Commentary'):''}${tab('notes','Notes')}${hasHist?tab('hist','History'):''}</div>`;
+  if(dTab==='cit'){
+    if(n===0){
+      body += `<p class="empty-note">No General Assembly actions reference this provision yet. The text stands on its own — when a case, overture, inquiry, or record-review exception cites it, it will surface here.</p>`;
+    } else {
+      const allRows=[]; Object.keys(counts).forEach(t=>allRows.push(...citeRows(t,counts[t])));
+      body += `<p class="dsum"><b>${n}</b> GA action${n>1?'s':''} — ${counts.case} cases · ${counts.ov} overtures · ${counts.inq} inquiries · ${counts.rpr} RPR</p>`;
+      if(n>=12) body += histogram(allRows);
+      const chip=(k,l,c)=>`<button class="fchip${dFilter===k?' on':''}" data-filter="${k}">${l}${c!=null?` ${c}`:''}</button>`;
+      body += `<div class="fchips">${chip('all','All',n)}`
+        + (counts.case?chip('case','Cases',counts.case):'') + (counts.ov?chip('ov','Overtures',counts.ov):'')
+        + (counts.inq?chip('inq','Inquiries',counts.inq):'') + (counts.rpr?chip('rpr','RPR',counts.rpr):'')
+        + `<button class="sortbtn" data-sort>${dSort==='desc'?'Newest first':'Oldest first'} ⇅</button></div>`;
+      const types = dFilter==='all' ? ['case','ov','inq','rpr'] : [dFilter];
+      types.forEach(t=>{
+        if(!counts[t]) return;
+        const [cls,label]=TYPE_META[t];
+        const rows=citeRows(t,counts[t]).sort((a,b)=>dSort==='desc'?b.year-a.year:a.year-b.year);
+        body += `<div class="cgrp"><p class="cgrp-h"><span class="tag ${cls}">${label}</span><span class="cgrp-n">${counts[t]}</span></p>`
+          + rows.map(r=>`<a class="cite" href="#"><span class="yr">${r.year}</span>${r.label}<span class="out">· ${r.outcome}</span><span class="arr">↗</span></a>`).join('') + `</div>`;
+      });
+    }
+  } else if(dTab==='proofs'){
+    const styled = (proofs||'').replace(/\(([^)]*)\)/g, '<span class="pref">($1)</span>');
+    body += `<div class="proofs-view"><p>${styled}</p><p class="cattrib">Scripture proofs · westminsterstandards.org (public domain)</p></div>`;
+  } else if(dTab==='comm'){
+    body += `<div class="commentary">${(comm||[]).map(p=>`<p>${p}</p>`).join('')}<p class="cattrib">${COMMENTARY_LABEL} — imported pack, personal use.</p></div>`;
+  } else if(dTab==='notes'){
+    body += notesBlock(ref);
+  } else if(dTab==='hist'){
+    body += `<div class="histtab">${d.amend.map(a=>`<div class="hrow"><b>${a.ga}</b> — ${a.n}</div>`).join('')}<p class="hnote">Compiled from the Digest (Part I) and verified against the minutes.</p></div>`;
+  }
+  document.getElementById('dBody').innerHTML = body;
+}
+let lastTrigger=null;
+function openDrawer(ref){
+  drawerRef=ref; dFilter='all'; dSort='desc';
+  // open on Proofs for Westminster provisions (their primary apparatus), else Citations
+  const PRF = {wcf:window.WCF_PROOFS, wlc:window.WLC_PROOFS, wsc:window.WSC_PROOFS}[current];
+  dTab = (PRF && PRF[ref] && total(dossierFor(ref))===0) ? 'proofs' : 'cit';
+  lastTrigger = document.activeElement;
+  renderDrawer();
+  const dr=document.getElementById('drawer');
+  dr.classList.add('show'); dr.setAttribute('aria-hidden','false');
+  document.getElementById('overlay').classList.add('show');
+  setTimeout(()=>document.getElementById('closeDrawer').focus(), 60);
+}
+function closeDrawer(){
+  const dr=document.getElementById('drawer');
+  dr.classList.remove('show'); dr.setAttribute('aria-hidden','true');
+  document.getElementById('overlay').classList.remove('show');
+  if(lastTrigger && lastTrigger.focus) lastTrigger.focus();
+}
+
+/* ───────────── palette ───────────── */
+const PAL_INDEX = [
+  {ref:"24-1",book:"bco",open:{part:"fog",ch:"24"},txt:"Those who have been called to office…"},
+  {ref:"24-2",book:"bco",open:{part:"fog",ch:"24"},txt:"Ruling elders and deacons, being chosen…"},
+  {ref:"31-2",book:"bco",open:{part:"rod",ch:"31"},txt:"Process against an offender shall not commence…"},
+  {ref:"51-2",book:"bco",open:{part:"dow",ch:"51"},txt:"The Lord's Day, being the Christian Sabbath…"},
+  {ref:"21.1",book:"wcf",open:{ch:"21"},txt:"The light of nature showeth that there is a God…"},
+  {ref:"21.5",book:"wcf",open:{ch:"21"},txt:"The reading of the Scriptures with godly fear…"},
+  {ref:"Q.1",book:"wsc",open:{qStart:"1",qEnd:"3",title:"Man's chief end"},txt:"Man's chief end is to glorify God…"},
+];
+let palSel=0, palResults=[];
+function palRender(q){
+  q=q.trim().toLowerCase();
+  palResults = !q ? PAL_INDEX.slice(0,6) : PAL_INDEX.filter(h=>h.ref.toLowerCase().includes(q)||h.txt.toLowerCase().includes(q));
+  palSel=0;
+  document.getElementById('palHits').innerHTML = palResults.map((h,i)=>
+    `<div class="hit ${i===0?'sel':''}" data-i="${i}"><span class="ref">${h.book==='bco'?'BCO ':h.book.toUpperCase()+' '}${h.ref}</span><span class="txt">${h.txt}</span></div>`
+  ).join('') || `<div class="hit"><span class="txt">No matches</span></div>`;
+}
+function palGo(i){
+  const h = palResults[i]; if(!h) return;
+  closePal();
+  openTarget(h.book, h.open.qStart!=null ? {qStart:h.open.qStart, qEnd:h.open.qEnd, anchor:'Q.'+h.open.qStart} : h.open);
+  const el = document.getElementById('p-'+h.ref);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>openDrawer(h.ref), 300);
+}
+function openPal(){ document.getElementById('palWrap').classList.add('show'); const i=document.getElementById('palInput'); i.value=''; palRender(''); i.focus(); }
+function closePal(){ document.getElementById('palWrap').classList.remove('show'); }
+
+/* ───────────── events ───────────── */
+function closeMenu(){ const m=document.getElementById('mobileMenu'); if(m){ m.classList.remove('open'); document.getElementById('hamburger').setAttribute('aria-expanded','false'); } }
+document.getElementById('brand').addEventListener('click', ()=>{ closeMenu(); showHome(); });
+document.getElementById('books').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) showComponent(b.dataset.book); });
+document.getElementById('hamburger').addEventListener('click', ()=>{ const m=document.getElementById('mobileMenu'); const open=m.classList.toggle('open'); document.getElementById('hamburger').setAttribute('aria-expanded', open); });
+document.body.addEventListener('click', e=>{
+  const ns = e.target.closest('.note-save'); if(ns){ const ta=document.querySelector('#drawer .note-input'); const v=ta&&ta.value.trim(); if(v){ (NOTES[drawerRef]=NOTES[drawerRef]||[]).push({who:"You", when:noteDate(), text:v}); saveNotes(); } dTab='notes'; renderDrawer(); return; }
+  const nd = e.target.closest('.note-del'); if(nd){ const i=+nd.dataset.i; if(NOTES[drawerRef]){ NOTES[drawerRef].splice(i,1); if(!NOTES[drawerRef].length) delete NOTES[drawerRef]; } saveNotes(); dTab='notes'; renderDrawer(); return; }
+  const dt = e.target.closest('.dtab'); if(dt){ dTab=dt.dataset.tab; renderDrawer(); return; }
+  const fc = e.target.closest('.fchip'); if(fc){ dFilter=fc.dataset.filter; renderDrawer(); return; }
+  if(e.target.closest('.sortbtn')){ dSort = dSort==='desc'?'asc':'desc'; renderDrawer(); return; }
+  const cc = e.target.closest('.copy-cite'); if(cc){ try{ navigator.clipboard.writeText(cc.dataset.cite); }catch(_){ } cc.textContent='Copied ✓'; return; }
+  if(e.target.closest('.home-jump')){ openPal(); return; }
+  const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else showComponent(mm.dataset.book); return; }
+  const bn = e.target.closest('.bn'); if(bn){ const a=bn.dataset.bn; if(a==='library') showHome(); else if(a==='search') openPal(); else showComponent(current); return; }
+  const home = e.target.closest('[data-home]'); if(home){ showHome(); return; }
+  const railBack = e.target.closest('.rail-back,.read-back'); if(railBack){ showComponent(railBack.dataset.book); return; }
+  const entry = e.target.closest('.entry,.hentry'); if(entry){ showComponent(entry.dataset.book); return; }
+  const toc = e.target.closest('.toc a'); if(toc){ openFromEl(toc); return; }
+  const pg = e.target.closest('.pgnav'); if(pg){ pg.hasAttribute('data-contents') ? showComponent(pg.dataset.book) : openFromEl(pg); return; }
+  const den = e.target.closest('.density button'); if(den){ document.getElementById('doc').className='doc cat-'+den.dataset.density; document.querySelectorAll('.density button').forEach(b=>b.setAttribute('aria-pressed', b===den)); return; }
+  const sig = e.target.closest('.sig, .sig-inline'); if(sig){ openDrawer(sig.dataset.ref); return; }
+  const n = e.target.closest('.n'); if(n){ openDrawer(n.dataset.ref); return; }
+  const pf = e.target.closest('.pf-toggle'); if(pf){ pf.nextElementSibling.classList.toggle('open'); return; }
+  const pm = e.target.closest('.pf-more'); if(pm){ const v=pm.nextElementSibling; v.classList.toggle('open'); pm.textContent = v.classList.contains('open')?'Hide full text ▴':'Show full text ▾'; return; }
+  const ql = e.target.closest('.cat-list .prov.q'); if(ql){ ql.classList.toggle('expanded'); return; }
+});
+document.getElementById('closeDrawer').addEventListener('click', closeDrawer);
+document.getElementById('overlay').addEventListener('click', closeDrawer);
+document.getElementById('openPal').addEventListener('click', openPal);
+
+/* ── packs & notes panel ── */
+function renderPacks(){
+  const nc = Object.values(NOTES).reduce((a,x)=>a+x.length,0);
+  const cc = Object.keys(window.BCO_COMMENTARY||{}).length;
+  document.getElementById('packsBody').innerHTML =
+      `<div class="pack-row"><div><b>My notes</b><span class="pack-sub">${nc} note${nc!==1?'s':''} · stored on this device</span></div><button class="pack-btn" data-act="export-notes"${nc?'':' disabled'}>Export…</button></div>`
+    + `<div class="pack-row"><div><b>Commentary</b><span class="pack-sub">${cc?(COMMENTARY_LABEL+' · '+cc+' sections'):'none loaded — import a pack to enable the Commentary tab'}</span></div></div>`
+    + `<button class="pack-btn import" data-act="import">Import a pack…</button>`
+    + `<p class="packs-note">Notes and imported packs are kept in this browser's local storage and survive reloads. They also export/import as portable JSON pack files (the durable backup). Commentary ships as a separate pack to keep copyrighted text out of the app.</p>`;
+}
+function openPacks(){ renderPacks(); document.getElementById('packWrap').classList.add('show'); }
+function closePacks(){ document.getElementById('packWrap').classList.remove('show'); }
+document.getElementById('openPacks').addEventListener('click', openPacks);
+document.getElementById('packClose').addEventListener('click', closePacks);
+document.getElementById('packWrap').addEventListener('click', e=>{ if(e.target.id==='packWrap') closePacks(); });
+document.getElementById('packsBody').addEventListener('click', e=>{
+  const b=e.target.closest('[data-act]'); if(!b) return;
+  if(b.dataset.act==='export-notes') exportNotes();
+  else if(b.dataset.act==='import') document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const res=importPack(JSON.parse(r.result)); renderPacks(); if(document.getElementById('drawer').classList.contains('show')) renderDrawer(); alert(`Imported ${res.kind} pack — ${res.n} entries.`); }catch(err){ alert('Import failed: '+err.message); } };
+  r.readAsText(f); e.target.value='';
+});
+document.getElementById('palInput').addEventListener('input', e=>palRender(e.target.value));
+document.getElementById('palHits').addEventListener('click', e=>{ const h=e.target.closest('.hit'); if(h&&h.dataset.i!=null) palGo(+h.dataset.i); });
+document.getElementById('palInput').addEventListener('keydown', e=>{
+  if(e.key==='ArrowDown'){ e.preventDefault(); palSel=Math.min(palSel+1,palResults.length-1); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); palSel=Math.max(palSel-1,0); }
+  else if(e.key==='Enter'){ e.preventDefault(); palGo(palSel); return; }
+  else return;
+  document.querySelectorAll('.hit').forEach((el,i)=>el.classList.toggle('sel',i===palSel));
+});
+document.addEventListener('keydown', e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){ e.preventDefault(); openPal(); }
+  if(e.key==='Escape'){ closePal(); closeDrawer(); closePacks(); }
+});
+
+/* keyboard activation for the provision number + proof toggle (role="button") */
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Enter' && e.key!==' ') return;
+  const t=e.target; if(!t.classList) return;
+  if(t.classList.contains('n')){ e.preventDefault(); openDrawer(t.dataset.ref); }
+  else if(t.classList.contains('pf-toggle')){ e.preventDefault(); t.nextElementSibling.classList.toggle('open'); }
+});
+
+/* ── sequential nav: ← / → arrow keys (desktop) ── */
+document.addEventListener('keydown', e=>{
+  if(view!=='read') return;
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if(/^(INPUT|TEXTAREA)$/.test((e.target.tagName||''))) return;
+  if(document.getElementById('palWrap').classList.contains('show')) return;
+  if(e.key==='ArrowRight'){ goRelative(1); }
+  else if(e.key==='ArrowLeft'){ goRelative(-1); }
+});
+
+/* ── sequential nav: horizontal swipe (touch) ── */
+let tsX=0, tsY=0, tracking=false;
+document.addEventListener('touchstart', e=>{
+  // ignore swipes that begin on the open drawer/sheet or the palette
+  if(view!=='read') { tracking=false; return; }
+  if(document.getElementById('drawer').classList.contains('show')) { tracking=false; return; }
+  const t=e.changedTouches[0]; tsX=t.clientX; tsY=t.clientY; tracking=true;
+}, {passive:true});
+document.addEventListener('touchend', e=>{
+  if(!tracking) return; tracking=false;
+  const t=e.changedTouches[0], dx=t.clientX-tsX, dy=t.clientY-tsY;
+  // horizontal-dominant gesture past threshold → turn page (vertical scroll untouched)
+  if(Math.abs(dx)>70 && Math.abs(dx) > Math.abs(dy)*1.8){ goRelative(dx<0 ? 1 : -1); }
+}, {passive:true});
+
+showHome();
+</script>
+</body>
+</html>
