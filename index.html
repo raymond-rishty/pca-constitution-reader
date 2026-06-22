@@ -105,6 +105,13 @@
   .prov .body{font-size:1.22rem; line-height:1.72}
   .prov .n{font-weight:600; color:var(--navy); text-decoration:none; cursor:pointer; border-bottom:1px dotted transparent; padding-bottom:1px}
   .prov .n:hover{border-bottom-color:var(--accent)}
+  .prov .body .lead{margin:0}
+  .prov .body .bpara{margin:.6em 0}
+  .prov .li{padding-left:1.7em; text-indent:-1.7em; margin:.32em 0}
+  .prov .li .mk{font-weight:600; color:var(--navy); font-variant-numeric:tabular-nums; margin-right:.15em}
+  .prov .li.d2,.prov .bpara.d2{margin-left:1.8em}
+  .prov .li.d3,.prov .bpara.d3{margin-left:3.6em}
+  .prov .li.d4,.prov .bpara.d4{margin-left:5.4em}
   .sig-inline{display:none; align-items:center; gap:5px; font-family:var(--sans); font-size:.68rem; color:var(--accent); background:var(--accent-soft); border-radius:2px; padding:1px 9px 1px 7px; text-decoration:none; line-height:1.7; margin:0 4px; vertical-align:2px; white-space:nowrap}
   .sig-inline .dot{width:6px; height:6px; border-radius:50%; background:var(--accent)}
   .prov.q .n{display:block; margin-bottom:3px; color:var(--navy); font-style:normal; font-size:1.15rem}
@@ -690,7 +697,7 @@ function buildChapter(book, o){
     const subtitle = isChapter ? bc.title : "";
     if(bc.vacated) return {kicker, title, subtitle, railSub:[], provs:[{ref:null, body:"This chapter has been vacated."}]};
     const provs = (bc.paras||[]).map(p=>({ref:null, body:p}))
-      .concat((bc.sections||[]).map(s=>Object.assign({ref:s.ref, body:s.body}, bc.part==='dow' ? {con:!!s.binding} : {})));
+      .concat((bc.sections||[]).map(s=>Object.assign({ref:s.ref, body:s.body, blocks:s.blocks}, bc.part==='dow' ? {con:!!s.binding} : {})));
     return {kicker, title, subtitle, advisoryNote: bc.part==='dow' ? DFW_NOTE : undefined,
       railSub: (bc.sections||[]).map(s=>s.ref), provs};
   }
@@ -899,6 +906,17 @@ function bounce(){
   d.classList.remove('bump'); void d.offsetWidth; d.classList.add('bump');
 }
 
+function renderBlocks(blocks, head){
+  let lead='', start=0;
+  if(blocks[0] && blocks[0][0]==='p' && blocks[0][1]===0){ lead=blocks[0][2]; start=1; }
+  let out = `<p class="lead">${head} ${lead}</p>`;
+  for(let k=start;k<blocks.length;k++){
+    const b=blocks[k];
+    if(b[0]==='p') out += `<p class="bpara d${b[1]}">${b[2]}</p>`;
+    else out += `<div class="li d${b[1]}"><span class="mk">${b[2]}</span> ${b[3]}</div>`;
+  }
+  return out;
+}
 function showChapter(book, o){
   setView("read"); current=book; cur={book,o}; setRoute(book+'/'+o.ch);
   document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', b.dataset.book===book));
@@ -922,6 +940,9 @@ function showChapter(book, o){
     const tag = (p.con===true)?`<span class="ptag bind">[ BINDING ]</span>`:'';
     if(ch.q){
       doc += `<div class="prov q" id="p-${p.ref}"><span class="body"><a class="n" data-ref="${p.ref}" ${nAttrs(rl,n)}>${p.ref}</a>${inline}${tag} ${p.q}</span><span class="ans">${p.body}</span></div>`;
+    } else if(p.blocks){
+      const head = `<a class="n" data-ref="${p.ref}" ${nAttrs(rl,n)}>${p.ref}.</a>${inline}${tag}`;
+      doc += `<div class="prov${p.con===true?' binding':''}" id="p-${p.ref}"><div class="body">${renderBlocks(p.blocks, head)}</div></div>`;
     } else {
       doc += `<div class="prov${p.con===true?' binding':''}" id="p-${p.ref}"><span class="body"><a class="n" data-ref="${p.ref}" ${nAttrs(rl,n)}>${p.ref}.</a>${inline}${tag} ${p.body}</span></div>`;
     }
@@ -1014,6 +1035,7 @@ function sectionText(ref){
   if(el){
     const c = el.cloneNode(true);
     c.querySelectorAll('.n, .sig-inline, .ptag, sup.pf, .proofs, .pf-toggle, .pf-more').forEach(x=>x.remove());
+    c.querySelectorAll('.lead, .li, .bpara').forEach(x=>x.prepend(' '));   // preserve spacing across blocks
     const t = c.textContent.replace(/\s+/g,' ').trim();
     if(t) return t;
   }
@@ -1029,7 +1051,7 @@ function renderDrawer(){
   document.getElementById('dMeta').innerHTML =
     (auth ? `<span class="auth-pill ${auth}">${auth==='binding'?'Binding · constitutional':'Advisory'}</span>` : '')
     + `<button class="copy-cite" data-cite="${refLabel}">⧉ Copy citation</button>`
-    + `<button class="copy-cite" data-copytext="1">⧉ Copy section text</button>`;
+    + `<button class="copy-cite" data-copytext="1" data-cite="${refLabel}">⧉ Copy section text</button>`;
   const counts={case:d.cases, ov:d.ov, inq:d.inq, rpr:d.rpr, pp:d.pp};
   const hasHist = d.amend && d.amend.length;
   const comm = (current==='bco' && window.BCO_COMMENTARY) ? window.BCO_COMMENTARY[ref] : null;
@@ -1138,7 +1160,7 @@ document.body.addEventListener('click', e=>{
   const dt = e.target.closest('.dtab'); if(dt){ dTab=dt.dataset.tab; renderDrawer(); return; }
   const fc = e.target.closest('.fchip'); if(fc){ dFilter=fc.dataset.filter; renderDrawer(); return; }
   if(e.target.closest('.sortbtn')){ dSort = dSort==='desc'?'asc':'desc'; renderDrawer(); return; }
-  const cc = e.target.closest('.copy-cite'); if(cc){ const orig=cc.textContent, txt = cc.hasAttribute('data-copytext') ? sectionText(drawerRef) : cc.dataset.cite; try{ navigator.clipboard.writeText(txt); }catch(_){ } cc.textContent='Copied ✓'; setTimeout(()=>{ if(document.body.contains(cc)) cc.textContent=orig; }, 1600); return; }
+  const cc = e.target.closest('.copy-cite'); if(cc){ const orig=cc.textContent, txt = cc.hasAttribute('data-copytext') ? (cc.dataset.cite + ': ' + sectionText(drawerRef)) : cc.dataset.cite; try{ navigator.clipboard.writeText(txt); }catch(_){ } cc.textContent='Copied ✓'; setTimeout(()=>{ if(document.body.contains(cc)) cc.textContent=orig; }, 1600); return; }
   if(e.target.closest('.home-jump')){ openPal(); return; }
   const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else showComponent(mm.dataset.book); return; }
   const bn = e.target.closest('.bn'); if(bn){ const a=bn.dataset.bn; if(a==='library') showHome(); else if(a==='search') openPal(); else showComponent(current); return; }
