@@ -310,6 +310,7 @@
   .cgrp-h .cgrp-n{color:var(--muted); font-family:var(--sans); font-size:.74rem; font-variant-numeric:tabular-nums}
   .cgrp-h .tag{font-size:.66rem; font-weight:600; text-transform:uppercase; letter-spacing:.03em; padding:2px 8px; border-radius:2px}
   .cite{display:flex; gap:8px; align-items:baseline; text-decoration:none; color:var(--ink-soft); font-size:.86rem; padding:7px 0; border-top:1px solid var(--line); line-height:1.45}
+  .cite .sp-chip{font-family:var(--sans); font-size:.66rem; font-weight:700; letter-spacing:.02em; color:var(--accent-ink); background:var(--accent-soft); border-radius:2px; padding:1px 5px; margin-right:6px; white-space:nowrap}
   .cite:first-of-type{border-top:none}
   .cite:hover{color:var(--accent)}
   .cite .yr{flex:none; color:var(--muted); font-variant-numeric:tabular-nums; font-family:var(--sans); font-size:.78rem}
@@ -1052,6 +1053,24 @@ function sectionText(ref){
   }
   return (dossierFor(ref).quote||'').replace(/…\s*$/,'');
 }
+/* sub-points of `ref` named in a citation title, e.g. "BCO 12-5.b" -> ["b"].
+   Literal match + boundary guards so RAO/other refs and partial numbers (1-3 in 11-3) don't leak. */
+function citeSubpoints(ref, ttl){
+  const out=[]; let i=0;
+  while((i=ttl.indexOf(ref, i))!==-1){
+    const before=ttl[i-1], after=i+ref.length;
+    if(!(before && /[\d-]/.test(before)) && !/\d/.test(ttl[after]||'')){
+      const m=/^\.?\(?([a-z])\)?(?![a-z])/.exec(ttl.slice(after));
+      if(m && !out.includes(m[1])) out.push(m[1]);
+    }
+    i=after;
+  }
+  return out;
+}
+function spChip(ref, ttl){
+  const sp=citeSubpoints(ref, ttl);
+  return sp.length ? `<span class="sp-chip" title="Cites ${ref}.${sp.join(', '+ref+'.')}">${ref}.${sp.join('/')}</span>` : '';
+}
 function renderDrawer(){
   const ref=drawerRef, d=dossierFor(ref), n=total(d);
   const refLabel=(current==='bco'?'BCO ':current.toUpperCase()+' ')+ref;
@@ -1090,7 +1109,7 @@ function renderDrawer(){
         const [cls,label]=TYPE_META[t];
         const rows=d.rows.filter(r=>r.t===t).sort((a,b)=>dSort==='desc'?(b.yr||0)-(a.yr||0):(a.yr||0)-(b.yr||0));
         body += `<div class="cgrp"><p class="cgrp-h"><span class="tag ${cls}">${label}</span><span class="cgrp-n">${counts[t]}</span></p>`
-          + rows.map(r=>`<a class="cite" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="yr">${r.yr||''}</span><span class="ctxt">${esc(r.ttl)}${r.disp?`<span class="out">· ${esc(r.disp)}</span>`:''}</span><span class="arr">↗</span></a>`).join('') + `</div>`;
+          + rows.map(r=>`<a class="cite" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="yr">${r.yr||''}</span><span class="ctxt">${current==='bco'?spChip(ref,r.ttl):''}${esc(r.ttl)}${r.disp?`<span class="out">· ${esc(r.disp)}</span>`:''}</span><span class="arr">↗</span></a>`).join('') + `</div>`;
       });
       body += `<a class="ga-browse" href="${(window.GA_BASE||'#')}app/" target="_blank" rel="noopener">Search the full GA Minutes corpus ↗</a>`;
     }
