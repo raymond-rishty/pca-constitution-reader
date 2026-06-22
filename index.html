@@ -106,12 +106,13 @@
   .prov .n{font-weight:600; color:var(--navy); text-decoration:none; cursor:pointer; border-bottom:1px dotted transparent; padding-bottom:1px}
   .prov .n:hover{border-bottom-color:var(--accent)}
   .prov .body .lead{margin:0}
-  .prov .body .bpara{margin:.6em 0}
-  .prov .li{padding-left:1.7em; text-indent:-1.7em; margin:.32em 0}
+  .prov .body .bpara{margin-top:.6em; margin-bottom:.6em}
+  .prov .li{margin-top:.32em; margin-bottom:.32em; padding-left:1.5em; text-indent:-1.5em}
   .prov .li .mk{font-weight:600; color:var(--navy); font-variant-numeric:tabular-nums; margin-right:.15em}
-  .prov .li.d2,.prov .bpara.d2{margin-left:1.8em}
-  .prov .li.d3,.prov .bpara.d3{margin-left:3.6em}
-  .prov .li.d4,.prov .bpara.d4{margin-left:5.4em}
+  .prov .li.d1,.prov .bpara.d1{margin-left:1.7em}
+  .prov .li.d2,.prov .bpara.d2{margin-left:3.4em}
+  .prov .li.d3,.prov .bpara.d3{margin-left:5.1em}
+  .prov .li.d4,.prov .bpara.d4{margin-left:6.8em}
   .sig-inline{display:none; align-items:center; gap:5px; font-family:var(--sans); font-size:.68rem; color:var(--accent); background:var(--accent-soft); border-radius:2px; padding:1px 9px 1px 7px; text-decoration:none; line-height:1.7; margin:0 4px; vertical-align:2px; white-space:nowrap}
   .sig-inline .dot{width:6px; height:6px; border-radius:50%; background:var(--accent)}
   .prov.q .n{display:block; margin-bottom:3px; color:var(--navy); font-style:normal; font-size:1.15rem}
@@ -1160,7 +1161,7 @@ document.body.addEventListener('click', e=>{
   const dt = e.target.closest('.dtab'); if(dt){ dTab=dt.dataset.tab; renderDrawer(); return; }
   const fc = e.target.closest('.fchip'); if(fc){ dFilter=fc.dataset.filter; renderDrawer(); return; }
   if(e.target.closest('.sortbtn')){ dSort = dSort==='desc'?'asc':'desc'; renderDrawer(); return; }
-  const cc = e.target.closest('.copy-cite'); if(cc){ const orig=cc.textContent, txt = cc.hasAttribute('data-copytext') ? (cc.dataset.cite + ': ' + sectionText(drawerRef)) : cc.dataset.cite; try{ navigator.clipboard.writeText(txt); }catch(_){ } cc.textContent='Copied ✓'; setTimeout(()=>{ if(document.body.contains(cc)) cc.textContent=orig; }, 1600); return; }
+  const cc = e.target.closest('.copy-cite'); if(cc){ const orig=cc.textContent, txt = cc.hasAttribute('data-copytext') ? (cc.dataset.cite + '. ' + sectionText(drawerRef)) : cc.dataset.cite; try{ navigator.clipboard.writeText(txt); }catch(_){ } cc.textContent='Copied ✓'; setTimeout(()=>{ if(document.body.contains(cc)) cc.textContent=orig; }, 1600); return; }
   if(e.target.closest('.home-jump')){ openPal(); return; }
   const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else showComponent(mm.dataset.book); return; }
   const bn = e.target.closest('.bn'); if(bn){ const a=bn.dataset.bn; if(a==='library') showHome(); else if(a==='search') openPal(); else showComponent(current); return; }
