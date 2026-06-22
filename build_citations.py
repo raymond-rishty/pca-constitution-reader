@@ -10,8 +10,23 @@ import json, re, collections, sys, os, glob
 
 SRC = "/workspace/dist/pca-ga/app/search_index.json"
 CASES_DIR = "/workspace/dist/pca-ga/cases"
+CONTENT = "/workspace/constitution-app/content"
 OUT = "/workspace/constitution-app/content/citations.js"
 GA_BASE = "https://raymond-rishty.github.io/pca-ga/"
+
+def valid_refs():
+    """The set of provision refs the app can actually display, keyed by
+    component. Citations to anything outside this set (phantom keys from OCR
+    noise or RAO refs) are dropped so they never inflate counts."""
+    v = {"bco": set(), "wcf": set(), "wlc": set(), "wsc": set()}
+    bco = open(f"{CONTENT}/bco.js").read()
+    v["bco"] = set(re.findall(r'"ref":\s*"(\d+-\d+)"', bco))
+    wcf = open(f"{CONTENT}/wcf.js").read()
+    v["wcf"] = set(re.findall(r'"ref":\s*"(\d+\.\d+)"', wcf))
+    for comp, fn in (("wlc", "wlc.js"), ("wsc", "wsc.js")):
+        txt = open(f"{CONTENT}/{fn}").read()
+        v[comp] = {f"Q.{n}" for n in re.findall(r'"n":\s*(\d+)', txt)}
+    return v
 
 TYPE_CODE = {
     "Judicial case": "case",
@@ -57,9 +72,16 @@ def norm(prov):
     # accept "BCO 24-1", "BCO24-1", or a bare "24-1" (the corpus drops the
     # prefix when the OCR split it). Require chapter-section (a dash) so we
     # don't guess at chapter-only refs.
-    m = re.match(r'^(?:BCO\s*)?([0-9]{1,2})\s*-\s*([0-9]{1,2})', p, re.I)
+    m = re.match(r'^(BCO\s*)?([0-9]{1,2})\s*-\s*([0-9]{1,2})(.*)', p, re.I)
     if m:
-        return ("bco", f"{int(m.group(1))}-{int(m.group(2))}")
+        had_prefix = bool(m.group(1))
+        rest = m.group(4)
+        # Prefix-less refs are ambiguous: RAO/RONR use deeper numbering like
+        # "16-3.e.5" or "14-9g". A real BCO section is just NN-S, so when there
+        # is no explicit BCO prefix, reject a trailing letter or third level.
+        if not had_prefix and re.match(r'\s*[.\-]?[a-z]|\s*\.[0-9]', rest, re.I):
+            return None
+        return ("bco", f"{int(m.group(2))}-{int(m.group(3))}")
     return None
 
 # inline provision references inside a case body (the index doesn't tag cases)
@@ -102,8 +124,13 @@ def main():
     seen = collections.defaultdict(set)      # dedupe (key, url)
     skipped = collections.Counter()
     kept_provstrings = set()
+    VALID = valid_refs()
+    dropped_invalid = collections.Counter()
 
     def add(comp, ref, entry):
+        if ref not in VALID.get(comp, ()):    # phantom key (OCR noise / RAO) — not a real provision
+            dropped_invalid[f"{comp}|{ref}"] += 1
+            return
         key = f"{comp}|{ref}"
         if entry["url"] in seen[key]:
             return
@@ -167,6 +194,9 @@ def main():
     print(f"wrote {OUT}")
     print(f"provisions with citations: {len(table)}  ({dict(bycomp)})")
     print(f"total citation rows: {total_rows}")
+    print(f"dropped phantom keys (not real provisions): {len(dropped_invalid)} distinct, "
+          f"{sum(dropped_invalid.values())} occurrences; e.g. "
+          f"{[k for k,_ in dropped_invalid.most_common(8)]}")
     print(f"distinct provision strings kept: {len(kept_provstrings)}")
     top_skips = skipped.most_common(15)
     print(f"skipped provision strings (distinct {len(skipped)}); top:")

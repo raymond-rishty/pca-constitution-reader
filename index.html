@@ -348,7 +348,11 @@
     main{display:block; width:100%; max-width:100%; min-width:0; padding:24px 18px 140px}
     .doc{max-width:100%}                              /* hard-cap the reading column to the viewport */
     body[data-view="read"] aside.rail, .gutter{display:none}
-    .sig-inline{display:inline-flex}
+    .sig-inline{display:inline-flex; padding:5px 12px 5px 10px}   /* fatter tap target */
+    /* fat tap target on mobile: pad the section number's hit area, offset margins so layout holds */
+    .prov .n{display:inline-block; padding:7px 8px; margin:-7px -4px; border-bottom:none; border-radius:3px; -webkit-tap-highlight-color:var(--accent-soft)}
+    .prov .n:active{background:var(--accent-soft)}
+    .prov.q .n{padding:7px 8px 5px}
     .landing .home-title{font-size:2rem}
     .toc{columns:1}
     .pg .pl{font-size:.66rem}
@@ -1004,6 +1008,17 @@ function notesBlock(ref){
 }
 
 let drawerRef=null, dTab='cit', dFilter='all', dSort='desc';
+/* full section prose, lifted from the rendered provision (d.quote is only a truncated preview) */
+function sectionText(ref){
+  const el = document.getElementById('p-'+ref);
+  if(el){
+    const c = el.cloneNode(true);
+    c.querySelectorAll('.n, .sig-inline, .ptag, sup.pf, .proofs, .pf-toggle, .pf-more').forEach(x=>x.remove());
+    const t = c.textContent.replace(/\s+/g,' ').trim();
+    if(t) return t;
+  }
+  return (dossierFor(ref).quote||'').replace(/…\s*$/,'');
+}
 function renderDrawer(){
   const ref=drawerRef, d=dossierFor(ref), n=total(d);
   const refLabel=(current==='bco'?'BCO ':current.toUpperCase()+' ')+ref;
@@ -1013,7 +1028,8 @@ function renderDrawer(){
   const auth = AUTH[ref];
   document.getElementById('dMeta').innerHTML =
     (auth ? `<span class="auth-pill ${auth}">${auth==='binding'?'Binding · constitutional':'Advisory'}</span>` : '')
-    + `<button class="copy-cite" data-cite="${refLabel}">⧉ Copy citation</button>`;
+    + `<button class="copy-cite" data-cite="${refLabel}">⧉ Copy citation</button>`
+    + `<button class="copy-cite" data-copytext="1">⧉ Copy section text</button>`;
   const counts={case:d.cases, ov:d.ov, inq:d.inq, rpr:d.rpr, pp:d.pp};
   const hasHist = d.amend && d.amend.length;
   const comm = (current==='bco' && window.BCO_COMMENTARY) ? window.BCO_COMMENTARY[ref] : null;
@@ -1122,7 +1138,7 @@ document.body.addEventListener('click', e=>{
   const dt = e.target.closest('.dtab'); if(dt){ dTab=dt.dataset.tab; renderDrawer(); return; }
   const fc = e.target.closest('.fchip'); if(fc){ dFilter=fc.dataset.filter; renderDrawer(); return; }
   if(e.target.closest('.sortbtn')){ dSort = dSort==='desc'?'asc':'desc'; renderDrawer(); return; }
-  const cc = e.target.closest('.copy-cite'); if(cc){ try{ navigator.clipboard.writeText(cc.dataset.cite); }catch(_){ } cc.textContent='Copied ✓'; return; }
+  const cc = e.target.closest('.copy-cite'); if(cc){ const orig=cc.textContent, txt = cc.hasAttribute('data-copytext') ? sectionText(drawerRef) : cc.dataset.cite; try{ navigator.clipboard.writeText(txt); }catch(_){ } cc.textContent='Copied ✓'; setTimeout(()=>{ if(document.body.contains(cc)) cc.textContent=orig; }, 1600); return; }
   if(e.target.closest('.home-jump')){ openPal(); return; }
   const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else showComponent(mm.dataset.book); return; }
   const bn = e.target.closest('.bn'); if(bn){ const a=bn.dataset.bn; if(a==='library') showHome(); else if(a==='search') openPal(); else showComponent(current); return; }
