@@ -222,6 +222,7 @@
   .t-ov{background:#e0eede; color:#2f5130}
   .t-inq{background:#dde7f1; color:#28486a}
   .t-rpr{background:#f4e6d6; color:#7a4a12}
+  .t-pp{background:#e7e2ef; color:#4a3a6a}
   .grp summary .lbl{flex:1}
   .grp summary .num{color:var(--muted); font-variant-numeric:tabular-nums}
   .grp .items{padding:0 2px 12px 30px}
@@ -290,13 +291,16 @@
   .cgrp{margin:0 0 16px}
   .cgrp-h{display:flex; align-items:center; gap:9px; margin:0 0 4px}
   .cgrp-h .cgrp-n{color:var(--muted); font-family:var(--sans); font-size:.74rem; font-variant-numeric:tabular-nums}
-  .cite{display:block; text-decoration:none; color:var(--ink-soft); font-size:.86rem; padding:7px 0; border-top:1px solid var(--line); line-height:1.45}
+  .cite{display:flex; gap:8px; align-items:baseline; text-decoration:none; color:var(--ink-soft); font-size:.86rem; padding:7px 0; border-top:1px solid var(--line); line-height:1.45}
   .cite:first-of-type{border-top:none}
   .cite:hover{color:var(--accent)}
-  .cite .yr{color:var(--muted); font-variant-numeric:tabular-nums; margin-right:8px; font-family:var(--sans); font-size:.78rem}
+  .cite .yr{flex:none; color:var(--muted); font-variant-numeric:tabular-nums; font-family:var(--sans); font-size:.78rem}
+  .cite .ctxt{flex:1; min-width:0; overflow-wrap:break-word}
   .cite .out{display:inline-block; margin-left:6px; font-size:.74rem; color:var(--muted)}
-  .cite .arr{float:right; color:var(--line-2)}
+  .cite .arr{flex:none; color:var(--line-2)}
   .cite:hover .arr{color:var(--accent)}
+  .ga-browse{display:inline-block; margin-top:16px; font-family:var(--sans); font-size:.8rem; color:var(--accent); text-decoration:none; border-bottom:1px solid var(--line-2); padding-bottom:1px}
+  .ga-browse:hover{border-color:var(--accent)}
   .histtab .hrow{padding:8px 0; border-top:1px solid var(--line); font-size:.86rem; color:var(--ink-soft); line-height:1.5}
   .histtab .hrow:first-child{border-top:none}
   .histtab .hrow b{color:var(--navy)}
@@ -449,6 +453,7 @@
 <script src="content/wcf.js"></script>
 <script src="content/bco.js"></script>
 <script src="content/proofs.js"></script>
+<script src="content/citations.js"></script>
 <script>
 /* ══════════ CONTENT: real where sourced (window.WSC), placeholder elsewhere ══════════ */
 const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.";
@@ -604,8 +609,18 @@ const CURATED = {
     ]},
 };
 
-const dossierFor = r => DOSSIER[r] || {quote:"", cases:0, ov:0, inq:0, rpr:0, amend:[]};
-const total = d => d.cases + d.ov + d.inq + d.rpr;
+function esc(s){ return (s||"").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+// real GA citations for the provision currently being viewed (keyed component|ref)
+function citesFor(comp, ref){ return (window.CITATIONS && window.CITATIONS[comp+'|'+ref]) || []; }
+const dossierFor = r => {
+  const base = DOSSIER[r] || {};
+  const rows = citesFor(current, r);
+  const c = {case:0, ov:0, inq:0, rpr:0, pp:0};
+  rows.forEach(e => { c[e.t] = (c[e.t]||0) + 1; });
+  return {quote: base.quote||"", amend: base.amend||[], rows,
+          cases:c.case, ov:c.ov, inq:c.inq, rpr:c.rpr, pp:c.pp};
+};
+const total = d => d.rows ? d.rows.length : 0;
 
 // proof texts: references shown by default, full verse text on demand (two-stage)
 function proofsBlock(o){
@@ -971,21 +986,9 @@ function openFromEl(el){
 /* ───────────── drawer (provision dossier) ───────────── */
 // authority for DfW provisions (binding = constitutional; advisory = not binding)
 const AUTH = {"51-1":"advisory","51-2":"advisory","51-3":"binding","58-4":"binding"};
-// sample citation pools (year, label, outcome) — cycled & spread across decades for the demo
-const CITES = {
-  case:[[2019,"Smith v. Presbytery of the SE","sustained"],[2012,"Re: officer election","dismissed"],[2004,"Appeal of procedural irregularities","sustained"],[1996,"Complaint re: nomination","denied"]],
-  ov:[[2024,"Amend 24-1 re: term eldership","answered by ref"],[2018,"Clarify the notice period","adopted"],[2011,"From Calvary Presbytery","negative"],[2002,"Re: ordination procedure","referred"],[1989,"From Heritage Presbytery","carried over"]],
-  inq:[[2018,"CCB — meaning of ‘inducted’","advice given"],[2007,"CCB — quorum for election","advice given"]],
-  rpr:[[2016,"Westminster Pby — no record of election","satisfactory"],[2013,"Calvary Pby — incomplete exam","satisfactory"],[2009,"Heritage Pby — call not minuted","raised"],[2001,"Grace Pby — no congregational vote","satisfactory"]],
-};
-const TYPE_META = {case:["t-case","Judicial cases"], ov:["t-ov","Overtures"], inq:["t-inq","Inquiries"], rpr:["t-rpr","RPR exceptions"]};
-function citeRows(type, n){
-  const pool = CITES[type]||[], out=[];
-  for(let i=0;i<n;i++){ const s=pool[i%pool.length]; out.push({type, year:s[0]-Math.floor(i/pool.length)*7, label:s[1], outcome:s[2]}); }
-  return out;
-}
+const TYPE_META = {case:["t-case","Judicial cases"], ov:["t-ov","Overtures"], inq:["t-inq","Inquiries"], rpr:["t-rpr","RPR exceptions"], pp:["t-pp","Study reports"]};
 function histogram(rows){
-  const dec={}; rows.forEach(r=>{ const d=Math.floor(r.year/10)*10; dec[d]=(dec[d]||0)+1; });
+  const dec={}; rows.forEach(r=>{ if(!r.yr) return; const d=Math.floor(r.yr/10)*10; dec[d]=(dec[d]||0)+1; });
   const ds=Object.keys(dec).map(Number).sort((a,b)=>a-b); if(!ds.length) return '';
   const max=Math.max(...ds.map(d=>dec[d]));
   return `<div class="histo"><p class="hcap">GA citations by decade</p>` + ds.map(d=>
@@ -1011,7 +1014,7 @@ function renderDrawer(){
   document.getElementById('dMeta').innerHTML =
     (auth ? `<span class="auth-pill ${auth}">${auth==='binding'?'Binding · constitutional':'Advisory'}</span>` : '')
     + `<button class="copy-cite" data-cite="${refLabel}">⧉ Copy citation</button>`;
-  const counts={case:d.cases, ov:d.ov, inq:d.inq, rpr:d.rpr};
+  const counts={case:d.cases, ov:d.ov, inq:d.inq, rpr:d.rpr, pp:d.pp};
   const hasHist = d.amend && d.amend.length;
   const comm = (current==='bco' && window.BCO_COMMENTARY) ? window.BCO_COMMENTARY[ref] : null;
   const PRF = {wcf:window.WCF_PROOFS, wlc:window.WLC_PROOFS, wsc:window.WSC_PROOFS}[current];
@@ -1020,24 +1023,27 @@ function renderDrawer(){
   let body = `<div class="dtabs">${tab('cit','Citations'+(n?` (${n})`:''))}${proofs?tab('proofs','Proofs'):''}${comm?tab('comm','Commentary'):''}${tab('notes','Notes')}${hasHist?tab('hist','History'):''}</div>`;
   if(dTab==='cit'){
     if(n===0){
-      body += `<p class="empty-note">No General Assembly actions reference this provision yet. The text stands on its own — when a case, overture, inquiry, or record-review exception cites it, it will surface here.</p>`;
+      body += `<p class="empty-note">No General Assembly action in the corpus cites this provision. The text stands on its own — when a case, overture, inquiry, or record-review exception references it, it will surface here.</p>`
+        + `<a class="ga-browse" href="${(window.GA_BASE||'#')}app/" target="_blank" rel="noopener">Search the full GA Minutes corpus ↗</a>`;
     } else {
-      const allRows=[]; Object.keys(counts).forEach(t=>allRows.push(...citeRows(t,counts[t])));
-      body += `<p class="dsum"><b>${n}</b> GA action${n>1?'s':''} — ${counts.case} cases · ${counts.ov} overtures · ${counts.inq} inquiries · ${counts.rpr} RPR</p>`;
-      if(n>=12) body += histogram(allRows);
+      const parts = [counts.case&&`${counts.case} case${counts.case>1?'s':''}`, counts.ov&&`${counts.ov} overture${counts.ov>1?'s':''}`,
+        counts.inq&&`${counts.inq} inquir${counts.inq>1?'ies':'y'}`, counts.rpr&&`${counts.rpr} RPR`, counts.pp&&`${counts.pp} study`].filter(Boolean);
+      body += `<p class="dsum"><b>${n}</b> GA action${n>1?'s':''} — ${parts.join(' · ')}</p>`;
+      if(n>=12) body += histogram(d.rows);
       const chip=(k,l,c)=>`<button class="fchip${dFilter===k?' on':''}" data-filter="${k}">${l}${c!=null?` ${c}`:''}</button>`;
       body += `<div class="fchips">${chip('all','All',n)}`
         + (counts.case?chip('case','Cases',counts.case):'') + (counts.ov?chip('ov','Overtures',counts.ov):'')
-        + (counts.inq?chip('inq','Inquiries',counts.inq):'') + (counts.rpr?chip('rpr','RPR',counts.rpr):'')
+        + (counts.inq?chip('inq','Inquiries',counts.inq):'') + (counts.rpr?chip('rpr','RPR',counts.rpr):'') + (counts.pp?chip('pp','Studies',counts.pp):'')
         + `<button class="sortbtn" data-sort>${dSort==='desc'?'Newest first':'Oldest first'} ⇅</button></div>`;
-      const types = dFilter==='all' ? ['case','ov','inq','rpr'] : [dFilter];
+      const types = dFilter==='all' ? ['case','ov','inq','rpr','pp'] : [dFilter];
       types.forEach(t=>{
         if(!counts[t]) return;
         const [cls,label]=TYPE_META[t];
-        const rows=citeRows(t,counts[t]).sort((a,b)=>dSort==='desc'?b.year-a.year:a.year-b.year);
+        const rows=d.rows.filter(r=>r.t===t).sort((a,b)=>dSort==='desc'?(b.yr||0)-(a.yr||0):(a.yr||0)-(b.yr||0));
         body += `<div class="cgrp"><p class="cgrp-h"><span class="tag ${cls}">${label}</span><span class="cgrp-n">${counts[t]}</span></p>`
-          + rows.map(r=>`<a class="cite" href="#"><span class="yr">${r.year}</span>${r.label}<span class="out">· ${r.outcome}</span><span class="arr">↗</span></a>`).join('') + `</div>`;
+          + rows.map(r=>`<a class="cite" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="yr">${r.yr||''}</span><span class="ctxt">${esc(r.ttl)}${r.disp?`<span class="out">· ${esc(r.disp)}</span>`:''}</span><span class="arr">↗</span></a>`).join('') + `</div>`;
       });
+      body += `<a class="ga-browse" href="${(window.GA_BASE||'#')}app/" target="_blank" rel="noopener">Search the full GA Minutes corpus ↗</a>`;
     }
   } else if(dTab==='proofs'){
     const styled = (proofs||'').replace(/\(([^)]*)\)/g, '<span class="pref">($1)</span>');
