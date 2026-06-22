@@ -147,7 +147,7 @@
 
   /* home (title page) */
   .home-eyebrow{font-family:var(--sans); font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0 0 6px; text-align:center}
-  .home-title{font-weight:600; font-size:2.6rem; line-height:1.16; letter-spacing:-.015em; margin:0 auto; text-align:center; color:var(--navy); max-width:16ch}
+  .landing .home-title{font-weight:600; font-size:2.6rem; line-height:1.16; letter-spacing:-.015em; margin:0 auto; text-align:center; color:var(--navy); max-width:16ch}
   /* icon-led component entries (Stitch landing) */
   .hentries{margin-top:10px}
   .hentry{display:block; text-decoration:none; color:inherit; text-align:center; padding:28px 0; cursor:pointer; border-top:1px solid var(--line)}
@@ -345,7 +345,7 @@
     .doc{max-width:100%}                              /* hard-cap the reading column to the viewport */
     body[data-view="read"] aside.rail, .gutter{display:none}
     .sig-inline{display:inline-flex}
-    .home-title{font-size:2rem}
+    .landing .home-title{font-size:2rem}
     .toc{columns:1}
     .pg .pl{font-size:.66rem}
     .swipe-hint{display:block; text-align:center; font-size:.72rem; color:var(--muted); margin:14px 0 0; font-family:var(--sans)}
@@ -698,8 +698,23 @@ const HOME_DESC = {
   wsc:"Concise instruction, for learning by heart.",
   bco:"Government, Discipline, and Worship.",
 };
+/* ── URL routing: hash reflects the current location so it's linkable + survives reload ── */
+function setRoute(r){ try{ history.replaceState(null, '', r ? '#'+r : location.pathname + location.search); }catch(_){ } }
+function applyRoute(){
+  closeDrawer(); closePal(); closePacks();
+  const raw = decodeURIComponent((location.hash || '').replace(/^#\/?/, ''));
+  if(!raw){ showHome(); return; }
+  const i = raw.indexOf('/');
+  const book = i < 0 ? raw : raw.slice(0, i);
+  const rest = i < 0 ? '' : raw.slice(i + 1);
+  if(!COMPONENTS[book]){ showHome(); return; }
+  if(!rest){ showComponent(book); return; }
+  if(COMPONENTS[book].mode === 'scroll') openTarget(book, {anchor: rest});
+  else openTarget(book, {ch: rest});
+}
+
 function showHome(){
-  setView("home"); current="bco";
+  setView("home"); current="bco"; setRoute('');
   document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', false));
   const entry = k => {
     const c = COMPONENTS[k];
@@ -717,7 +732,7 @@ function showHome(){
 }
 
 function showComponent(book){
-  setView("component"); current=book;
+  setView("component"); current=book; setRoute(book);
   document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', b.dataset.book===book));
   const c = COMPONENTS[book];
   let toc = '';
@@ -792,7 +807,7 @@ function renderCatechism(book, anchor){
   // rail = movement jump-index (scrollspy-highlighted)
   document.getElementById('rail').innerHTML =
     `<a class="rail-back" data-book="${book}">‹ ${c.abbr} contents</a><p class="crumb">Movements</p><ol class="sub">` +
-    secs.map(([a,b,t])=>`<li><a data-spy="Q.${a}" href="#p-Q.${a}">Q${a}–${b}</a></li>`).join('') + `</ol>`;
+    secs.map(([a,b,t])=>`<li><a class="jump" data-spy="Q.${a}" data-anchor="Q.${a}">Q${a}–${b}</a></li>`).join('') + `</ol>`;
   // doc = whole catechism
   let doc = `<a class="read-back" data-book="${book}">‹ ${c.name}</a><p class="kicker">${c.name}</p>`
     + `<h1>${book==='wsc'?'Shorter':'Larger'} Catechism</h1><p class="subtitle">${c.tag}</p>`
@@ -826,10 +841,10 @@ function renderCatechism(book, anchor){
   docEl.innerHTML = doc;
   document.getElementById('gutter').innerHTML = gut;
   alignGutter();
-  // deep-link: jump to the requested question and reflect it in the URL
+  // reflect the location in the URL (book, or book/Q.N when jumped to a question)
+  setRoute(anchor ? book+'/'+anchor : book);
   if(anchor && document.getElementById('p-'+anchor)){
     document.getElementById('p-'+anchor).scrollIntoView({block:'start'});
-    history.replaceState(null,'','#p-'+anchor);
   } else { window.scrollTo(0,0); }
   docEl.classList.remove('turn'); void docEl.offsetWidth; docEl.classList.add('turn');
 }
@@ -866,13 +881,13 @@ function bounce(){
 }
 
 function showChapter(book, o){
-  setView("read"); current=book; cur={book,o};
+  setView("read"); current=book; cur={book,o}; setRoute(book+'/'+o.ch);
   document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', b.dataset.book===book));
   const ch = buildChapter(book, o);
   const c = COMPONENTS[book];
   // rail
   let rail = `<a class="rail-back" data-book="${book}">‹ ${c.abbr} contents</a><p class="crumb">${ch.title}</p>`;
-  if(ch.railSub && ch.railSub.length) rail += `<ol class="sub">` + ch.railSub.map(r=>`<li><a href="#p-${r}">${r}</a></li>`).join('') + `</ol>`;
+  if(ch.railSub && ch.railSub.length) rail += `<ol class="sub">` + ch.railSub.map(r=>`<li><a class="jump" data-anchor="${r}">${r}</a></li>`).join('') + `</ol>`;
   document.getElementById('rail').innerHTML = rail;
   // doc
   let doc = `<a class="read-back" data-book="${book}">‹ ${c.name}</a>`
@@ -1092,6 +1107,8 @@ document.getElementById('brand').addEventListener('click', ()=>{ closeMenu(); sh
 document.getElementById('books').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) showComponent(b.dataset.book); });
 document.getElementById('hamburger').addEventListener('click', ()=>{ const m=document.getElementById('mobileMenu'); const open=m.classList.toggle('open'); document.getElementById('hamburger').setAttribute('aria-expanded', open); });
 document.body.addEventListener('click', e=>{
+  if(e.target.closest('a[href="#"]')) e.preventDefault();   // placeholder citation links: don't navigate to '#'
+  const ja = e.target.closest('[data-anchor]'); if(ja){ const el=document.getElementById('p-'+ja.dataset.anchor); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); return; }
   const ns = e.target.closest('.note-save'); if(ns){ const ta=document.querySelector('#drawer .note-input'); const v=ta&&ta.value.trim(); if(v){ (NOTES[drawerRef]=NOTES[drawerRef]||[]).push({who:"You", when:noteDate(), text:v}); saveNotes(); } dTab='notes'; renderDrawer(); return; }
   const nd = e.target.closest('.note-del'); if(nd){ const i=+nd.dataset.i; if(NOTES[drawerRef]){ NOTES[drawerRef].splice(i,1); if(!NOTES[drawerRef].length) delete NOTES[drawerRef]; } saveNotes(); dTab='notes'; renderDrawer(); return; }
   const dt = e.target.closest('.dtab'); if(dt){ dTab=dt.dataset.tab; renderDrawer(); return; }
@@ -1116,6 +1133,7 @@ document.body.addEventListener('click', e=>{
 document.getElementById('closeDrawer').addEventListener('click', closeDrawer);
 document.getElementById('overlay').addEventListener('click', closeDrawer);
 document.getElementById('openPal').addEventListener('click', openPal);
+document.getElementById('palWrap').addEventListener('click', e=>{ if(e.target.id==='palWrap') closePal(); });   // click backdrop to dismiss
 
 /* ── packs & notes panel ── */
 function renderPacks(){
@@ -1190,7 +1208,8 @@ document.addEventListener('touchend', e=>{
   if(Math.abs(dx)>70 && Math.abs(dx) > Math.abs(dy)*1.8){ goRelative(dx<0 ? 1 : -1); }
 }, {passive:true});
 
-showHome();
+window.addEventListener('hashchange', applyRoute);   // back/forward + manual edits
+applyRoute();                                        // initial render from the URL (deep link / reload)
 </script>
 </body>
 </html>
