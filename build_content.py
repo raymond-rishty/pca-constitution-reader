@@ -102,10 +102,15 @@ def build_bco():
     # chapter title (<h4><i>…</i>), or a numbered section start (<b>NN-S</b>).
     # tokens: chapter heading (spelled number); chapter title (<h4> inner, tags stripped);
     # section = a <p> that BEGINS with "NN-S." (number may be wrapped in any mix of <b>/<strong>/<span>).
+    # A section opener may live in a <p> OR an <h4> (chapter-opening sections like
+    # 27-1 are styled as headings), and the number itself may have stray spaces or
+    # tags inside it ("35- 5 ."). Try the section pattern before the generic <h4>
+    # title so heading-styled sections aren't swallowed as titles.
+    _gap = r'(?:\s|<[^>]+>|&nbsp;)*'
     tok = re.compile(
-        r'<h2[^>]*>\s*CHAPTER\s+([A-Z–\-]+)\s*</h2>'
-        r'|<h4[^>]*>(.*?)</h4>'
-        r'|<p[^>]*>(?:\s|<[^>]+>)*(\d+)-(\d+[A-Za-z]?)(?:\s|<[^>]+>)*\.',
+        r'<h2[^>]*>\s*CHAPTER\s+([A-Z–\-]+)\s*</h2>'                          # 1: chapter heading
+        rf'|<(?:p|h4)[^>]*>{_gap}(\d+){_gap}-{_gap}(\d+[A-Za-z]?){_gap}\.'    # 2,3: section NN-S
+        r'|<h4[^>]*>(.*?)</h4>',                                              # 4: chapter title
         re.S | re.I)
     chapters = {}
     for part, _name, url in BCO_PARTS:
@@ -117,15 +122,15 @@ def build_bco():
                 cur = w2n(m.group(1))
                 chapters.setdefault(str(cur), {"part": part, "title": "", "sections": []})
                 continue
-            if m.group(2) is not None:                                  # chapter title
-                t = clean(m.group(2))
+            if m.group(4) is not None:                                  # chapter title
+                t = clean(m.group(4))
                 if cur and not chapters[str(cur)]["title"] and t:
                     chapters[str(cur)]["title"] = t
                 continue
-            ch = int(m.group(3))                                        # numbered section
+            ch = int(m.group(2))                                        # numbered section
             if ch != cur:
                 continue                                                # cross-reference, not a section header
-            ref = f"{ch}-{m.group(4)}"
+            ref = f"{ch}-{m.group(3)}"
             end = marks[i + 1].start() if i + 1 < len(marks) else len(src)
             body = clean(src[m.end():end]).strip()
             sec = {"ref": ref, "body": body}
@@ -138,6 +143,16 @@ def build_bco():
         c["vacated"] = not c["sections"]
     nums = sorted(int(k) for k in chapters)
     assert nums == list(range(1, 64)), f"BCO chapters not 1..63: {len(nums)} found ({nums[:3]}…{nums[-3:]})"
+    # completeness guard: within a chapter, sections run 1..N with no holes. An
+    # interior gap means a section was dropped during extraction (e.g. an <h4>
+    # opener or a number rendered as "35- 5 ."). Fail loudly so it can't ship.
+    gaps = []
+    for k, c in chapters.items():
+        secn = sorted({int(re.match(r'\d+-(\d+)', s["ref"]).group(1)) for s in c["sections"]})
+        missing = [i for i in range(1, secn[-1] + 1) if i not in secn] if secn else []
+        if missing:
+            gaps.append(f"BCO {k} missing {missing}")
+    assert not gaps, "BCO section gaps (incomplete extraction): " + "; ".join(gaps)
     return chapters
 
 PREFACE_URL = "https://www.pcaac.org/book-of-church-order/preface/"

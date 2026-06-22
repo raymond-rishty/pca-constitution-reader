@@ -1023,6 +1023,10 @@ window.BCO = {
 "title": "Discipline – Its Nature, Subjects and Ends",
 "sections": [
 {
+"ref": "27-1",
+"body": "Discipline is the exercise of authority given the Church by the Lord Jesus Christ to instruct and guide its members and to promote its purity and welfare. The term has two senses: a. the one referring to the whole government, inspection, training, guardianship and control which the church maintains over its members, its officers and its courts; b. the other a restricted and technical sense, signifying judicial process."
+},
+{
 "ref": "27-2",
 "body": "All baptized persons, being members of the Church are subject to its discipline and entitled to the benefits thereof."
 },
@@ -1347,6 +1351,10 @@ window.BCO = {
 "body": "The testimony of more than one witness shall be necessary in order to establish any charge; yet if, in addition to the testimony of one witness, corroborative evidence be produced, the offense may be considered to be proved. 35-5. It belongs to the court to judge the degree of credibility to be attached to all evidence."
 },
 {
+"ref": "35-5",
+"body": "It belongs to the court to judge the degree of credibility to be attached to all evidence."
+},
+{
 "ref": "35-6",
 "body": "No witness afterwards to be examined, unless a member of the court, shall be present during the examination of another witness on the same case, if either party object."
 },
@@ -1359,8 +1367,28 @@ window.BCO = {
 "body": "The oath or affirmation to a witness shall be administered by the Moderator in the following or like terms: Do you solemnly promise, in the presence of God, that you will declare the truth, the whole truth, and nothing but the truth, according to the best of your knowledge in the matter in which you are called to witness, as you shall answer it to the great Judge of the living and the dead? If, however, at any time a witness should present himself before a court, who for conscientious reasons prefers to swear or affirm in any other manner, he should be allowed to do so. 35-9. All testimony shall be recorded (transcription, audiotape, videotape, or some other electronic means) and witnesses informed of such prior to testifying. Such recording becomes part of the Record of the Case. However, in order to be referenced in written or oral briefs, such recording must be transcribed and the transcription authenticated by the trial court. The court of final appeal may assess the cost of transcription equitably among the parties."
 },
 {
+"ref": "35-9",
+"body": "All testimony shall be recorded (transcription, audiotape, videotape, or some other electronic means) and witnesses informed of such prior to testifying. Such recording becomes part of the Record of the Case. However, in order to be referenced in written or oral briefs, such recording must be transcribed and the transcription authenticated by the trial court. The court of final appeal may assess the cost of transcription equitably among the parties."
+},
+{
 "ref": "35-10",
 "body": "The records of a court or any part of them, whether original or transcribed, if regularly authenticated by the moderator and clerk, or by either of them, shall be deemed good and sufficient evidence in every other court. 35-11. In like manner, testimony taken by one court and regularly certified shall be received by every other court as no less valid than if it had been taken by itself. 35-12. When it is not convenient for a court to have the whole or perhaps any part of the testimony in any particular case taken in its presence, a commission shall be appointed, or coordinate court requested, to take the testimony in question, which shall be considered as if taken in the presence of the court. Due notice of the commission or coordinate court or videoconference, and of the time and place of its meeting, shall be given to the opposite party, that he may have an opportunity of attending. If the accused shall desire on his part to take testimony at a distance for his own exculpation, he shall give notice to the court of the time and place at which it shall be taken, in order that a commission or coordinate court, as in the former case, may be appointed for the purpose. Testimony may be taken on written interrogatories by filing the same with the clerk of the court having jurisdiction of the case, and giving two weeks' notice thereof to the adverse party, during which time he may file cross-interrogatories, if he desire it. Testimony shall then be taken by the commission or coordinate court in answer to the direct and cross-interrogatories, if such are filed, and no notice need be given of the time and place of taking the testimony. 35-13. A member of the court shall not be disqualified from sitting as a judge by having given testimony in the case, unless a party makes an objection, and the court subsequently determines that such member should be disqualified. The elder against whom the objection has been made shall retain the right to vote in the determination of qualification. A member of the court who is the prosecutor in the case (BCO 31-2) is disqualified from sitting as a judge. 35-14. An officer or private member of the church refusing to testify may be censured for contumacy."
+},
+{
+"ref": "35-11",
+"body": "In like manner, testimony taken by one court and regularly certified shall be received by every other court as no less valid than if it had been taken by itself."
+},
+{
+"ref": "35-12",
+"body": "When it is not convenient for a court to have the whole or perhaps any part of the testimony in any particular case taken in its presence, a commission shall be appointed, or coordinate court requested, to take the testimony in question, which shall be considered as if taken in the presence of the court. Due notice of the commission or coordinate court or videoconference, and of the time and place of its meeting, shall be given to the opposite party, that he may have an opportunity of attending. If the accused shall desire on his part to take testimony at a distance for his own exculpation, he shall give notice to the court of the time and place at which it shall be taken, in order that a commission or coordinate court, as in the former case, may be appointed for the purpose. Testimony may be taken on written interrogatories by filing the same with the clerk of the court having jurisdiction of the case, and giving two weeks' notice thereof to the adverse party, during which time he may file cross-interrogatories, if he desire it. Testimony shall then be taken by the commission or coordinate court in answer to the direct and cross-interrogatories, if such are filed, and no notice need be given of the time and place of taking the testimony."
+},
+{
+"ref": "35-13",
+"body": "A member of the court shall not be disqualified from sitting as a judge by having given testimony in the case, unless a party makes an objection, and the court subsequently determines that such member should be disqualified. The elder against whom the objection has been made shall retain the right to vote in the determination of qualification. A member of the court who is the prosecutor in the case (BCO 31-2) is disqualified from sitting as a judge."
+},
+{
+"ref": "35-14",
+"body": "An officer or private member of the church refusing to testify may be censured for contumacy."
 },
 {
 "ref": "35-15",
