@@ -1108,6 +1108,8 @@ document.getElementById('books').addEventListener('click', e=>{ const b=e.target
 document.getElementById('hamburger').addEventListener('click', ()=>{ const m=document.getElementById('mobileMenu'); const open=m.classList.toggle('open'); document.getElementById('hamburger').setAttribute('aria-expanded', open); });
 document.body.addEventListener('click', e=>{
   if(e.target.closest('a[href="#"]')) e.preventDefault();   // placeholder citation links: don't navigate to '#'
+  const mEl=document.getElementById('mobileMenu');          // click-off to dismiss the hamburger menu
+  if(mEl && mEl.classList.contains('open') && !e.target.closest('#mobileMenu') && !e.target.closest('#hamburger')) closeMenu();
   const ja = e.target.closest('[data-anchor]'); if(ja){ const el=document.getElementById('p-'+ja.dataset.anchor); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); return; }
   const ns = e.target.closest('.note-save'); if(ns){ const ta=document.querySelector('#drawer .note-input'); const v=ta&&ta.value.trim(); if(v){ (NOTES[drawerRef]=NOTES[drawerRef]||[]).push({who:"You", when:noteDate(), text:v}); saveNotes(); } dTab='notes'; renderDrawer(); return; }
   const nd = e.target.closest('.note-del'); if(nd){ const i=+nd.dataset.i; if(NOTES[drawerRef]){ NOTES[drawerRef].splice(i,1); if(!NOTES[drawerRef].length) delete NOTES[drawerRef]; } saveNotes(); dTab='notes'; renderDrawer(); return; }
@@ -1141,7 +1143,7 @@ function renderPacks(){
   const cc = Object.keys(window.BCO_COMMENTARY||{}).length;
   document.getElementById('packsBody').innerHTML =
       `<div class="pack-row"><div><b>My notes</b><span class="pack-sub">${nc} note${nc!==1?'s':''} · stored on this device</span></div><button class="pack-btn" data-act="export-notes"${nc?'':' disabled'}>Export…</button></div>`
-    + `<div class="pack-row"><div><b>Commentary</b><span class="pack-sub">${cc?(COMMENTARY_LABEL+' · '+cc+' sections'):'none loaded — import a pack to enable the Commentary tab'}</span></div></div>`
+    + (cc ? `<div class="pack-row"><div><b>Commentary</b><span class="pack-sub">${COMMENTARY_LABEL+' · '+cc+' sections'}</span></div></div>` : ``)
     + `<button class="pack-btn import" data-act="import">Import a pack…</button>`
     + `<p class="packs-note">Notes and imported packs are kept in this browser's local storage and survive reloads. They also export/import as portable JSON pack files (the durable backup). Commentary ships as a separate pack to keep copyrighted text out of the app.</p>`;
 }
