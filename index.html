@@ -426,6 +426,8 @@
   <button class="mm-item" data-book="wlc">Westminster Larger Catechism</button>
   <button class="mm-item" data-book="wsc">Westminster Shorter Catechism</button>
   <button class="mm-item" data-book="bco">Book of Church Order</button>
+  <button class="mm-item" id="mmInstall" data-install>Install app</button>
+  <button class="mm-item" data-import>Import a pack…</button>
 </div>
 
 <div class="shell">
@@ -1146,28 +1148,49 @@ function closeDrawer(){
 }
 
 /* ───────────── palette ───────────── */
-const PAL_INDEX = [
-  {ref:"24-1",book:"bco",open:{part:"fog",ch:"24"},txt:"Those who have been called to office…"},
-  {ref:"24-2",book:"bco",open:{part:"fog",ch:"24"},txt:"Ruling elders and deacons, being chosen…"},
-  {ref:"31-2",book:"bco",open:{part:"rod",ch:"31"},txt:"Process against an offender shall not commence…"},
-  {ref:"51-2",book:"bco",open:{part:"dow",ch:"51"},txt:"The Lord's Day, being the Christian Sabbath…"},
-  {ref:"21.1",book:"wcf",open:{ch:"21"},txt:"The light of nature showeth that there is a God…"},
-  {ref:"21.5",book:"wcf",open:{ch:"21"},txt:"The reading of the Scriptures with godly fear…"},
-  {ref:"Q.1",book:"wsc",open:{qStart:"1",qEnd:"3",title:"Man's chief end"},txt:"Man's chief end is to glorify God…"},
-];
+/* search index — built lazily from the loaded content (ref + text of every provision) */
+let SEARCH=null;
+function _plain(html){ const d=document.createElement('div'); d.innerHTML=html||''; return (d.textContent||'').replace(/\s+/g,' ').trim(); }
+function buildSearch(){
+  const out=[];
+  if(window.WCF) for(const ch in window.WCF){ const c=window.WCF[ch]; (c.sections||[]).forEach(s=>out.push({book:'wcf', ref:s.ref, open:{ch}, sub:'Ch. '+ch+(c.title?' · '+c.title:''), txt:_plain(s.body)})); }
+  [['wsc',window.WSC],['wlc',window.WLC]].forEach(([bk,arr])=>{ if(Array.isArray(arr)) arr.forEach((qa,i)=>{ const ref='Q.'+(i+1); out.push({book:bk, ref, open:{qStart:String(i+1), anchor:ref}, sub:_plain(qa.q), txt:_plain(qa.q)+' '+_plain(qa.a)}); }); });
+  if(window.BCO && window.BCO_ORDER) window.BCO_ORDER.forEach(id=>{ const e=window.BCO[id]; (e.sections||[]).forEach(s=>{ let t=_plain(s.body); if(!t && s.blocks) t=s.blocks.map(b=>_plain(b[b.length-1])).join(' '); out.push({book:'bco', ref:s.ref, open:{ch:id}, sub:e.title||'', txt:t}); }); });
+  return out;
+}
+const BOOK_LABEL={wcf:'WCF',wlc:'WLC',wsc:'WSC',bco:'BCO'};
 let palSel=0, palResults=[];
 function palRender(q){
-  q=q.trim().toLowerCase();
-  palResults = !q ? PAL_INDEX.slice(0,6) : PAL_INDEX.filter(h=>h.ref.toLowerCase().includes(q)||h.txt.toLowerCase().includes(q));
+  if(!SEARCH) SEARCH=buildSearch();
+  let s=q.trim().toLowerCase();
+  let bf=null;   // optional leading book qualifier: "bco 35-4", "confession 21.5", "shorter q.1"
+  const m=s.match(/^(wcf|confession|wlc|larger|wsc|shorter|bco|book of church order|catechism)\b[\s:.\-]*/);
+  if(m){ const k=m[1]; bf=(k==='wcf'||k.startsWith('conf'))?'wcf':(k==='wlc'||k.startsWith('larger'))?'wlc':(k==='wsc'||k.startsWith('shorter'))?'wsc':(k==='bco'||k.startsWith('book'))?'bco':null; if(bf) s=s.slice(m[0].length).trim(); }
+  const pool = bf ? SEARCH.filter(h=>h.book===bf) : SEARCH;
+  if(!s){ palResults = pool.slice(0,8); }
+  else {
+    const qn=s.replace(/[\s.\-]/g,''); const scored=[];
+    for(const h of pool){
+      const rl=h.ref.toLowerCase(), rn=rl.replace(/[\s.\-]/g,'');
+      let sc=-1;
+      if(rl===s || (qn && rn===qn)) sc=0;
+      else if(qn && rn.startsWith(qn)) sc=1;
+      else if(s.length>=2 && h.txt.toLowerCase().includes(s)) sc=3;
+      if(sc>=0) scored.push([sc,h]);
+    }
+    scored.sort((x,y)=> x[0]-y[0] || x[1].ref.localeCompare(y[1].ref,undefined,{numeric:true}));
+    palResults = scored.slice(0,30).map(x=>x[1]);
+  }
   palSel=0;
-  document.getElementById('palHits').innerHTML = palResults.map((h,i)=>
-    `<div class="hit ${i===0?'sel':''}" data-i="${i}"><span class="ref">${h.book==='bco'?'BCO ':h.book.toUpperCase()+' '}${h.ref}</span><span class="txt">${h.txt}</span></div>`
-  ).join('') || `<div class="hit"><span class="txt">No matches</span></div>`;
+  const hits=palResults.map((h,i)=>
+    `<div class="hit ${i===0?'sel':''}" data-i="${i}"><span class="ref">${BOOK_LABEL[h.book]} ${h.ref}</span><span class="txt">${esc(h.txt||h.sub||'')}</span></div>`
+  ).join('');
+  document.getElementById('palHits').innerHTML = hits || `<div class="hit"><span class="txt">No matches — try a reference like “BCO 35-4”, “WCF 21.5”, or “WSC Q.1”.</span></div>`;
 }
 function palGo(i){
   const h = palResults[i]; if(!h) return;
   closePal();
-  openTarget(h.book, h.open.qStart!=null ? {qStart:h.open.qStart, qEnd:h.open.qEnd, anchor:'Q.'+h.open.qStart} : h.open);
+  openTarget(h.book, h.open);
   const el = document.getElementById('p-'+h.ref);
   if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
   setTimeout(()=>openDrawer(h.ref), 300);
@@ -1192,7 +1215,7 @@ document.body.addEventListener('click', e=>{
   if(e.target.closest('.sortbtn')){ dSort = dSort==='desc'?'asc':'desc'; renderDrawer(); return; }
   const cc = e.target.closest('.copy-cite'); if(cc){ const orig=cc.textContent, txt = cc.hasAttribute('data-copytext') ? (cc.dataset.cite + '. ' + sectionText(drawerRef)) : cc.dataset.cite; try{ navigator.clipboard.writeText(txt); }catch(_){ } cc.textContent='Copied ✓'; setTimeout(()=>{ if(document.body.contains(cc)) cc.textContent=orig; }, 1600); return; }
   if(e.target.closest('.home-jump')){ openPal(); return; }
-  const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else showComponent(mm.dataset.book); return; }
+  const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else if(mm.hasAttribute('data-install')) promptInstall(); else if(mm.hasAttribute('data-import')) document.getElementById('importFile').click(); else showComponent(mm.dataset.book); return; }
   const bn = e.target.closest('.bn'); if(bn){ const a=bn.dataset.bn; if(a==='library') showHome(); else if(a==='search') openPal(); else showComponent(current); return; }
   const home = e.target.closest('[data-home]'); if(home){ showHome(); return; }
   const railBack = e.target.closest('.rail-back,.read-back'); if(railBack){ showComponent(railBack.dataset.book); return; }
@@ -1286,6 +1309,19 @@ document.addEventListener('touchend', e=>{
 
 window.addEventListener('hashchange', applyRoute);   // back/forward + manual edits
 applyRoute();                                        // initial render from the URL (deep link / reload)
+
+/* ── PWA: capture the install prompt so the hamburger "Install app" item can fire it ── */
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; });
+window.addEventListener('appinstalled', ()=>{ deferredPrompt=null; const b=document.getElementById('mmInstall'); if(b) b.style.display='none'; });
+if(matchMedia('(display-mode: standalone)').matches || navigator.standalone){ const b=document.getElementById('mmInstall'); if(b) b.style.display='none'; }
+function promptInstall(){
+  if(deferredPrompt){ deferredPrompt.prompt(); const c=deferredPrompt.userChoice; deferredPrompt=null; if(c&&c.finally) c.finally(()=>{}); return; }
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  alert(ios
+    ? 'To install on iPhone/iPad: in Safari tap the Share button, then “Add to Home Screen.”'
+    : 'If no install prompt appears, open your browser menu and choose “Install app” / “Add to Home screen.” (It may already be installed.)');
+}
 
 /* ── PWA: register the service worker (installable + full offline) ── */
 if('serviceWorker' in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
