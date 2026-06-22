@@ -196,8 +196,10 @@ def build_bco_appendices():
     titles = {}
     for m in re.finditer(r'<a href="#App_([A-Z])"[^>]*>\s*APPENDIX\s+[A-Z]\s*</a>\s*([^<]*)', src, re.I):
         titles[m.group(1).upper()] = clean(m.group(2))
-    heads = list(re.finditer(r'<h2[^>]*>\s*APPENDIX\s+([A-Z])\s*</h2>', src, re.I))
+    # tolerate empty trailing inline tags before </h2> (some headings render "APPENDIX A<b></b>")
+    heads = list(re.finditer(r'<h2[^>]*>\s*APPENDIX\s+([A-Z])\s*(?:<[^>]*>\s*)*</h2>', src, re.I))
     assert heads, "no appendix headings found"
+    assert len(heads) >= 10, f"expected 10 appendices (A-J), got {len(heads)}: {[m.group(1) for m in heads]}"
     out = []
     for i, m in enumerate(heads):
         L = m.group(1).upper()
@@ -206,7 +208,7 @@ def build_bco_appendices():
         if foot != -1 and foot < e:
             e = foot
         t = titles.get(L, "")
-        title = f"Appendix {L}" + (f" — {t.title()}" if t else "")
+        title = f"Appendix {L}" + (f" — {t.title().replace(chr(39)+'S', chr(39)+'s')}" if t else "")
         out.append({"id": f"app{L}", "part": "appx", "title": title, "paras": _paras(src[m.end():e])})
     return out
 
