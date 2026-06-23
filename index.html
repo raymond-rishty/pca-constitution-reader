@@ -904,6 +904,8 @@ function showComponent(book){
       ? 'Full Book of Church Order — for personal study only (© PCA; not for redistribution). The Directory for Worship marks its binding (constitutional) sections.'
       : ((book==='wsc'&&window.WSC)||(book==='wlc'&&window.WLC)||(book==='wcf'&&window.WCF))
       ? 'Full text — public-domain OPC edition (the standard the PCA has adopted). Scripture proof texts are pending a proof-text source (WCF 21 shows a sample).'
+      : c.custom
+      ? 'Imported document — added from a pack and stored on this device; a local governing document, not part of the PCA Constitution.'
       : c.mode==='scroll'
       ? 'Design prototype — placeholder text. The catechism opens as one long-scrolling page; every question is individually anchored and deep-linkable.'
       : 'Design prototype — text is placeholder and the chapter list is illustrative. The chapter marked “sample” opens a live reading view.'}</p>
