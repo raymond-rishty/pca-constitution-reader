@@ -2,3 +2,4 @@
 content/packs/
 __pycache__/
 *.pyc
+.claude/

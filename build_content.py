@@ -105,10 +105,15 @@ def build_bco():
     # chapter title (<h4><i>…</i>), or a numbered section start (<b>NN-S</b>).
     # tokens: chapter heading (spelled number); chapter title (<h4> inner, tags stripped);
     # section = a <p> that BEGINS with "NN-S." (number may be wrapped in any mix of <b>/<strong>/<span>).
+    # A section opener may live in a <p> OR an <h4> (chapter-opening sections like
+    # 27-1 are styled as headings), and the number itself may have stray spaces or
+    # tags inside it ("35- 5 ."). Try the section pattern before the generic <h4>
+    # title so heading-styled sections aren't swallowed as titles.
+    _gap = r'(?:\s|<[^>]+>|&nbsp;)*'
     tok = re.compile(
-        r'<h2[^>]*>\s*CHAPTER\s+([A-Z–\-]+)\s*</h2>'
-        r'|<h4[^>]*>(.*?)</h4>'
-        r'|<p[^>]*>(?:\s|<[^>]+>)*(\d+)-(\d+[A-Za-z]?)(?:\s|<[^>]+>)*\.',
+        r'<h2[^>]*>\s*CHAPTER\s+([A-Z–\-]+)\s*</h2>'                          # 1: chapter heading
+        rf'|<(?:p|h4)[^>]*>{_gap}(\d+){_gap}-{_gap}(\d+[A-Za-z]?){_gap}\.'    # 2,3: section NN-S
+        r'|<h4[^>]*>(.*?)</h4>',                                              # 4: chapter title
         re.S | re.I)
     chapters = {}
     for part, _name, url in BCO_PARTS:
@@ -120,15 +125,15 @@ def build_bco():
                 cur = w2n(m.group(1))
                 chapters.setdefault(str(cur), {"part": part, "title": "", "sections": []})
                 continue
-            if m.group(2) is not None:                                  # chapter title
-                t = clean(m.group(2))
+            if m.group(4) is not None:                                  # chapter title
+                t = clean(m.group(4))
                 if cur and not chapters[str(cur)]["title"] and t:
                     chapters[str(cur)]["title"] = t
                 continue
-            ch = int(m.group(3))                                        # numbered section
+            ch = int(m.group(2))                                        # numbered section
             if ch != cur:
                 continue                                                # cross-reference, not a section header
-            ref = f"{ch}-{m.group(4)}"
+            ref = f"{ch}-{m.group(3)}"
             end = marks[i + 1].start() if i + 1 < len(marks) else len(src)
             body = clean(src[m.end():end]).strip()
             sec = {"ref": ref, "body": body}
@@ -141,6 +146,16 @@ def build_bco():
         c["vacated"] = not c["sections"]
     nums = sorted(int(k) for k in chapters)
     assert nums == list(range(1, 64)), f"BCO chapters not 1..63: {len(nums)} found ({nums[:3]}…{nums[-3:]})"
+    # completeness guard: within a chapter, sections run 1..N with no holes. An
+    # interior gap means a section was dropped during extraction (e.g. an <h4>
+    # opener or a number rendered as "35- 5 ."). Fail loudly so it can't ship.
+    gaps = []
+    for k, c in chapters.items():
+        secn = sorted({int(re.match(r'\d+-(\d+)', s["ref"]).group(1)) for s in c["sections"]})
+        missing = [i for i in range(1, secn[-1] + 1) if i not in secn] if secn else []
+        if missing:
+            gaps.append(f"BCO {k} missing {missing}")
+    assert not gaps, "BCO section gaps (incomplete extraction): " + "; ".join(gaps)
     return chapters
 
 PREFACE_URL = "https://www.pcaac.org/book-of-church-order/preface/"
@@ -184,8 +199,10 @@ def build_bco_appendices():
     titles = {}
     for m in re.finditer(r'<a href="#App_([A-Z])"[^>]*>\s*APPENDIX\s+[A-Z]\s*</a>\s*([^<]*)', src, re.I):
         titles[m.group(1).upper()] = clean(m.group(2))
-    heads = list(re.finditer(r'<h2[^>]*>\s*APPENDIX\s+([A-Z])\s*</h2>', src, re.I))
+    # tolerate empty trailing inline tags before </h2> (some headings render "APPENDIX A<b></b>")
+    heads = list(re.finditer(r'<h2[^>]*>\s*APPENDIX\s+([A-Z])\s*(?:<[^>]*>\s*)*</h2>', src, re.I))
     assert heads, "no appendix headings found"
+    assert len(heads) >= 10, f"expected 10 appendices (A-J), got {len(heads)}: {[m.group(1) for m in heads]}"
     out = []
     for i, m in enumerate(heads):
         L = m.group(1).upper()
@@ -194,7 +211,7 @@ def build_bco_appendices():
         if foot != -1 and foot < e:
             e = foot
         t = titles.get(L, "")
-        title = f"Appendix {L}" + (f" — {t.title()}" if t else "")
+        title = f"Appendix {L}" + (f" — {t.title().replace(chr(39)+'S', chr(39)+'s')}" if t else "")
         out.append({"id": f"app{L}", "part": "appx", "title": title, "paras": _paras(src[m.end():e])})
     return out
 
@@ -490,6 +507,131 @@ def build_proofs():
                 out["wcf"][f"{ch}.{sm.group(1)}"] = t
     return out
 
+# ── Scripture verse text for tappable proofs ──────────────────────────────
+# Berean Standard Bible (public domain, CC0). Only the verses the proofs cite
+# are bundled. The proof refs (clause-tied) are tokenized into tappable anchors;
+# all the fiddly normalization lives here (one place) so the reader stays dumb.
+BSB_URL = "https://bereanbible.com/bsb.txt"
+
+BOOK = {}
+def _bk(canon, *aliases):
+    BOOK[canon.lower()] = canon
+    for a in aliases:
+        BOOK[a.lower().rstrip('.')] = canon
+_bk('Genesis','Gen'); _bk('Exodus','Exod','Ex'); _bk('Leviticus','Lev'); _bk('Numbers','Num','Numb')
+_bk('Deuteronomy','Deut'); _bk('Joshua','Josh'); _bk('Judges','Judg'); _bk('Ruth')
+_bk('1 Samuel','1 Sam'); _bk('2 Samuel','2 Sam'); _bk('1 Kings','1 Kgs'); _bk('2 Kings','2 Kgs')
+_bk('1 Chronicles','1 Chron','1 Chr'); _bk('2 Chronicles','2 Chron','2 Chr')
+_bk('Ezra'); _bk('Nehemiah','Neh'); _bk('Esther','Esth'); _bk('Job')
+_bk('Psalm','Ps','Psa','Psalms'); _bk('Proverbs','Prov'); _bk('Ecclesiastes','Eccl','Eccles','Ecc')
+_bk('Song of Solomon','Cant','Song'); _bk('Isaiah','Isa'); _bk('Jeremiah','Jer'); _bk('Lamentations','Lam')
+_bk('Ezekiel','Ezek'); _bk('Daniel','Dan'); _bk('Hosea','Hos'); _bk('Joel'); _bk('Amos'); _bk('Obadiah','Obad')
+_bk('Jonah'); _bk('Micah','Mic'); _bk('Nahum','Nah'); _bk('Habakkuk','Hab'); _bk('Zephaniah','Zeph')
+_bk('Haggai','Hag'); _bk('Zechariah','Zech'); _bk('Malachi','Mal')
+_bk('Matthew','Matt','Mt'); _bk('Mark'); _bk('Luke'); _bk('John'); _bk('Acts','Act')
+_bk('Romans','Rom'); _bk('1 Corinthians','1 Cor'); _bk('2 Corinthians','2 Cor')
+_bk('Galatians','Gal','Ga'); _bk('Ephesians','Eph'); _bk('Philippians','Phil','Philip')
+_bk('Colossians','Col'); _bk('1 Thessalonians','1 Thess'); _bk('2 Thessalonians','2 Thess')
+_bk('1 Timothy','1 Tim'); _bk('2 Timothy','2 Tim'); _bk('Titus','Tit','1 Tit')
+_bk('Philemon','Philem','Phlm'); _bk('Hebrews','Heb'); _bk('James','Jas')
+_bk('1 Peter','1 Pet'); _bk('2 Peter','2 Pet'); _bk('1 John'); _bk('2 John'); _bk('3 John')
+_bk('Jude'); _bk('Revelation','Rev')
+
+def norm_book(raw):
+    if not raw: return None
+    s = raw.strip().rstrip('.').lower()
+    s = re.sub(r'^iii\s+', '3 ', s); s = re.sub(r'^ii\s+', '2 ', s); s = re.sub(r'^i\s+', '1 ', s)
+    return BOOK.get(s)
+
+# A verse number must be whole ((?!\d)), not a chapter ((?!\s*:)), and not a book
+# ordinal — the "1" of "1 John" ((?!\s+[A-Za-z])) — so refs never bleed into each other.
+_BOOKTOK = r'(?:(?:[1-3]|I{1,3})\s+)?[A-Z][a-z]+\.?'
+_VNUM  = r'\d+(?!\d)(?!\s*:)(?!\s+[A-Za-z])'
+_RANGE = rf'{_VNUM}(?:\s*[–—-]\s*\d+)?'
+_VLIST = rf'{_RANGE}(?:\s*,\s*{_RANGE})*'
+TOK_RE = re.compile(rf'(?:({_BOOKTOK})\s*)?(\d+):\s*({_VLIST})')
+
+def _expand_verses(part):
+    out = []
+    for chunk in part.replace('—', '–').split(','):
+        chunk = chunk.strip()
+        if not chunk: continue
+        if '–' in chunk or '-' in chunk:
+            sep = '–' if '–' in chunk else '-'
+            a, _, b = chunk.partition(sep); a, b = a.strip(), b.strip()
+            if a.isdigit() and b.isdigit(): out.extend(range(int(a), int(b) + 1))
+            elif a.isdigit(): out.append(int(a))
+        elif chunk.isdigit():
+            out.append(int(chunk))
+    return out
+
+def load_bsb():
+    idx = {}
+    for line in fetch(BSB_URL).splitlines():
+        if '\t' not in line: continue
+        ref, text = line.split('\t', 1)
+        m = re.match(r'^(.+?)\s+(\d+):(\d+)$', ref.strip())
+        if m:
+            idx[f"{m.group(1).strip()} {int(m.group(2))}:{int(m.group(3))}"] = text.strip()
+    return idx
+
+def _read_proofs_js():
+    """Parse the existing content/proofs.js back into {corpus: {ref: text}}."""
+    src = open(os.path.join(OUT, "proofs.js"), encoding="utf-8").read()
+    out = {}
+    for m in re.finditer(r'window\.(WCF|WLC|WSC)_PROOFS\s*=\s*(\{.*?\});', src, re.S):
+        out[m.group(1).lower()] = json.loads(m.group(2))
+    return out
+
+# Single-chapter books are cited "Jude 6" / "3 John 12" (no chapter); rewrite to
+# "Book 1:N" so they resolve. Also fix the occasional "65;2" semicolon-for-colon typo.
+_SINGLE_CH = r'(?:[23]\s*John|Jude|Obadiah|Obad\.|Philemon|Philem\.|Phlm\.)'
+def _prenorm(g):
+    g = re.sub(r'(\d)\s*;\s*(\d)', r'\1:\2', g)
+    g = re.sub(rf'\b({_SINGLE_CH})\s+(?=\d)', r'\1 1:', g)
+    return g
+
+def build_verses():
+    """Returns (verses {key:text}, refmap {parenthetical-inner: anchored-html}, stats)."""
+    bsb = load_bsb()
+    proofs = _read_proofs_js()
+    verses, refmap = {}, {}
+    total = resolved = chapter_only = 0
+    unresolved = []
+    def anchor(group):
+        nonlocal total, resolved, chapter_only
+        group = _prenorm(group)
+        # whole-chapter citations ("Acts 15", "Ps. 83") have a book+number but no ':' — left as plain text
+        chapter_only += len(re.findall(rf'{_BOOKTOK}\s*\d+(?!\s*:)(?!\d)', group))
+        state = {"book": None}
+        def repl(m):
+            nonlocal total, resolved
+            b = norm_book(m.group(1))
+            if b: state["book"] = b
+            book = b or state["book"]
+            if not book: return m.group(0)
+            ch, vs = int(m.group(2)), _expand_verses(m.group(3))
+            keys = [f"{book} {ch}:{v}" for v in vs]
+            ok = []
+            for k in keys:
+                total += 1
+                if k in bsb:
+                    resolved += 1; ok.append(k); verses[k] = bsb[k]
+                else:
+                    unresolved.append(k)
+            if not ok: return m.group(0)              # unresolved → plain (still shown)
+            return (f'<a class="vref" role="button" tabindex="0" '
+                    f'data-v="{html.escape("|".join(ok), quote=True)}">{m.group(0)}</a>')
+        return f'<span class="pref">({TOK_RE.sub(repl, group)})</span>'
+    for corpus in proofs.values():
+        for text in corpus.values():
+            for g in re.findall(r'\(([^()]*)\)', text):
+                if g not in refmap:
+                    refmap[g] = anchor(g)
+    stats = {"total": total, "resolved": resolved, "unresolved": sorted(set(unresolved)),
+             "verses": len(verses), "groups": len(refmap), "chapter_only": chapter_only}
+    return verses, refmap, stats
+
 def write(name, items):
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, f"{name}.js")
@@ -559,21 +701,18 @@ def do(name):
         with open(path, "w") as f:
             json.dump(pack, f, ensure_ascii=False, indent=0)
         print(f"Ramsay pack: {len(comm)} sections → {path}")
-    elif name == "proofs":
-        P = build_proofs()
-        os.makedirs(OUT, exist_ok=True)
-        path = os.path.join(OUT, "proofs.js")
-        with open(path, "w") as f:
-            f.write("/* Scripture proof texts (clause-tied refs) from westminsterstandards.org (public domain). */\n")
-            for k in ("wcf", "wlc", "wsc"):
-                f.write(f"window.{k.upper()}_PROOFS = " + json.dumps(P[k], ensure_ascii=False, indent=0) + ";\n")
-        print(f"Proofs: WCF {len(P['wcf'])}, WLC {len(P['wlc'])}, WSC {len(P['wsc'])} → {path}")
+    elif name in ("proofs", "verses"):
+        # SUPERSEDED: proofs.js + verses.js now carry the PCA's OFFICIAL proof texts
+        # (pcaac.org), built by build_proofs/build.sh. The old westminsterstandards.org
+        # parse here produced the *classic* Westminster proof set (wrong selection for a
+        # PCA app, e.g. WSC Q26) — do NOT regenerate from it or it will clobber the data.
+        sys.exit("'proofs'/'verses' are built by build_proofs/build.sh now — see build_proofs/README.md")
     else:
         sys.exit(f"unknown target: {name}")
 
 if __name__ == "__main__":
     targets = sys.argv[1:] or ["wsc"]
     if targets == ["all"]:
-        targets = ["wsc", "wlc", "wcf", "bco", "commentary", "ramsay", "proofs"]
+        targets = ["wsc", "wlc", "wcf", "bco", "commentary", "ramsay"]  # proofs/verses: build_proofs/build.sh
     for t in targets:
         do(t)

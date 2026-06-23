@@ -1,0 +1,19 @@
+{
+  "name": "PCA Constitution",
+  "short_name": "PCA Constitution",
+  "description": "The Constitution of the Presbyterian Church in America — the Westminster Standards and the Book of Church Order, with General Assembly citations.",
+  "id": "/",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fbf9f6",
+  "theme_color": "#1a2b48",
+  "categories": ["books", "reference", "education"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
