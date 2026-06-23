@@ -505,6 +505,7 @@
 <script src="content/proofs.js"></script>
 <script src="content/verses.js"></script>
 <script src="content/citations.js"></script>
+<script src="content/ramsay.js"></script>
 <script>
 /* ══════════ CONTENT: real where sourced (window.WSC), placeholder elsewhere ══════════ */
 const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.";
@@ -1315,11 +1316,14 @@ document.getElementById('palWrap').addEventListener('click', e=>{ if(e.target.id
 /* ── packs & notes panel ── */
 function renderPacks(){
   const nc = Object.values(NOTES).reduce((a,x)=>a+x.length,0);
+  const have = new Set(window.BCO_COMMENTARIES.map(c=>c.label));
+  const available = (window.BUNDLED_PACKS||[]).filter(p=>!have.has(p.label));   // public-domain packs shipped with the app
   document.getElementById('packsBody').innerHTML =
       `<div class="pack-row"><div><b>My notes</b><span class="pack-sub">${nc} note${nc!==1?'s':''} · stored on this device</span></div><button class="pack-btn" data-act="export-notes"${nc?'':' disabled'}>Export…</button></div>`
     + window.BCO_COMMENTARIES.map((c,i)=>`<div class="pack-row"><div><b>${c.label}</b><span class="pack-sub">Commentary · ${Object.keys(c.entries).length} sections</span></div><button class="pack-btn" data-act="rm-comm" data-i="${i}">Remove</button></div>`).join('')
+    + available.map(p=>`<div class="pack-row"><div><b>${p.label}</b><span class="pack-sub">Commentary · ${Object.keys(p.entries).length} sections · public domain, included</span></div><button class="pack-btn" data-act="add-bundled" data-label="${p.label}">Add</button></div>`).join('')
     + `<button class="pack-btn import" data-act="import">Import a pack…</button>`
-    + `<p class="packs-note">Notes and imported packs are kept in this browser's local storage and survive reloads. They also export/import as portable JSON pack files (the durable backup). Commentary ships as separate packs to keep copyrighted text out of the app — import as many as you like; each gets its own tab on a provision.</p>`;
+    + `<p class="packs-note">Notes and imported packs are kept in this browser's local storage and survive reloads. Public-domain commentary (Ramsay) is included — just tap <b>Add</b>. Copyrighted commentary (e.g. Smith) isn't bundled; import it as your own JSON file. Each added pack gets its own tab on a provision, and all of this exports/imports as portable JSON.</p>`;
 }
 function openPacks(){ renderPacks(); document.getElementById('packWrap').classList.add('show'); }
 function closePacks(){ document.getElementById('packWrap').classList.remove('show'); }
@@ -1331,6 +1335,7 @@ document.getElementById('packsBody').addEventListener('click', e=>{
   if(b.dataset.act==='export-notes') exportNotes();
   else if(b.dataset.act==='import') document.getElementById('importFile').click();
   else if(b.dataset.act==='rm-comm'){ window.BCO_COMMENTARIES.splice(+b.dataset.i,1); saveCommentaries(); renderPacks(); if(document.getElementById('drawer').classList.contains('show')) renderDrawer(); }
+  else if(b.dataset.act==='add-bundled'){ const p=(window.BUNDLED_PACKS||[]).find(x=>x.label===b.dataset.label); if(p){ importPack(p); renderPacks(); if(document.getElementById('drawer').classList.contains('show')) renderDrawer(); } }
 });
 document.getElementById('importFile').addEventListener('change', e=>{
   const f=e.target.files[0]; if(!f) return;
