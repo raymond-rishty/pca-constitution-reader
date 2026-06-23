@@ -380,8 +380,6 @@
   @keyframes bump{25%{transform:translateX(9px)} 70%{transform:translateX(-4px)} 100%{transform:none}}
   .doc.turn{animation:turn .2s ease}
   .doc.bump{animation:bump .26s ease}
-  @keyframes provflash{0%{background:var(--accent-soft); box-shadow:0 0 0 6px var(--accent-soft)} 100%{background:transparent; box-shadow:0 0 0 6px transparent}}
-  .prov.flash{animation:provflash 2s ease; border-radius:3px}
 
   /* ───────────────────────── responsive ───────────────────────── */
   @media(max-width:880px){
@@ -773,18 +771,8 @@ function applyRoute(){
   const rest = i < 0 ? '' : raw.slice(i + 1);
   if(!COMPONENTS[book]){ showHome(); return; }
   if(!rest){ showComponent(book); return; }
-  if(COMPONENTS[book].mode === 'scroll'){
-    openTarget(book, {anchor: rest});
-    flashProv(rest);
-  } else {
-    let chId = rest, sectionRef = null;
-    if(book === 'bco'){
-      if(window.BCO && window.BCO[rest]) chId = rest;                 // a chapter / front / appendix id
-      else { const c = bcoRefChapter(rest); chId = c || rest.split('-')[0]; sectionRef = rest; }
-    } else if(rest.indexOf('.') >= 0){ chId = rest.split('.')[0]; sectionRef = rest; }
-    openTarget(book, {ch: chId});
-    if(sectionRef) flashProv(sectionRef);
-  }
+  if(COMPONENTS[book].mode === 'scroll') openTarget(book, {anchor: rest});
+  else openTarget(book, {ch: rest});
 }
 
 function showHome(){
@@ -1117,8 +1105,7 @@ function renderDrawer(){
   document.getElementById('dMeta').innerHTML =
     (auth ? `<span class="auth-pill ${auth}">${auth==='binding'?'Binding · constitutional':'Advisory'}</span>` : '')
     + `<button class="copy-cite" data-cite="${refLabel}">⧉ Copy citation</button>`
-    + `<button class="copy-cite" data-copytext="1" data-cite="${refLabel}">⧉ Copy section text</button>`
-    + `<button class="copy-cite share-sec">↗ Share</button>`;
+    + `<button class="copy-cite" data-copytext="1" data-cite="${refLabel}">⧉ Copy section text</button>`;
   const counts={case:d.cases, ov:d.ov, inq:d.inq, rpr:d.rpr, pp:d.pp};
   const hasHist = d.amend && d.amend.length;
   const comm = (current==='bco' && window.BCO_COMMENTARY) ? window.BCO_COMMENTARY[ref] : null;
@@ -1284,7 +1271,6 @@ document.body.addEventListener('click', e=>{
   const dt = e.target.closest('.dtab'); if(dt){ dTab=dt.dataset.tab; renderDrawer(); return; }
   const fc = e.target.closest('.fchip'); if(fc){ dFilter=fc.dataset.filter; renderDrawer(); return; }
   if(e.target.closest('.sortbtn')){ dSort = dSort==='desc'?'asc':'desc'; renderDrawer(); return; }
-  const sh = e.target.closest('.share-sec'); if(sh){ shareSection(sh); return; }
   const cc = e.target.closest('.copy-cite'); if(cc){ const orig=cc.textContent, txt = cc.hasAttribute('data-copytext') ? (cc.dataset.cite + '. ' + sectionText(drawerRef)) : cc.dataset.cite; try{ navigator.clipboard.writeText(txt); }catch(_){ } cc.textContent='Copied ✓'; setTimeout(()=>{ if(document.body.contains(cc)) cc.textContent=orig; }, 1600); return; }
   const vr = e.target.closest('.vref'); if(vr){ toggleVref(vr); return; }
   const va = e.target.closest('.vall'); if(va){ const view=va.closest('.proofs-view'); const open=va.getAttribute('aria-pressed')!=='true'; view.querySelectorAll('.vref').forEach(a=>a.classList.toggle('open',open)); rebuildVerses(view); return; }
@@ -1411,24 +1397,6 @@ async function shareApp(){
   const url=appURL();
   const r=await shareData({title:'PCA Constitution', text:'The Constitution of the Presbyterian Church in America — the Westminster Standards and the Book of Church Order, with General Assembly citations.', url});
   if(r==='copied') alert('Link copied:\n'+url);
-}
-async function shareSection(btn){
-  const ref=drawerRef; if(!ref) return;
-  const label=(current==='bco'?'BCO ':current.toUpperCase()+' ')+ref;
-  const url=appURL()+'#'+current+'/'+ref;
-  const r=await shareData({title:'PCA Constitution — '+label, text:label+' — '+sectionText(ref), url});
-  if((r==='copied'||r==='fail') && btn){ const o=btn.textContent; btn.textContent=(r==='copied'?'Link copied ✓':'Copy failed'); setTimeout(()=>{ if(document.body.contains(btn)) btn.textContent=o; },1600); }
-}
-/* deep-link helpers: map a BCO section ref to its chapter id, and flash a linked provision */
-let BCO_REF2CH=null;
-function bcoRefChapter(ref){
-  if(!BCO_REF2CH){ BCO_REF2CH={}; if(window.BCO && window.BCO_ORDER) window.BCO_ORDER.forEach(id=>{ (window.BCO[id].sections||[]).forEach(x=>{ BCO_REF2CH[x.ref]=id; }); }); }
-  return BCO_REF2CH[ref];
-}
-function flashProv(ref){
-  const el=document.getElementById('p-'+ref); if(!el) return;
-  el.scrollIntoView({behavior:'smooth', block:'center'});
-  el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
 }
 
 /* ── PWA: register the service worker (installable + full offline) ── */
