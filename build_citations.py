@@ -84,33 +84,55 @@ def norm(prov):
         return ("bco", f"{int(m.group(2))}-{int(m.group(3))}")
     return None
 
-# inline provision references inside a case body (the index doesn't tag cases)
-INLINE_RE = re.compile(
-    r'_?BCO_?\s*\d{1,2}-\d{1,2}[A-Za-z.]*'
-    r'|WCF\s*\d{1,2}[-.]\d{1,2}'
-    r'|(?:WLC|WSC|LC)\s*\d{1,3}', re.I)
+DIST = "/workspace/dist/pca-ga"
 
-def scan_cases(add):
-    """Parse cases/*.md for header metadata + inline provision refs; feed each
-    (provision -> case) into add(comp, ref, entry)."""
+# Inline reference patterns for document bodies. The corpus index barely tags
+# Westminster refs (3 WSC strings in all of search_index), yet the prose cites
+# the Confession and Catechisms inline under many spellings — so we mine bodies.
+BCO_INLINE = re.compile(r'_?BCO_?\s*(\d{1,2})-(\d{1,2})[A-Za-z.]*', re.I)
+WCF_INLINE = re.compile(
+    r'(?:WCF|W\.C\.F\.|(?:Westminster )?Confession(?: of Faith)?)[,\s]*'
+    r'(?:ch(?:apter)?\.?\s*)?(\d{1,2})\s*[-.]\s*(\d{1,2})', re.I)
+WLC_INLINE = re.compile(
+    r'(?:WLC|W\.L\.C\.|Larger Catechism)[,\s]*(?:Q(?:uestion)?s?\.?\s*)?(\d{1,3})', re.I)
+WSC_INLINE = re.compile(
+    r'(?:WSC|W\.S\.C\.|Shorter Catechism)[,\s]*(?:Q(?:uestion)?s?\.?\s*)?(\d{1,3})', re.I)
+
+def inline_refs(txt, westminster_only):
+    """Yield (comp, ref) for every Constitution reference found in a body."""
+    for m in WCF_INLINE.finditer(txt):
+        yield ("wcf", f"{int(m.group(1))}.{int(m.group(2))}")
+    for m in WLC_INLINE.finditer(txt):
+        yield ("wlc", f"Q.{int(m.group(1))}")
+    for m in WSC_INLINE.finditer(txt):
+        yield ("wsc", f"Q.{int(m.group(1))}")
+    if not westminster_only:
+        for m in BCO_INLINE.finditer(txt):
+            nr = norm(f"BCO {m.group(1)}-{m.group(2)}")
+            if nr:
+                yield nr
+
+def scan_dir(add, subdir, type_code, westminster_only):
+    """Parse a catalogue dir (cases/overtures/inquiries/rpr/studies) for header
+    metadata + inline refs; link each to the catalogue page. For the indexed
+    types we take Westminster refs only (BCO already comes from the index, with
+    its canonical URLs) to avoid double-counting."""
     n_files = n_refs = 0
-    for path in sorted(glob.glob(os.path.join(CASES_DIR, "*.md"))):
+    for path in sorted(glob.glob(os.path.join(DIST, subdir, "*.md"))):
         txt = open(path).read()
+        head = txt[:800]
         mt = re.search(r'^#\s+(.+)', txt, re.M)
         title = mt.group(1).strip() if mt else os.path.basename(path)
-        my = re.search(r'\*\*Assembly:\*\*[^()\n]*\((\d{4})\)', txt)
+        my = re.search(r'\((\d{4})\)', head)                       # Assembly/First-raised year
         year = int(my.group(1)) if my else None
-        md = re.search(r'\*\*Disposition:\*\*\s*([^\n]+)', txt)
+        md = re.search(r'\*\*(?:Final [Dd]isposition|Disposition)\:\*\*\s*([^\n·]+)', head)
         disp = md.group(1).strip() if md else ""
         if len(disp) > 60:
             disp = disp[:57].rstrip() + "…"
-        url = GA_BASE + "cases/" + re.sub(r'\.md$', '.html', os.path.basename(path))
-        entry = {"t": "case", "ttl": title, "sub": "", "yr": year, "disp": disp, "url": url}
-        provset = set()
-        for m in INLINE_RE.finditer(txt):
-            nr = norm(m.group(0).replace("_", " "))
-            if nr:
-                provset.add(nr)
+        rel = os.path.relpath(path, DIST)
+        url = GA_BASE + re.sub(r'\.md$', '.html', rel)
+        entry = {"t": type_code, "ttl": title, "sub": "", "yr": year, "disp": disp, "url": url}
+        provset = set(inline_refs(txt, westminster_only))
         if provset:
             n_files += 1
         for comp, ref in provset:
@@ -164,9 +186,14 @@ def main():
             kept_provstrings.add(prov)
             add(comp, ref, entry)
 
-    # judicial cases: not indexed by provision — harvest inline refs from bodies
-    case_files, case_refs = scan_cases(add)
-    print(f"scanned cases: {case_files} files contributed {case_refs} provision links")
+    # Body scans. Cases aren't in the index at all → take all refs (BCO + WS).
+    # The other types ARE indexed for BCO, but their Westminster references are
+    # almost entirely untagged, so we harvest those from the bodies.
+    cf, cr = scan_dir(add, "cases", "case", westminster_only=False)
+    print(f"scanned cases: {cf} files, {cr} provision links (BCO + Westminster)")
+    for subdir, code in (("overtures","ov"), ("inquiries","inq"), ("rpr/exc","rpr"), ("studies","pp")):
+        f, r = scan_dir(add, subdir, code, westminster_only=True)
+        print(f"scanned {subdir}: {f} files, {r} Westminster links")
 
     # sort each provision's actions newest-first, then by type
     torder = {"case":0,"ov":1,"inq":2,"rpr":3,"pp":4}
