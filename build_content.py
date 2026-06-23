@@ -529,36 +529,18 @@ def do(name):
         with open(path, "w") as f:
             json.dump(pack, f, ensure_ascii=False, indent=0)
         print(f"Commentary pack: {len(comm)} sections → {path}")
-    elif name == "proofs":
-        P = build_proofs()
-        os.makedirs(OUT, exist_ok=True)
-        path = os.path.join(OUT, "proofs.js")
-        with open(path, "w") as f:
-            f.write("/* Scripture proof texts (clause-tied refs) from westminsterstandards.org (public domain). */\n")
-            for k in ("wcf", "wlc", "wsc"):
-                f.write(f"window.{k.upper()}_PROOFS = " + json.dumps(P[k], ensure_ascii=False, indent=0) + ";\n")
-        print(f"Proofs: WCF {len(P['wcf'])}, WLC {len(P['wlc'])}, WSC {len(P['wsc'])} → {path}")
-    elif name == "verses":
-        verses, refmap, st = build_verses()
-        os.makedirs(OUT, exist_ok=True)
-        path = os.path.join(OUT, "verses.js")
-        with open(path, "w") as f:
-            f.write("/* Scripture verse text for tappable proofs — Berean Standard Bible "
-                    "(public domain, CC0; bereanbible.com). Only proof-cited verses are bundled. */\n")
-            f.write("window.VERSES = " + json.dumps(verses, ensure_ascii=False, indent=0) + ";\n")
-            f.write("window.PROOF_REFMAP = " + json.dumps(refmap, ensure_ascii=False, indent=0) + ";\n")
-        pct = 100 * st["resolved"] / st["total"] if st["total"] else 0
-        print(f"Verses: {st['resolved']}/{st['total']} refs resolved ({pct:.1f}%), "
-              f"{st['verses']} verses, {st['groups']} ref-groups → {path}")
-        print(f"  whole-chapter citations left as plain text (not expanded): {st['chapter_only']}")
-        if st["unresolved"]:
-            print(f"  unresolved (rendered as plain citations): {', '.join(st['unresolved'])}")
+    elif name in ("proofs", "verses"):
+        # SUPERSEDED: proofs.js + verses.js now carry the PCA's OFFICIAL proof texts
+        # (pcaac.org), built by build_proofs/build.sh. The old westminsterstandards.org
+        # parse here produced the *classic* Westminster proof set (wrong selection for a
+        # PCA app, e.g. WSC Q26) — do NOT regenerate from it or it will clobber the data.
+        sys.exit("'proofs'/'verses' are built by build_proofs/build.sh now — see build_proofs/README.md")
     else:
         sys.exit(f"unknown target: {name}")
 
 if __name__ == "__main__":
     targets = sys.argv[1:] or ["wsc"]
     if targets == ["all"]:
-        targets = ["wsc", "wlc", "wcf", "bco", "commentary", "proofs", "verses"]
+        targets = ["wsc", "wlc", "wcf", "bco", "commentary"]  # proofs/verses: build_proofs/build.sh
     for t in targets:
         do(t)

@@ -1,0 +1,8 @@
+# regenerable / large / copyrighted inputs — not committed (run build.sh to fetch)
+*.pdf
+*.txt
+*.html
+*.bbox.xml
+*_proofs.json
+__pycache__/
+*.pyc

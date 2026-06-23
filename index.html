@@ -327,9 +327,15 @@
   /* commentary (Morton Smith) — BCO dossier tab */
   .commentary p{font-family:var(--sans); font-size:.88rem; line-height:1.6; color:var(--ink-soft); margin:0 0 11px}
   .cattrib{font-family:var(--sans); font-size:.72rem; color:var(--muted); margin-top:14px; border-top:1px solid var(--line); padding-top:10px}
-  /* Scripture proofs — Westminster dossier tab (settled text in serif, clause-tied refs in sans/accent) */
+  /* Scripture proofs — PCA dossier tab, footnote-style (settled answer in serif; lettered proof-groups in sans/accent) */
   .proofs-view p{font-family:var(--serif); font-size:1.02rem; line-height:1.65; color:var(--ink); margin:0 0 10px}
   .proofs-view .pref{font-family:var(--sans); font-size:.78em; color:var(--accent); padding:0 1px}
+  .proofs-view .pans{font-family:var(--serif); font-size:1.04rem; line-height:1.72; color:var(--ink); margin:0 0 12px}
+  .proofs-view .pans sup{font-family:var(--sans); font-size:.6em; font-weight:700; color:var(--accent); padding-left:.5px}
+  .pgroups{border-top:1px solid var(--line); padding-top:9px}
+  .pgroup{display:flex; gap:9px; align-items:baseline; margin:5px 0; line-height:1.55}
+  .pgroup .plabel{font-family:var(--sans); font-weight:700; font-style:italic; color:var(--accent-ink); min-width:1.1em; flex:none; text-align:right}
+  .pgroup .prefs{font-family:var(--sans); font-size:.84rem; color:var(--accent)}
   /* tappable clause-tied refs → reveal verse text (BSB) */
   .proofs-view .vref{cursor:pointer; text-decoration:underline dotted; text-underline-offset:2px; text-decoration-thickness:1px}
   .proofs-view .vref:hover{color:var(--accent-ink)}
@@ -1129,12 +1135,15 @@ function renderDrawer(){
     }
   } else if(dTab==='proofs'){
     const RM = window.PROOF_REFMAP||{};
-    const styled = (proofs||'').replace(/\(([^()]*)\)/g, (m,g)=> RM[g] || `<span class="pref">(${g})</span>`);
-    const tappable = styled.indexOf('class="vref"')>=0;
+    const groups = (proofs.groups||[]).map(([letter,rs])=>
+      `<div class="pgroup"><span class="plabel">${esc(letter)}</span><span class="prefs">${RM[rs]||esc(rs)}</span></div>`).join('');
+    const tappable = groups.indexOf('class="vref"')>=0;
     body += `<div class="proofs-view">`
       + (tappable ? `<button class="vall" aria-pressed="false">Show all verse text</button>` : ``)
-      + `<p>${styled}</p><div class="vlist"></div>`
-      + `<p class="cattrib">Scripture proofs · westminsterstandards.org (public domain)`
+      + `<p class="pans">${proofs.ans||''}</p>`
+      + (groups ? `<div class="pgroups">${groups}</div>` : ``)
+      + `<div class="vlist"></div>`
+      + `<p class="cattrib">PCA Constitution — official Scripture proofs (pcaac.org)`
       + (tappable ? ` · verse text: Berean Standard Bible (public domain)` : ``) + `</p></div>`;
   } else if(dTab==='comm'){
     body += `<div class="commentary">${(comm||[]).map(p=>`<p>${p}</p>`).join('')}<p class="cattrib">${COMMENTARY_LABEL} — imported pack, personal use.</p></div>`;
