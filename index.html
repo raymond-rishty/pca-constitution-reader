@@ -345,8 +345,11 @@
   .vall:hover{background:var(--paper-2)}
   .vall[aria-pressed="true"]{background:var(--paper-2); color:var(--accent-ink); border-color:var(--accent)}
   .vlist{margin-top:2px}
-  .vrow{font-family:var(--serif); font-size:.97rem; line-height:1.58; color:var(--ink); border-left:2px solid var(--navy); background:var(--paper-2); padding:7px 12px; margin:7px 0; border-radius:0 2px 2px 0}
-  .vrow .vk{display:block; font-family:var(--sans); font-size:.7rem; font-weight:600; letter-spacing:.02em; color:var(--accent-ink); margin-bottom:2px}
+  /* one block per tapped reference; verses within a reference share the block */
+  .vblock{border-left:2px solid var(--navy); background:var(--paper-2); padding:8px 12px; margin:8px 0; border-radius:0 2px 2px 0}
+  .vblock .vbref{font-family:var(--sans); font-size:.72rem; font-weight:700; letter-spacing:.02em; color:var(--accent-ink); margin-bottom:5px}
+  .vblock .vline{font-family:var(--serif); font-size:.97rem; line-height:1.58; color:var(--ink); margin:3px 0}
+  .vblock .vline .vn{font-family:var(--sans); font-size:.66rem; font-weight:600; color:var(--muted); margin-right:6px; vertical-align:1px}
 
   /* ───────────────────────── ⌘K palette ───────────────────────── */
   .pal-wrap{position:fixed; inset:0; z-index:50; display:none; align-items:flex-start; justify-content:center; background:rgba(42,38,32,.3); padding-top:14vh}
@@ -1245,12 +1248,25 @@ function rebuildVerses(view){
   const list=view.querySelector('.vlist'); if(!list) return;
   const V=window.VERSES||{}; let out='';
   view.querySelectorAll('.vref.open').forEach(a=>{
-    (a.dataset.v||'').split('|').forEach(k=>{ const t=V[k]; if(t) out+=`<div class="vrow"><span class="vk">${esc(k)}</span>${esc(t)}</div>`; });
+    const keys=(a.dataset.v||'').split('|').filter(Boolean);
+    const multi=keys.length>1;
+    const lines=keys.map(k=>{ const t=V[k]; if(!t) return '';
+      const vn=multi?`<span class="vn">${esc(k.split(' ').pop())}</span>`:'';   // verse "ch:v" tag, only when a ref spans >1 verse
+      return `<div class="vline">${vn}${esc(t)}</div>`; }).filter(Boolean).join('');
+    if(lines) out+=`<div class="vblock"><div class="vbref">${a.textContent}</div>${lines}</div>`;
   });
   list.innerHTML=out;
   const btn=view.querySelector('.vall');
   if(btn){ const all=view.querySelectorAll('.vref').length, open=view.querySelectorAll('.vref.open').length;
     const allOpen=all>0&&open===all; btn.setAttribute('aria-pressed',allOpen); btn.textContent=allOpen?'Hide all verse text':'Show all verse text'; }
+}
+/* tapping a reference is exclusive: reveal just that one, removing any other open ref (toggle off if already open) */
+function toggleVref(vr){
+  const view=vr.closest('.proofs-view'); if(!view) return;
+  const was=vr.classList.contains('open');
+  view.querySelectorAll('.vref.open').forEach(x=>x.classList.remove('open'));
+  if(!was) vr.classList.add('open');
+  rebuildVerses(view);
 }
 
 /* ───────────── events ───────────── */
@@ -1270,7 +1286,7 @@ document.body.addEventListener('click', e=>{
   if(e.target.closest('.sortbtn')){ dSort = dSort==='desc'?'asc':'desc'; renderDrawer(); return; }
   const sh = e.target.closest('.share-sec'); if(sh){ shareSection(sh); return; }
   const cc = e.target.closest('.copy-cite'); if(cc){ const orig=cc.textContent, txt = cc.hasAttribute('data-copytext') ? (cc.dataset.cite + '. ' + sectionText(drawerRef)) : cc.dataset.cite; try{ navigator.clipboard.writeText(txt); }catch(_){ } cc.textContent='Copied ✓'; setTimeout(()=>{ if(document.body.contains(cc)) cc.textContent=orig; }, 1600); return; }
-  const vr = e.target.closest('.vref'); if(vr){ vr.classList.toggle('open'); rebuildVerses(vr.closest('.proofs-view')); return; }
+  const vr = e.target.closest('.vref'); if(vr){ toggleVref(vr); return; }
   const va = e.target.closest('.vall'); if(va){ const view=va.closest('.proofs-view'); const open=va.getAttribute('aria-pressed')!=='true'; view.querySelectorAll('.vref').forEach(a=>a.classList.toggle('open',open)); rebuildVerses(view); return; }
   if(e.target.closest('.home-jump')){ openPal(); return; }
   const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else if(mm.hasAttribute('data-install')) promptInstall(); else if(mm.hasAttribute('data-import')) document.getElementById('importFile').click(); else if(mm.hasAttribute('data-share')) shareApp(); else showComponent(mm.dataset.book); return; }
@@ -1338,7 +1354,7 @@ document.addEventListener('keydown', e=>{
   const t=e.target; if(!t.classList) return;
   if(t.classList.contains('n')){ e.preventDefault(); openDrawer(t.dataset.ref); }
   else if(t.classList.contains('pf-toggle')){ e.preventDefault(); t.nextElementSibling.classList.toggle('open'); }
-  else if(t.classList.contains('vref')){ e.preventDefault(); t.classList.toggle('open'); rebuildVerses(t.closest('.proofs-view')); }
+  else if(t.classList.contains('vref')){ e.preventDefault(); toggleVref(t); }
 });
 
 /* ── sequential nav: ← / → arrow keys (desktop) ── */
