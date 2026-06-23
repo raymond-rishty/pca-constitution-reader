@@ -352,6 +352,131 @@ def build_proofs():
                 out["wcf"][f"{ch}.{sm.group(1)}"] = t
     return out
 
+# ── Scripture verse text for tappable proofs ──────────────────────────────
+# Berean Standard Bible (public domain, CC0). Only the verses the proofs cite
+# are bundled. The proof refs (clause-tied) are tokenized into tappable anchors;
+# all the fiddly normalization lives here (one place) so the reader stays dumb.
+BSB_URL = "https://bereanbible.com/bsb.txt"
+
+BOOK = {}
+def _bk(canon, *aliases):
+    BOOK[canon.lower()] = canon
+    for a in aliases:
+        BOOK[a.lower().rstrip('.')] = canon
+_bk('Genesis','Gen'); _bk('Exodus','Exod','Ex'); _bk('Leviticus','Lev'); _bk('Numbers','Num','Numb')
+_bk('Deuteronomy','Deut'); _bk('Joshua','Josh'); _bk('Judges','Judg'); _bk('Ruth')
+_bk('1 Samuel','1 Sam'); _bk('2 Samuel','2 Sam'); _bk('1 Kings','1 Kgs'); _bk('2 Kings','2 Kgs')
+_bk('1 Chronicles','1 Chron','1 Chr'); _bk('2 Chronicles','2 Chron','2 Chr')
+_bk('Ezra'); _bk('Nehemiah','Neh'); _bk('Esther','Esth'); _bk('Job')
+_bk('Psalm','Ps','Psa','Psalms'); _bk('Proverbs','Prov'); _bk('Ecclesiastes','Eccl','Eccles','Ecc')
+_bk('Song of Solomon','Cant','Song'); _bk('Isaiah','Isa'); _bk('Jeremiah','Jer'); _bk('Lamentations','Lam')
+_bk('Ezekiel','Ezek'); _bk('Daniel','Dan'); _bk('Hosea','Hos'); _bk('Joel'); _bk('Amos'); _bk('Obadiah','Obad')
+_bk('Jonah'); _bk('Micah','Mic'); _bk('Nahum','Nah'); _bk('Habakkuk','Hab'); _bk('Zephaniah','Zeph')
+_bk('Haggai','Hag'); _bk('Zechariah','Zech'); _bk('Malachi','Mal')
+_bk('Matthew','Matt','Mt'); _bk('Mark'); _bk('Luke'); _bk('John'); _bk('Acts','Act')
+_bk('Romans','Rom'); _bk('1 Corinthians','1 Cor'); _bk('2 Corinthians','2 Cor')
+_bk('Galatians','Gal','Ga'); _bk('Ephesians','Eph'); _bk('Philippians','Phil','Philip')
+_bk('Colossians','Col'); _bk('1 Thessalonians','1 Thess'); _bk('2 Thessalonians','2 Thess')
+_bk('1 Timothy','1 Tim'); _bk('2 Timothy','2 Tim'); _bk('Titus','Tit','1 Tit')
+_bk('Philemon','Philem','Phlm'); _bk('Hebrews','Heb'); _bk('James','Jas')
+_bk('1 Peter','1 Pet'); _bk('2 Peter','2 Pet'); _bk('1 John'); _bk('2 John'); _bk('3 John')
+_bk('Jude'); _bk('Revelation','Rev')
+
+def norm_book(raw):
+    if not raw: return None
+    s = raw.strip().rstrip('.').lower()
+    s = re.sub(r'^iii\s+', '3 ', s); s = re.sub(r'^ii\s+', '2 ', s); s = re.sub(r'^i\s+', '1 ', s)
+    return BOOK.get(s)
+
+# A verse number must be whole ((?!\d)), not a chapter ((?!\s*:)), and not a book
+# ordinal — the "1" of "1 John" ((?!\s+[A-Za-z])) — so refs never bleed into each other.
+_BOOKTOK = r'(?:(?:[1-3]|I{1,3})\s+)?[A-Z][a-z]+\.?'
+_VNUM  = r'\d+(?!\d)(?!\s*:)(?!\s+[A-Za-z])'
+_RANGE = rf'{_VNUM}(?:\s*[–—-]\s*\d+)?'
+_VLIST = rf'{_RANGE}(?:\s*,\s*{_RANGE})*'
+TOK_RE = re.compile(rf'(?:({_BOOKTOK})\s*)?(\d+):\s*({_VLIST})')
+
+def _expand_verses(part):
+    out = []
+    for chunk in part.replace('—', '–').split(','):
+        chunk = chunk.strip()
+        if not chunk: continue
+        if '–' in chunk or '-' in chunk:
+            sep = '–' if '–' in chunk else '-'
+            a, _, b = chunk.partition(sep); a, b = a.strip(), b.strip()
+            if a.isdigit() and b.isdigit(): out.extend(range(int(a), int(b) + 1))
+            elif a.isdigit(): out.append(int(a))
+        elif chunk.isdigit():
+            out.append(int(chunk))
+    return out
+
+def load_bsb():
+    idx = {}
+    for line in fetch(BSB_URL).splitlines():
+        if '\t' not in line: continue
+        ref, text = line.split('\t', 1)
+        m = re.match(r'^(.+?)\s+(\d+):(\d+)$', ref.strip())
+        if m:
+            idx[f"{m.group(1).strip()} {int(m.group(2))}:{int(m.group(3))}"] = text.strip()
+    return idx
+
+def _read_proofs_js():
+    """Parse the existing content/proofs.js back into {corpus: {ref: text}}."""
+    src = open(os.path.join(OUT, "proofs.js"), encoding="utf-8").read()
+    out = {}
+    for m in re.finditer(r'window\.(WCF|WLC|WSC)_PROOFS\s*=\s*(\{.*?\});', src, re.S):
+        out[m.group(1).lower()] = json.loads(m.group(2))
+    return out
+
+# Single-chapter books are cited "Jude 6" / "3 John 12" (no chapter); rewrite to
+# "Book 1:N" so they resolve. Also fix the occasional "65;2" semicolon-for-colon typo.
+_SINGLE_CH = r'(?:[23]\s*John|Jude|Obadiah|Obad\.|Philemon|Philem\.|Phlm\.)'
+def _prenorm(g):
+    g = re.sub(r'(\d)\s*;\s*(\d)', r'\1:\2', g)
+    g = re.sub(rf'\b({_SINGLE_CH})\s+(?=\d)', r'\1 1:', g)
+    return g
+
+def build_verses():
+    """Returns (verses {key:text}, refmap {parenthetical-inner: anchored-html}, stats)."""
+    bsb = load_bsb()
+    proofs = _read_proofs_js()
+    verses, refmap = {}, {}
+    total = resolved = chapter_only = 0
+    unresolved = []
+    def anchor(group):
+        nonlocal total, resolved, chapter_only
+        group = _prenorm(group)
+        # whole-chapter citations ("Acts 15", "Ps. 83") have a book+number but no ':' — left as plain text
+        chapter_only += len(re.findall(rf'{_BOOKTOK}\s*\d+(?!\s*:)(?!\d)', group))
+        state = {"book": None}
+        def repl(m):
+            nonlocal total, resolved
+            b = norm_book(m.group(1))
+            if b: state["book"] = b
+            book = b or state["book"]
+            if not book: return m.group(0)
+            ch, vs = int(m.group(2)), _expand_verses(m.group(3))
+            keys = [f"{book} {ch}:{v}" for v in vs]
+            ok = []
+            for k in keys:
+                total += 1
+                if k in bsb:
+                    resolved += 1; ok.append(k); verses[k] = bsb[k]
+                else:
+                    unresolved.append(k)
+            if not ok: return m.group(0)              # unresolved → plain (still shown)
+            return (f'<a class="vref" role="button" tabindex="0" '
+                    f'data-v="{html.escape("|".join(ok), quote=True)}">{m.group(0)}</a>')
+        return f'<span class="pref">({TOK_RE.sub(repl, group)})</span>'
+    for corpus in proofs.values():
+        for text in corpus.values():
+            for g in re.findall(r'\(([^()]*)\)', text):
+                if g not in refmap:
+                    refmap[g] = anchor(g)
+    stats = {"total": total, "resolved": resolved, "unresolved": sorted(set(unresolved)),
+             "verses": len(verses), "groups": len(refmap), "chapter_only": chapter_only}
+    return verses, refmap, stats
+
 def write(name, items):
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, f"{name}.js")
@@ -413,12 +538,27 @@ def do(name):
             for k in ("wcf", "wlc", "wsc"):
                 f.write(f"window.{k.upper()}_PROOFS = " + json.dumps(P[k], ensure_ascii=False, indent=0) + ";\n")
         print(f"Proofs: WCF {len(P['wcf'])}, WLC {len(P['wlc'])}, WSC {len(P['wsc'])} → {path}")
+    elif name == "verses":
+        verses, refmap, st = build_verses()
+        os.makedirs(OUT, exist_ok=True)
+        path = os.path.join(OUT, "verses.js")
+        with open(path, "w") as f:
+            f.write("/* Scripture verse text for tappable proofs — Berean Standard Bible "
+                    "(public domain, CC0; bereanbible.com). Only proof-cited verses are bundled. */\n")
+            f.write("window.VERSES = " + json.dumps(verses, ensure_ascii=False, indent=0) + ";\n")
+            f.write("window.PROOF_REFMAP = " + json.dumps(refmap, ensure_ascii=False, indent=0) + ";\n")
+        pct = 100 * st["resolved"] / st["total"] if st["total"] else 0
+        print(f"Verses: {st['resolved']}/{st['total']} refs resolved ({pct:.1f}%), "
+              f"{st['verses']} verses, {st['groups']} ref-groups → {path}")
+        print(f"  whole-chapter citations left as plain text (not expanded): {st['chapter_only']}")
+        if st["unresolved"]:
+            print(f"  unresolved (rendered as plain citations): {', '.join(st['unresolved'])}")
     else:
         sys.exit(f"unknown target: {name}")
 
 if __name__ == "__main__":
     targets = sys.argv[1:] or ["wsc"]
     if targets == ["all"]:
-        targets = ["wsc", "wlc", "wcf", "bco", "commentary", "proofs"]
+        targets = ["wsc", "wlc", "wcf", "bco", "commentary", "proofs", "verses"]
     for t in targets:
         do(t)
