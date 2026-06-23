@@ -173,6 +173,9 @@
   .hicon svg{width:30px; height:30px; display:block; margin:0 auto}
   .hname{display:block; font-size:1.55rem; font-weight:600; color:var(--navy); line-height:1.2}
   .hentry:hover .hname{color:var(--accent)}
+  .home-added{margin-top:30px}
+  .home-added .division-h{text-align:left}
+  .home-added-note{font-family:var(--sans); font-size:.78rem; color:var(--muted); margin:6px 0 0; font-style:italic}
   .hdesc{display:block; font-family:var(--sans); font-size:.86rem; color:var(--muted); margin-top:7px}
   .home-rule{width:54px; height:2px; background:var(--accent); opacity:.6; margin:22px auto}
   .home-lede{font-size:1.12rem; color:var(--ink-soft); line-height:1.65; max-width:36rem; margin:0 auto 8px; text-align:center}
@@ -506,6 +509,7 @@
 <script src="content/verses.js"></script>
 <script src="content/citations.js"></script>
 <script src="content/ramsay.js"></script>
+<script src="content/sample-presbytery.js"></script>
 <script>
 /* ══════════ CONTENT: real where sourced (window.WSC), placeholder elsewhere ══════════ */
 const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.";
@@ -576,6 +580,29 @@ const SPINE = {
     : BCO_PARTS.flatMap(p=>p.chapters.map(ch=>({part:p.key, ch:String(ch[0]), title:ch[1], partName:p.name})))),
 };
 
+/* ── custom "book" packs: add whole governing documents (presbytery rules, session
+   standing rules, church bylaws). Built-ins and pack-added books flow through one registry,
+   so nav / TOC / reader / search / drawer treat them uniformly. ── */
+window.BOOK_PACKS = window.BOOK_PACKS || [];
+function pagedData(book){               // unified accessor for paged corpora (BCO + custom books)
+  if(book==='bco') return window.BCO_ORDER ? {map:window.BCO, order:window.BCO_ORDER} : null;
+  const bp = window.BOOK_PACKS.find(b=>b.component.key===book);
+  return bp ? {map:bp.chapters, order:bp.order} : null;
+}
+function registerBook(pack){            // make COMPONENTS/SPINE aware of a custom book
+  const k = pack.component.key;
+  COMPONENTS[k] = Object.assign({mode:'paged', custom:true}, pack.component);
+  SPINE[k] = (pack.order||[]).map(id=>({ch:id, title:(pack.chapters[id]||{}).title||''}));
+  const i = window.BOOK_PACKS.findIndex(b=>b.component.key===k);
+  if(i>=0) window.BOOK_PACKS[i]=pack; else window.BOOK_PACKS.push(pack);
+}
+const saveBooks = ()=>{ try{ localStorage.setItem("pcacon.books", JSON.stringify(window.BOOK_PACKS)); }catch(e){} };
+const DIVISIONS = {                     // home groupings (order = display order)
+  doctrinal:{label:"Doctrinal Standards", one:"Doctrinal Standard", order:1},
+  order:{label:"Church Order", one:"Church Order", order:2},
+  local:{label:"Local Rules & Courts", one:"Local Rule", order:3},
+};
+
 /* dossiers (drive the margin counts); refs not listed → empty state */
 const DOSSIER = {
   "24-1":{quote:"Those who have been called to office in the church…", cases:11, ov:18, inq:5, rpr:30,
@@ -607,6 +634,7 @@ const PACK_FORMAT = "pca-constitution-pack";
     else { const c=localStorage.getItem("pcacon.commentary");    // migrate the old single-pack key
            if(c){ const o=JSON.parse(c); if(o&&o.entries) window.BCO_COMMENTARIES=[{label:o.label||"Commentary", entries:o.entries}]; } }
   }catch(e){}
+  try{ const bk=localStorage.getItem("pcacon.books"); if(bk){ (JSON.parse(bk)||[]).forEach(p=>{ if(p&&p.component&&p.component.key) registerBook(p); }); } }catch(e){}
 })();
 const saveNotes = ()=>{ try{ localStorage.setItem("pcacon.notes", JSON.stringify(NOTES)); }catch(e){} };
 const saveCommentaries = ()=>{ try{ localStorage.setItem("pcacon.commentaries", JSON.stringify(window.BCO_COMMENTARIES)); localStorage.removeItem("pcacon.commentary"); }catch(e){} };
@@ -620,10 +648,14 @@ function importPack(obj){
     for(const ref in entries){ const have=NOTES[ref]||(NOTES[ref]=[]); const seen=new Set(have.map(x=>x.text)); (entries[ref]||[]).forEach(x=>{ if(!seen.has(x.text)) have.push(x); }); }
     saveNotes();
   } else if(obj.kind==="commentary"){                  // add, or replace a same-named pack (so re-import updates)
-    const label=obj.label||"Commentary", pack={label, entries};
+    const label=obj.label||"Commentary", pack={label, entries, corpus:obj.corpus||"bco"};
     const i=window.BCO_COMMENTARIES.findIndex(c=>c.label===label);
     if(i>=0) window.BCO_COMMENTARIES[i]=pack; else window.BCO_COMMENTARIES.push(pack);
     saveCommentaries();
+  } else if(obj.kind==="book"){                        // a whole new corpus (presbytery rules, bylaws…)
+    if(!obj.component || !obj.component.key) throw new Error("Book pack missing component.key.");
+    registerBook(obj); saveBooks();
+    return {kind:obj.kind, n:Object.values(obj.chapters||{}).reduce((a,c)=>a+((c.sections||[]).length),0)};
   } else throw new Error("Unsupported pack kind: "+obj.kind);
   return {kind:obj.kind, n};
 }
@@ -735,6 +767,13 @@ function buildChapter(book, o){
       railSub:["Q."+o.qStart,"Q."+(+o.qStart+1),"Q."+(+o.qStart+2)],
       provs:[0,1,2].map(i=>({ref:"Q."+(+o.qStart+i), q:"[Question "+(+o.qStart+i)+"]", body:LOREM}))};
   }
+  // custom book pack (presbytery rules, bylaws…) — same chapter/section shape as BCO
+  if(COMPONENTS[book] && COMPONENTS[book].custom){
+    const pd = pagedData(book), bc = pd && pd.map[o.ch];
+    if(bc) return {kicker:COMPONENTS[book].name, title:(bc.title||("Chapter "+o.ch)), subtitle:"",
+      railSub:(bc.sections||[]).map(s=>s.ref),
+      provs:(bc.sections||[]).map(s=>({ref:s.ref, body:s.body}))};
+  }
   // bco — real text from window.BCO
   if(window.BCO && window.BCO[o.ch]){
     const bc = window.BCO[o.ch];
@@ -792,8 +831,12 @@ function showHome(){
   document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', false));
   const entry = k => {
     const c = COMPONENTS[k];
-    return `<a class="hentry" data-book="${k}"><span class="hicon">${HOME_ICONS[k]}</span><span class="hname">${c.name}</span><span class="hdesc">${HOME_DESC[k]}</span></a>`;
+    return `<a class="hentry" data-book="${k}"><span class="hicon">${HOME_ICONS[k]||HOME_ICONS.bco}</span><span class="hname">${c.name}</span><span class="hdesc">${HOME_DESC[k]||c.tag||''}</span></a>`;
   };
+  const added = window.BOOK_PACKS.map(b=>b.component.key);
+  const addedSection = added.length
+    ? `<div class="home-added"><p class="division-h">${DIVISIONS.local.label}</p><p class="home-added-note">Added by you — local governing documents, not part of the Constitution.</p><div class="hentries">${added.map(entry).join('')}</div></div>`
+    : '';
   document.getElementById('doc').innerHTML = `<div class="landing home">
     <p class="home-eyebrow">The Standards of the</p>
     <h1 class="home-title">The Constitution of the Presbyterian Church in America</h1>
@@ -801,6 +844,7 @@ function showHome(){
     <p class="home-subordinate">Subject to and subordinate to the Scriptures of the Old and New Testaments, the inerrant Word of God.</p>
     <button class="home-jump" id="homeJump"><span><span class="mag">⌕</span>&nbsp; Jump to a reference — WCF 21.5, BCO 24-1, WSC Q.1…</span> <span class="kbd">⌘K</span></button>
     <div class="hentries">${entry('wcf')}${entry('wlc')}${entry('wsc')}${entry('bco')}</div>
+    ${addedSection}
   </div>`;
   window.scrollTo(0,0);
 }
@@ -822,6 +866,13 @@ function showComponent(book){
       + secs.map(([a,b,t])=>
         `<li><a data-book="${book}" data-qstart="${a}" data-qend="${b}" data-title="${t}"><span class="tn">Q${a}–${b}</span><span class="tt">${t}</span></a></li>`
       ).join('') + `</ol>`;
+  } else if(c.custom){ // custom book pack — flat chapter list
+    const pd = pagedData(book);
+    toc = `<h2 class="toc-h">Contents</h2><ol class="toc one">`
+      + (pd ? pd.order.map(id=>{ const bc=pd.map[id]||{};
+          return `<li><a data-book="${book}" data-ch="${id}"><span class="tn">${id}</span><span class="tt">${bc.title||('Chapter '+id)}</span></a></li>`;
+        }).join('') : '')
+      + `</ol>`;
   } else if(window.BCO){ // bco — real TOC: front matter, the three parts, appendices
     const GROUPS = [['front','Preface & Principles'],['fog','Form of Government'],['rod','Rules of Discipline'],['dow','Directory for the Worship of God'],['appx','Appendices']];
     toc = GROUPS.map(([key,label])=>{
@@ -844,7 +895,7 @@ function showComponent(book){
   }
   document.getElementById('doc').innerHTML = `<div class="landing component">
     <a class="back" data-home>‹ The PCA Constitution</a>
-    <p class="comp-eyebrow">${c.division==='doctrinal'?'Doctrinal Standard':'Church Order'}</p>
+    <p class="comp-eyebrow">${DIVISIONS[c.division]?DIVISIONS[c.division].one:'Church Order'}</p>
     <h1 class="comp-title">${c.name}</h1>
     <p class="comp-lede">${c.lede}</p>
     <p class="comp-meta">${c.meta}</p>
@@ -1109,7 +1160,8 @@ function spChip(ref, ttl){
 }
 function renderDrawer(){
   const ref=drawerRef, d=dossierFor(ref), n=total(d);
-  const refLabel=(current==='bco'?'BCO ':current.toUpperCase()+' ')+ref;
+  const isCustom = !!(COMPONENTS[current] && COMPONENTS[current].custom);
+  const refLabel=(COMPONENTS[current].abbr||current.toUpperCase())+' '+ref;
   document.getElementById('dEyebrow').textContent = COMPONENTS[current].name;
   document.getElementById('dRef').textContent = refLabel;
   document.getElementById('dQuote').textContent = d.quote ? `“${d.quote}”` : '';
@@ -1120,13 +1172,15 @@ function renderDrawer(){
     + `<button class="copy-cite" data-copytext="1" data-cite="${refLabel}">⧉ Copy section text</button>`;
   const counts={case:d.cases, ov:d.ov, inq:d.inq, rpr:d.rpr, pp:d.pp};
   const hasHist = d.amend && d.amend.length;
-  const comms = (current==='bco') ? window.BCO_COMMENTARIES
-      .filter(c=>Array.isArray(c.entries[ref]) && c.entries[ref].length)
-      .map(c=>({label:c.label, paras:c.entries[ref]})) : [];
+  const comms = window.BCO_COMMENTARIES                       // commentary packs targeting THIS corpus
+      .filter(c=>(c.corpus||'bco')===current && Array.isArray(c.entries[ref]) && c.entries[ref].length)
+      .map(c=>({label:c.label, paras:c.entries[ref]}));
   const PRF = {wcf:window.WCF_PROOFS, wlc:window.WLC_PROOFS, wsc:window.WSC_PROOFS}[current];
   const proofs = PRF ? PRF[ref] : null;
+  // custom books carry no GA citations / Scripture proofs — show only what applies
+  if(isCustom && (dTab==='cit'||dTab==='proofs')) dTab = comms.length?'comm':'notes';
   const tab=(k,label)=>`<button class="dtab${dTab===k?' on':''}" data-tab="${k}">${label}</button>`;
-  let body = `<div class="dtabs">${tab('cit','Citations'+(n?` (${n})`:''))}${proofs?tab('proofs','Proofs'):''}${comms.length?tab('comm','Commentary'+(comms.length>1?` (${comms.length})`:'')):''}${tab('notes','Notes')}${hasHist?tab('hist','History'):''}</div>`;
+  let body = `<div class="dtabs">${isCustom?'':tab('cit','Citations'+(n?` (${n})`:''))}${proofs?tab('proofs','Proofs'):''}${comms.length?tab('comm','Commentary'+(comms.length>1?` (${comms.length})`:'')):''}${tab('notes','Notes')}${hasHist?tab('hist','History'):''}</div>`;
   if(dTab==='cit'){
     if(n===0){
       body += `<p class="empty-note">No General Assembly action in the corpus cites this provision. The text stands on its own — when a case, overture, inquiry, or record-review exception references it, it will surface here.</p>`
@@ -1205,6 +1259,7 @@ function buildSearch(){
   if(window.WCF) for(const ch in window.WCF){ const c=window.WCF[ch]; (c.sections||[]).forEach(s=>out.push({book:'wcf', ref:s.ref, open:{ch}, sub:'Ch. '+ch+(c.title?' · '+c.title:''), txt:_plain(s.body)})); }
   [['wsc',window.WSC],['wlc',window.WLC]].forEach(([bk,arr])=>{ if(Array.isArray(arr)) arr.forEach((qa,i)=>{ const ref='Q.'+(i+1); out.push({book:bk, ref, open:{qStart:String(i+1), anchor:ref}, sub:_plain(qa.q), txt:_plain(qa.q)+' '+_plain(qa.a)}); }); });
   if(window.BCO && window.BCO_ORDER) window.BCO_ORDER.forEach(id=>{ const e=window.BCO[id]; (e.sections||[]).forEach(s=>{ let t=_plain(s.body); if(!t && s.blocks) t=s.blocks.map(b=>_plain(b[b.length-1])).join(' '); out.push({book:'bco', ref:s.ref, open:{ch:id}, sub:e.title||'', txt:t}); }); });
+  window.BOOK_PACKS.forEach(bp=>{ const k=bp.component.key; (bp.order||[]).forEach(id=>{ const ch=bp.chapters[id]||{}; (ch.sections||[]).forEach(s=>out.push({book:k, ref:s.ref, open:{ch:id}, sub:ch.title||'', txt:_plain(s.body)})); }); });
   return out;
 }
 const BOOK_LABEL={wcf:'WCF',wlc:'WLC',wsc:'WSC',bco:'BCO'};
@@ -1232,7 +1287,7 @@ function palRender(q){
   }
   palSel=0;
   const hits=palResults.map((h,i)=>
-    `<div class="hit ${i===0?'sel':''}" data-i="${i}"><span class="ref">${BOOK_LABEL[h.book]} ${h.ref}</span><span class="txt">${esc(h.txt||h.sub||'')}</span></div>`
+    `<div class="hit ${i===0?'sel':''}" data-i="${i}"><span class="ref">${BOOK_LABEL[h.book]||(COMPONENTS[h.book]&&COMPONENTS[h.book].abbr)||h.book.toUpperCase()} ${h.ref}</span><span class="txt">${esc(h.txt||h.sub||'')}</span></div>`
   ).join('');
   document.getElementById('palHits').innerHTML = hits || `<div class="hit"><span class="txt">No matches — try a reference like “BCO 35-4”, “WCF 21.5”, or “WSC Q.1”.</span></div>`;
 }
@@ -1316,14 +1371,17 @@ document.getElementById('palWrap').addEventListener('click', e=>{ if(e.target.id
 /* ── packs & notes panel ── */
 function renderPacks(){
   const nc = Object.values(NOTES).reduce((a,x)=>a+x.length,0);
-  const have = new Set(window.BCO_COMMENTARIES.map(c=>c.label));
-  const available = (window.BUNDLED_PACKS||[]).filter(p=>!have.has(p.label));   // public-domain packs shipped with the app
+  const haveComm = new Set(window.BCO_COMMENTARIES.map(c=>c.label));
+  const haveBook = new Set(window.BOOK_PACKS.map(b=>b.component.key));
+  const available = (window.BUNDLED_PACKS||[]).filter(p=> p.kind==='book' ? !haveBook.has(p.component.key) : !haveComm.has(p.label));
+  const bookSecs = p => Object.values(p.chapters||{}).reduce((a,c)=>a+((c.sections||[]).length),0);
   document.getElementById('packsBody').innerHTML =
       `<div class="pack-row"><div><b>My notes</b><span class="pack-sub">${nc} note${nc!==1?'s':''} · stored on this device</span></div><button class="pack-btn" data-act="export-notes"${nc?'':' disabled'}>Export…</button></div>`
     + window.BCO_COMMENTARIES.map((c,i)=>`<div class="pack-row"><div><b>${c.label}</b><span class="pack-sub">Commentary · ${Object.keys(c.entries).length} sections</span></div><button class="pack-btn" data-act="rm-comm" data-i="${i}">Remove</button></div>`).join('')
-    + available.map(p=>`<div class="pack-row"><div><b>${p.label}</b><span class="pack-sub">Commentary · ${Object.keys(p.entries).length} sections · public domain, included</span></div><button class="pack-btn" data-act="add-bundled" data-label="${p.label}">Add</button></div>`).join('')
+    + window.BOOK_PACKS.map(b=>`<div class="pack-row"><div><b>${b.component.name}</b><span class="pack-sub">Book · ${bookSecs(b)} sections</span></div><button class="pack-btn" data-act="rm-book" data-key="${b.component.key}">Remove</button></div>`).join('')
+    + available.map(p=>`<div class="pack-row"><div><b>${p.kind==='book'?p.component.name:p.label}</b><span class="pack-sub">${p.kind==='book'?'Book · '+bookSecs(p):'Commentary · '+Object.keys(p.entries).length} sections · public domain, included</span></div><button class="pack-btn" data-act="add-bundled" data-label="${p.label}">Add</button></div>`).join('')
     + `<button class="pack-btn import" data-act="import">Import a pack…</button>`
-    + `<p class="packs-note">Notes and imported packs are kept in this browser's local storage and survive reloads. Public-domain commentary (Ramsay) is included — just tap <b>Add</b>. Copyrighted commentary (e.g. Smith) isn't bundled; import it as your own JSON file. Each added pack gets its own tab on a provision, and all of this exports/imports as portable JSON.</p>`;
+    + `<p class="packs-note">Notes and imported packs are kept in this browser's local storage and survive reloads. Public-domain packs (Ramsay commentary; a sample book) are included — just tap <b>Add</b>. Copyrighted commentary (e.g. Smith) isn't bundled; import it as your own JSON file. Book packs add a whole new document (presbytery rules, session standing rules, bylaws) alongside the four standards. Everything exports/imports as portable JSON.</p>`;
 }
 function openPacks(){ renderPacks(); document.getElementById('packWrap').classList.add('show'); }
 function closePacks(){ document.getElementById('packWrap').classList.remove('show'); }
@@ -1335,12 +1393,13 @@ document.getElementById('packsBody').addEventListener('click', e=>{
   if(b.dataset.act==='export-notes') exportNotes();
   else if(b.dataset.act==='import') document.getElementById('importFile').click();
   else if(b.dataset.act==='rm-comm'){ window.BCO_COMMENTARIES.splice(+b.dataset.i,1); saveCommentaries(); renderPacks(); if(document.getElementById('drawer').classList.contains('show')) renderDrawer(); }
-  else if(b.dataset.act==='add-bundled'){ const p=(window.BUNDLED_PACKS||[]).find(x=>x.label===b.dataset.label); if(p){ importPack(p); renderPacks(); if(document.getElementById('drawer').classList.contains('show')) renderDrawer(); } }
+  else if(b.dataset.act==='rm-book'){ const k=b.dataset.key; window.BOOK_PACKS=window.BOOK_PACKS.filter(x=>x.component.key!==k); delete COMPONENTS[k]; delete SPINE[k]; saveBooks(); SEARCH=null; refreshNav(); renderPacks(); if(current===k) showHome(); else if(view==='home') showHome(); }
+  else if(b.dataset.act==='add-bundled'){ const p=(window.BUNDLED_PACKS||[]).find(x=>x.label===b.dataset.label); if(p){ importPack(p); if(p.kind==='book'){ SEARCH=null; refreshNav(); } renderPacks(); if(view==='home') showHome(); else if(document.getElementById('drawer').classList.contains('show')) renderDrawer(); } }
 });
 document.getElementById('importFile').addEventListener('change', e=>{
   const f=e.target.files[0]; if(!f) return;
   const r=new FileReader();
-  r.onload=()=>{ try{ const res=importPack(JSON.parse(r.result)); renderPacks(); if(document.getElementById('drawer').classList.contains('show')) renderDrawer(); alert(`Imported ${res.kind} pack — ${res.n} entries.`); }catch(err){ alert('Import failed: '+err.message); } };
+  r.onload=()=>{ try{ const res=importPack(JSON.parse(r.result)); if(res.kind==='book'){ SEARCH=null; refreshNav(); } renderPacks(); if(view==='home') showHome(); else if(document.getElementById('drawer').classList.contains('show')) renderDrawer(); alert(`Imported ${res.kind} pack — ${res.n} ${res.kind==='book'?'sections':'entries'}.`); }catch(err){ alert('Import failed: '+err.message); } };
   r.readAsText(f); e.target.value='';
 });
 document.getElementById('palInput').addEventListener('input', e=>palRender(e.target.value));
@@ -1391,7 +1450,18 @@ document.addEventListener('touchend', e=>{
   if(Math.abs(dx)>70 && Math.abs(dx) > Math.abs(dy)*1.8){ goRelative(dx<0 ? 1 : -1); }
 }, {passive:true});
 
+function refreshNav(){   // inject header + hamburger entries for pack-added books (built-ins are static HTML)
+  document.querySelectorAll('[data-customnav]').forEach(el=>el.remove());
+  const books=document.getElementById('books'), menu=document.getElementById('mobileMenu');
+  const anchor = menu && menu.querySelector('[data-install]');
+  window.BOOK_PACKS.forEach(bp=>{
+    const c=bp.component;
+    if(books){ const b=document.createElement('button'); b.dataset.book=c.key; b.setAttribute('data-customnav','1'); b.textContent=c.abbr||c.name; books.appendChild(b); }
+    if(menu){ const m=document.createElement('button'); m.className='mm-item'; m.dataset.book=c.key; m.setAttribute('data-customnav','1'); m.textContent=c.name; menu.insertBefore(m, anchor); }
+  });
+}
 window.addEventListener('hashchange', applyRoute);   // back/forward + manual edits
+refreshNav();                                        // surface any restored book packs in the nav
 applyRoute();                                        // initial render from the URL (deep link / reload)
 
 /* ── PWA: capture the install prompt so the hamburger "Install app" item can fire it ── */
