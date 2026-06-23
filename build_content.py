@@ -36,10 +36,13 @@ def bco_binding(part, ch, ref):
 def fetch(url):
     # curl works in this sandbox where Python's urllib rejects the proxy cert
     r = subprocess.run(["curl", "-sS", "-m", "30", "-A", "constitution-reader/0.1 (personal study)", url],
-                       capture_output=True, text=True)
+                       capture_output=True)
     if r.returncode != 0:
-        sys.exit(f"fetch failed ({url}): {r.stderr.strip()}")
-    return r.stdout
+        sys.exit(f"fetch failed ({url}): {r.stderr.decode('utf-8', 'replace').strip()}")
+    try:
+        return r.stdout.decode("utf-8")
+    except UnicodeDecodeError:
+        return r.stdout.decode("cp1252", "replace")   # pcahistory pages are Windows-1252
 
 def clean(s):
     s = re.sub(r"<br\s*/?>", " ", s)
@@ -385,6 +388,76 @@ def _coverage(text, body):
     matched = sum(b.size for b in difflib.SequenceMatcher(None, tn, bn, autojunk=False).get_matching_blocks())
     return matched / len(tn)
 
+# F. P. Ramsay, An Exposition of the Form of Government and the Rules of Discipline (1898) — PUBLIC DOMAIN.
+# Sourced from the PCA Historical Center's "Historical Development of the BCO" project, which reprints the
+# pertinent Ramsay section under each PCA paragraph (already mapped to current PCA chapter/paragraph numbers).
+RAMSAY_BASE = "https://www.pcahistory.org/bco/"
+_RAMSAY_ATTRIB = re.compile(r"F\.?\s*P\.?\s*Ramsay,.*Exposition", re.I)
+# Each page stacks several sources under "COMMENTARY" headers (Ramsay first, then the *copyrighted* Smith,
+# then Hodge, Scott's Digest, GA minutes…). Cut Ramsay's block at the next author/section so we take only his.
+_RAMSAY_END = re.compile(r"^(Morton\s+H\.?\s*Smith|Charles\s+Hodge|Thomas\s+E\.?\s*Peck"
+                         r"|Samuel\s+Miller|Scott,?\s*E\.?\s*C\.?|.*\bA\s+Digest\s+of\s+the\s+Acts"
+                         r"|Return to Index)", re.I)
+# Each page stacks sources under ALL-CAPS section headers (COMMENTARY:, CONSTITUTIONAL INQUIRY:,
+# OVERTURES AND AMENDMENTS:, DIGEST:, OTHER COMPARISONS:). The next such header ends Ramsay's block.
+_RAMSAY_CAPHEAD = re.compile(r"^[A-Z][A-Z0-9 ,.&'\-]{3,}:\s*$")     # NOT re.I — must be genuinely all-caps
+_RAMSAY_QUOTE = re.compile(r"^§?\s*\d+\s*[.—–-]+\s*[IVXLC0-9][IVXLC0-9-]*\s*[.:]")  # re-quoted provision line
+_RAMSAY_HEADING = re.compile(r"^(Section|Chapter|CHAPTER)\s+[IVXLC0-9]+\b.{0,70}$")
+_RAMSAY_DROP = re.compile(r"^(\[|\(Cf\.|\d{4}\b|\".{0,3}$)")        # placeholders, bare cross-refs/years, stray fragments
+
+def _ramsay_paras(htmltext):
+    """Pull only F. P. Ramsay's exposition out of a BCO-project page; None if the page has none."""
+    c = htmltext.find('name="Page Content"')
+    region = htmltext[c:] if c >= 0 else htmltext
+    region = re.sub(r"<br\s*/?>", "\n", region)
+    region = re.sub(r"<[^>]+>", "", region)
+    region = html.unescape(region).replace("’", "'").replace("“", '"').replace("”", '"')
+    lines = [re.sub(r"\s+", " ", ln).strip() for ln in region.split("\n")]
+    ai = next((i for i, ln in enumerate(lines) if _RAMSAY_ATTRIB.search(ln)), None)
+    if ai is None:
+        return None
+    out = []
+    for ln in lines[ai + 1:]:
+        if _RAMSAY_END.match(ln) or _RAMSAY_CAPHEAD.match(ln):
+            break
+        if len(ln) <= 1 or _RAMSAY_QUOTE.match(ln) or _RAMSAY_HEADING.match(ln) or _RAMSAY_DROP.match(ln):
+            continue
+        out.append(ln)
+    # ignore pages where nothing of substance survived (a stray header/fragment, no real exposition)
+    return out if sum(len(p) for p in out) >= 15 else None
+
+def build_ramsay():
+    """Ramsay covers only the Form of Government (ch. 1-26) and Rules of Discipline (ch. 27-46); the
+    Directory for Worship he reserved for a separate volume, so those pages carry no Ramsay text."""
+    path = os.path.join(OUT, "bco.js")
+    B = json.loads(re.search(r"window\.BCO\s*=\s*(\{.*?\});\s*\nwindow\.BCO_ORDER", open(path).read(), re.S).group(1))
+    refs = []
+    for v in B.values():
+        for s in (v.get("sections") or []):
+            m = re.match(r"^(\d+)-(\d+)$", s["ref"])
+            if m and 1 <= int(m.group(1)) <= 46:
+                refs.append((int(m.group(1)), int(m.group(2)), s["ref"]))
+    def soft(url):
+        try: return fetch(url)
+        except SystemExit: return ""        # one flaky page shouldn't sink a 340-page crawl
+    out, miss = {}, 0
+    for n, m, ref in refs:
+        sub = "fog" if n <= 26 else "rod"
+        ps = _ramsay_paras(soft(f"{RAMSAY_BASE}{sub}/{n:02d}/{m:02d}.html"))
+        if ps:
+            out[ref] = ps
+        else:
+            miss += 1
+    # Preface: King & Head (Ramsay's FoG ch. 2 §1) -> pref-1; Constitution Defined -> pref-3.
+    for ref, slug, count in (("pref-1", "preface/king", 6), ("pref-3", "preface/constitution", 2)):
+        acc = []
+        for i in range(1, count + 1):
+            acc += _ramsay_paras(soft(f"{RAMSAY_BASE}{slug}/{i:02d}.html")) or []
+        if acc:
+            out[ref] = acc
+    print(f"  Ramsay: {len(out)} sections with text, {miss} BCO paragraphs with no Ramsay equivalent")
+    return out
+
 # Scripture proof texts (clause-tied references) from westminsterstandards.org — public-domain Westminster
 # proofs. References only (no verse text), inline at each clause: "...glorify God, (Rom. 11:36, 1 Cor. 10:31)".
 PROOFS_SOURCES = {
@@ -469,6 +542,23 @@ def do(name):
         with open(path, "w") as f:
             json.dump(pack, f, ensure_ascii=False, indent=0)
         print(f"Commentary pack: {len(comm)} sections → {path}")
+    elif name == "ramsay":
+        comm = build_ramsay()
+        os.makedirs(os.path.join(OUT, "packs"), exist_ok=True)
+        path = os.path.join(OUT, "packs", "commentary-ramsay.pack.json")
+        pack = {
+            "format": "pca-constitution-pack", "version": 1, "kind": "commentary",
+            "label": "F. P. Ramsay — Exposition of the BCO (1898)",
+            "attribution": ("F. P. Ramsay, An Exposition of the Form of Government and the Rules of Discipline "
+                            "of the Presbyterian Church in the United States (Richmond: Presbyterian Committee of "
+                            "Publication, 1898). Public domain. Section text via the PCA Historical Center BCO "
+                            "project (pcahistory.org/bco), mapped to current PCA paragraphs."),
+            "corpus": "bco",
+            "entries": comm,
+        }
+        with open(path, "w") as f:
+            json.dump(pack, f, ensure_ascii=False, indent=0)
+        print(f"Ramsay pack: {len(comm)} sections → {path}")
     elif name == "proofs":
         P = build_proofs()
         os.makedirs(OUT, exist_ok=True)
@@ -484,6 +574,6 @@ def do(name):
 if __name__ == "__main__":
     targets = sys.argv[1:] or ["wsc"]
     if targets == ["all"]:
-        targets = ["wsc", "wlc", "wcf", "bco", "commentary", "proofs"]
+        targets = ["wsc", "wlc", "wcf", "bco", "commentary", "ramsay", "proofs"]
     for t in targets:
         do(t)
