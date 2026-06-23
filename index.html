@@ -451,7 +451,7 @@
   <button class="mm-item" data-book="wsc">Westminster Shorter Catechism</button>
   <button class="mm-item" data-book="bco">Book of Church Order</button>
   <button class="mm-item" id="mmInstall" data-install>Install app</button>
-  <button class="mm-item" data-import>Import a pack…</button>
+  <button class="mm-item" data-import>Packs &amp; notes…</button>
   <button class="mm-item" data-share>Share app</button>
 </div>
 
@@ -1294,7 +1294,7 @@ document.body.addEventListener('click', e=>{
   const vr = e.target.closest('.vref'); if(vr){ toggleVref(vr); return; }
   const va = e.target.closest('.vall'); if(va){ const view=va.closest('.proofs-view'); const open=va.getAttribute('aria-pressed')!=='true'; view.querySelectorAll('.vref').forEach(a=>a.classList.toggle('open',open)); rebuildVerses(view); return; }
   if(e.target.closest('.home-jump')){ openPal(); return; }
-  const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else if(mm.hasAttribute('data-install')) promptInstall(); else if(mm.hasAttribute('data-import')) document.getElementById('importFile').click(); else if(mm.hasAttribute('data-share')) shareApp(); else showComponent(mm.dataset.book); return; }
+  const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else if(mm.hasAttribute('data-install')) promptInstall(); else if(mm.hasAttribute('data-import')) openPacks(); else if(mm.hasAttribute('data-share')) shareApp(); else showComponent(mm.dataset.book); return; }
   const bn = e.target.closest('.bn'); if(bn){ const a=bn.dataset.bn; if(a==='library') showHome(); else if(a==='search') openPal(); else showComponent(current); return; }
   const home = e.target.closest('[data-home]'); if(home){ showHome(); return; }
   const railBack = e.target.closest('.rail-back,.read-back'); if(railBack){ showComponent(railBack.dataset.book); return; }
