@@ -276,7 +276,7 @@
   .packs{padding:0}
   .packs-head{display:flex; align-items:center; justify-content:space-between; padding:15px 20px; border-bottom:1px solid var(--line); font-family:var(--serif); font-weight:600; color:var(--navy); font-size:1.05rem}
   .packs-head .x{border:none; background:none; font-size:1.2rem; color:var(--muted); cursor:pointer}
-  .packs-body{padding:14px 20px 18px}
+  .packs-body{padding:14px 20px 18px; max-height:70vh; overflow-y:auto}   /* scroll when many packs, so Import stays reachable */
   .pack-row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--line)}
   .pack-row b{font-family:var(--sans); font-size:.92rem; color:var(--ink)}
   .pack-sub{display:block; font-family:var(--sans); font-size:.74rem; color:var(--muted); margin-top:2px}
@@ -509,7 +509,6 @@
 <script src="content/verses.js"></script>
 <script src="content/citations.js"></script>
 <script src="content/ramsay.js"></script>
-<script src="content/sample-presbytery.js"></script>
 <script>
 /* ══════════ CONTENT: real where sourced (window.WSC), placeholder elsewhere ══════════ */
 const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.";
