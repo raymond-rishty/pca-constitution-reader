@@ -301,9 +301,13 @@
   .histtab .hrow:first-child{border-top:none}
   .histtab .hrow b{color:var(--navy)}
   .hnote{font-size:.76rem; color:var(--muted); font-style:italic; margin-top:12px; font-family:var(--sans)}
-  /* commentary (Morton Smith) — BCO dossier tab */
+  /* commentary (imported packs: Smith, Ramsay, …) — BCO dossier tab */
   .commentary p{font-family:var(--sans); font-size:.88rem; line-height:1.6; color:var(--ink-soft); margin:0 0 11px}
   .cattrib{font-family:var(--sans); font-size:.72rem; color:var(--muted); margin-top:14px; border-top:1px solid var(--line); padding-top:10px}
+  .csubtabs{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 12px}
+  .csub{font-family:var(--sans); font-size:.74rem; color:var(--ink-soft); background:var(--paper-2); border:1px solid var(--line); border-radius:2px; padding:4px 9px; cursor:pointer}
+  .csub:hover{border-color:var(--line-2)}
+  .csub.on{background:var(--navy); color:#fff; border-color:var(--navy)}
   /* Scripture proofs — Westminster dossier tab (settled text in serif, clause-tied refs in sans/accent) */
   .proofs-view p{font-family:var(--serif); font-size:1.02rem; line-height:1.65; color:var(--ink); margin:0 0 10px}
   .proofs-view .pref{font-family:var(--sans); font-size:.78em; color:var(--accent); padding:0 1px}
@@ -540,15 +544,19 @@ const NOTES = {
 };
 
 /* ── notes + content packs: persistence (localStorage) + portable import/export ── */
-window.BCO_COMMENTARY = window.BCO_COMMENTARY || {};   // commentary now arrives via an imported pack, not the bundle
-let COMMENTARY_LABEL = "Commentary";
+window.BCO_COMMENTARIES = window.BCO_COMMENTARIES || [];   // [{label, entries}] — multiple commentary packs (Smith, Ramsay, …)
 const PACK_FORMAT = "pca-constitution-pack";
 (function restore(){                                   // durable when served; file:// may not persist (export files cover that)
   try{ const n=localStorage.getItem("pcacon.notes"); if(n){ const o=JSON.parse(n); Object.keys(NOTES).forEach(k=>delete NOTES[k]); Object.assign(NOTES, o); } }catch(e){}
-  try{ const c=localStorage.getItem("pcacon.commentary"); if(c){ const o=JSON.parse(c); window.BCO_COMMENTARY=o.entries||{}; COMMENTARY_LABEL=o.label||COMMENTARY_LABEL; } }catch(e){}
+  try{
+    const cs=localStorage.getItem("pcacon.commentaries");
+    if(cs){ window.BCO_COMMENTARIES = (JSON.parse(cs)||[]).filter(c=>c&&c.entries); }
+    else { const c=localStorage.getItem("pcacon.commentary");    // migrate the old single-pack key
+           if(c){ const o=JSON.parse(c); if(o&&o.entries) window.BCO_COMMENTARIES=[{label:o.label||"Commentary", entries:o.entries}]; } }
+  }catch(e){}
 })();
 const saveNotes = ()=>{ try{ localStorage.setItem("pcacon.notes", JSON.stringify(NOTES)); }catch(e){} };
-const saveCommentary = ()=>{ try{ localStorage.setItem("pcacon.commentary", JSON.stringify({label:COMMENTARY_LABEL, entries:window.BCO_COMMENTARY})); }catch(e){} };
+const saveCommentaries = ()=>{ try{ localStorage.setItem("pcacon.commentaries", JSON.stringify(window.BCO_COMMENTARIES)); localStorage.removeItem("pcacon.commentary"); }catch(e){} };
 const noteDate = ()=>{ try{ return new Date().toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}); }catch(e){ return ""; } };
 function packDownload(name, obj){ const u=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:"application/json"})); const a=document.createElement("a"); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u); }
 function exportNotes(){ packDownload("pca-constitution-notes.json", {format:PACK_FORMAT, version:1, kind:"notes", label:"My notes", exported:noteDate(), entries:NOTES}); }
@@ -558,8 +566,11 @@ function importPack(obj){
   if(obj.kind==="notes"){                              // merge (non-destructive), dedup by text
     for(const ref in entries){ const have=NOTES[ref]||(NOTES[ref]=[]); const seen=new Set(have.map(x=>x.text)); (entries[ref]||[]).forEach(x=>{ if(!seen.has(x.text)) have.push(x); }); }
     saveNotes();
-  } else if(obj.kind==="commentary"){
-    window.BCO_COMMENTARY=entries; COMMENTARY_LABEL=obj.label||"Commentary"; saveCommentary();
+  } else if(obj.kind==="commentary"){                  // add, or replace a same-named pack (so re-import updates)
+    const label=obj.label||"Commentary", pack={label, entries};
+    const i=window.BCO_COMMENTARIES.findIndex(c=>c.label===label);
+    if(i>=0) window.BCO_COMMENTARIES[i]=pack; else window.BCO_COMMENTARIES.push(pack);
+    saveCommentaries();
   } else throw new Error("Unsupported pack kind: "+obj.kind);
   return {kind:obj.kind, n};
 }
@@ -1000,7 +1011,7 @@ function notesBlock(ref){
     <div class="note-add"><textarea class="note-input" rows="2" placeholder="Add a note…"></textarea><button class="note-save">Save note</button></div></div>`;
 }
 
-let drawerRef=null, dTab='cit', dFilter='all', dSort='desc';
+let drawerRef=null, dTab='cit', dFilter='all', dSort='desc', dCommSel=0;
 function renderDrawer(){
   const ref=drawerRef, d=dossierFor(ref), n=total(d);
   const refLabel=(current==='bco'?'BCO ':current.toUpperCase()+' ')+ref;
@@ -1013,11 +1024,13 @@ function renderDrawer(){
     + `<button class="copy-cite" data-cite="${refLabel}">⧉ Copy citation</button>`;
   const counts={case:d.cases, ov:d.ov, inq:d.inq, rpr:d.rpr};
   const hasHist = d.amend && d.amend.length;
-  const comm = (current==='bco' && window.BCO_COMMENTARY) ? window.BCO_COMMENTARY[ref] : null;
+  const comms = (current==='bco') ? window.BCO_COMMENTARIES
+      .filter(c=>Array.isArray(c.entries[ref]) && c.entries[ref].length)
+      .map(c=>({label:c.label, paras:c.entries[ref]})) : [];
   const PRF = {wcf:window.WCF_PROOFS, wlc:window.WLC_PROOFS, wsc:window.WSC_PROOFS}[current];
   const proofs = PRF ? PRF[ref] : null;
   const tab=(k,label)=>`<button class="dtab${dTab===k?' on':''}" data-tab="${k}">${label}</button>`;
-  let body = `<div class="dtabs">${tab('cit','Citations'+(n?` (${n})`:''))}${proofs?tab('proofs','Proofs'):''}${comm?tab('comm','Commentary'):''}${tab('notes','Notes')}${hasHist?tab('hist','History'):''}</div>`;
+  let body = `<div class="dtabs">${tab('cit','Citations'+(n?` (${n})`:''))}${proofs?tab('proofs','Proofs'):''}${comms.length?tab('comm','Commentary'+(comms.length>1?` (${comms.length})`:'')):''}${tab('notes','Notes')}${hasHist?tab('hist','History'):''}</div>`;
   if(dTab==='cit'){
     if(n===0){
       body += `<p class="empty-note">No General Assembly actions reference this provision yet. The text stands on its own — when a case, overture, inquiry, or record-review exception cites it, it will surface here.</p>`;
@@ -1043,7 +1056,11 @@ function renderDrawer(){
     const styled = (proofs||'').replace(/\(([^)]*)\)/g, '<span class="pref">($1)</span>');
     body += `<div class="proofs-view"><p>${styled}</p><p class="cattrib">Scripture proofs · westminsterstandards.org (public domain)</p></div>`;
   } else if(dTab==='comm'){
-    body += `<div class="commentary">${(comm||[]).map(p=>`<p>${p}</p>`).join('')}<p class="cattrib">${COMMENTARY_LABEL} — imported pack, personal use.</p></div>`;
+    const sel = Math.min(Math.max(dCommSel,0), comms.length-1);
+    if(comms.length>1)
+      body += `<div class="csubtabs">${comms.map((c,i)=>`<button class="csub${i===sel?' on':''}" data-csub="${i}">${c.label.split(' — ')[0]}</button>`).join('')}</div>`;
+    const c = comms[sel];
+    body += `<div class="commentary">${c.paras.map(p=>`<p>${p}</p>`).join('')}<p class="cattrib">${c.label} — imported pack, personal use.</p></div>`;
   } else if(dTab==='notes'){
     body += notesBlock(ref);
   } else if(dTab==='hist'){
@@ -1053,7 +1070,7 @@ function renderDrawer(){
 }
 let lastTrigger=null;
 function openDrawer(ref){
-  drawerRef=ref; dFilter='all'; dSort='desc';
+  drawerRef=ref; dFilter='all'; dSort='desc'; dCommSel=0;
   // open on Proofs for Westminster provisions (their primary apparatus), else Citations
   const PRF = {wcf:window.WCF_PROOFS, wlc:window.WLC_PROOFS, wsc:window.WSC_PROOFS}[current];
   dTab = (PRF && PRF[ref] && total(dossierFor(ref))===0) ? 'proofs' : 'cit';
@@ -1113,6 +1130,7 @@ document.body.addEventListener('click', e=>{
   const ja = e.target.closest('[data-anchor]'); if(ja){ const el=document.getElementById('p-'+ja.dataset.anchor); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); return; }
   const ns = e.target.closest('.note-save'); if(ns){ const ta=document.querySelector('#drawer .note-input'); const v=ta&&ta.value.trim(); if(v){ (NOTES[drawerRef]=NOTES[drawerRef]||[]).push({who:"You", when:noteDate(), text:v}); saveNotes(); } dTab='notes'; renderDrawer(); return; }
   const nd = e.target.closest('.note-del'); if(nd){ const i=+nd.dataset.i; if(NOTES[drawerRef]){ NOTES[drawerRef].splice(i,1); if(!NOTES[drawerRef].length) delete NOTES[drawerRef]; } saveNotes(); dTab='notes'; renderDrawer(); return; }
+  const cb = e.target.closest('.csub'); if(cb){ dCommSel=+cb.dataset.csub; renderDrawer(); return; }
   const dt = e.target.closest('.dtab'); if(dt){ dTab=dt.dataset.tab; renderDrawer(); return; }
   const fc = e.target.closest('.fchip'); if(fc){ dFilter=fc.dataset.filter; renderDrawer(); return; }
   if(e.target.closest('.sortbtn')){ dSort = dSort==='desc'?'asc':'desc'; renderDrawer(); return; }
@@ -1140,12 +1158,11 @@ document.getElementById('palWrap').addEventListener('click', e=>{ if(e.target.id
 /* ── packs & notes panel ── */
 function renderPacks(){
   const nc = Object.values(NOTES).reduce((a,x)=>a+x.length,0);
-  const cc = Object.keys(window.BCO_COMMENTARY||{}).length;
   document.getElementById('packsBody').innerHTML =
       `<div class="pack-row"><div><b>My notes</b><span class="pack-sub">${nc} note${nc!==1?'s':''} · stored on this device</span></div><button class="pack-btn" data-act="export-notes"${nc?'':' disabled'}>Export…</button></div>`
-    + (cc ? `<div class="pack-row"><div><b>Commentary</b><span class="pack-sub">${COMMENTARY_LABEL+' · '+cc+' sections'}</span></div></div>` : ``)
+    + window.BCO_COMMENTARIES.map((c,i)=>`<div class="pack-row"><div><b>${c.label}</b><span class="pack-sub">Commentary · ${Object.keys(c.entries).length} sections</span></div><button class="pack-btn" data-act="rm-comm" data-i="${i}">Remove</button></div>`).join('')
     + `<button class="pack-btn import" data-act="import">Import a pack…</button>`
-    + `<p class="packs-note">Notes and imported packs are kept in this browser's local storage and survive reloads. They also export/import as portable JSON pack files (the durable backup). Commentary ships as a separate pack to keep copyrighted text out of the app.</p>`;
+    + `<p class="packs-note">Notes and imported packs are kept in this browser's local storage and survive reloads. They also export/import as portable JSON pack files (the durable backup). Commentary ships as separate packs to keep copyrighted text out of the app — import as many as you like; each gets its own tab on a provision.</p>`;
 }
 function openPacks(){ renderPacks(); document.getElementById('packWrap').classList.add('show'); }
 function closePacks(){ document.getElementById('packWrap').classList.remove('show'); }
@@ -1156,6 +1173,7 @@ document.getElementById('packsBody').addEventListener('click', e=>{
   const b=e.target.closest('[data-act]'); if(!b) return;
   if(b.dataset.act==='export-notes') exportNotes();
   else if(b.dataset.act==='import') document.getElementById('importFile').click();
+  else if(b.dataset.act==='rm-comm'){ window.BCO_COMMENTARIES.splice(+b.dataset.i,1); saveCommentaries(); renderPacks(); if(document.getElementById('drawer').classList.contains('show')) renderDrawer(); }
 });
 document.getElementById('importFile').addEventListener('change', e=>{
   const f=e.target.files[0]; if(!f) return;
