@@ -333,6 +333,8 @@
   .hnote{font-size:.76rem; color:var(--muted); font-style:italic; margin-top:12px; font-family:var(--sans)}
   /* commentary (imported packs: Smith, Ramsay, …) — BCO dossier tab */
   .commentary p{font-family:var(--sans); font-size:.88rem; line-height:1.6; color:var(--ink-soft); margin:0 0 11px}
+  .commentary .fn-item{scroll-margin-top:14px; padding:4px 8px; margin-left:-8px; margin-right:-8px; border-radius:3px; transition:background .25s}
+  .commentary .fn-item.on{background:var(--accent-soft)}   /* highlight the footnote you clicked */
   .cattrib{font-family:var(--sans); font-size:.72rem; color:var(--muted); margin-top:14px; border-top:1px solid var(--line); padding-top:10px}
   .csubtabs{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 12px}
   .csub{font-family:var(--sans); font-size:.74rem; color:var(--ink-soft); background:var(--paper-2); border:1px solid var(--line); border-radius:2px; padding:4px 9px; cursor:pointer}
@@ -1155,7 +1157,7 @@ function notesBlock(ref){
     <div class="note-add"><textarea class="note-input" rows="2" placeholder="Add a note…"></textarea><button class="note-save">Save note</button></div></div>`;
 }
 
-let drawerRef=null, dTab='cit', dFilter='all', dSort='desc', dCommSel=0;
+let drawerRef=null, dTab='cit', dFilter='all', dSort='desc', dCommSel=0, dFnSel=null;
 /* full section prose, lifted from the rendered provision (d.quote is only a truncated preview) */
 function sectionText(ref){
   const el = document.getElementById('p-'+ref);
@@ -1256,17 +1258,18 @@ function renderDrawer(){
     const c = comms[sel];
     body += `<div class="commentary">${c.paras.map(p=>`<p>${p}</p>`).join('')}<p class="cattrib">${c.attrib || (c.label + ' — imported pack, personal use.')}</p></div>`;
   } else if(dTab==='fn'){
-    body += `<div class="commentary">${fnotes.map((p,i)=>`<p><sup class="fnref">${i+1}</sup> ${p}</p>`).join('')}<p class="cattrib">Footnotes from the source document.</p></div>`;
+    body += `<div class="commentary">${fnotes.map((p,i)=>`<p class="fn-item${dFnSel===i+1?' on':''}" id="dfn-${i+1}"><sup class="fnref">${i+1}</sup> ${p}</p>`).join('')}<p class="cattrib">Footnotes from the source document.</p></div>`;
   } else if(dTab==='notes'){
     body += notesBlock(ref);
   } else if(dTab==='hist'){
     body += `<div class="histtab">${d.amend.map(a=>`<div class="hrow"><b>${a.ga}</b> — ${a.n}</div>`).join('')}<p class="hnote">Compiled from the Digest (Part I) and verified against the minutes.</p></div>`;
   }
   document.getElementById('dBody').innerHTML = body;
+  if(dTab==='fn' && dFnSel){ const el=document.getElementById('dfn-'+dFnSel); if(el) el.scrollIntoView({block:'center'}); }
 }
 let lastTrigger=null;
 function openDrawer(ref){
-  drawerRef=ref; dFilter='all'; dSort='desc'; dCommSel=0;
+  drawerRef=ref; dFilter='all'; dSort='desc'; dCommSel=0; dFnSel=null;
   // open on Proofs for Westminster provisions (their primary apparatus), else Citations
   const PRF = {wcf:window.WCF_PROOFS, wlc:window.WLC_PROOFS, wsc:window.WSC_PROOFS}[current];
   dTab = (PRF && PRF[ref] && total(dossierFor(ref))===0) ? 'proofs' : 'cit';
@@ -1392,7 +1395,7 @@ document.body.addEventListener('click', e=>{
   const pg = e.target.closest('.pgnav'); if(pg){ pg.hasAttribute('data-contents') ? showComponent(pg.dataset.book) : openFromEl(pg); return; }
   const den = e.target.closest('.density button'); if(den){ document.getElementById('doc').className='doc cat-'+den.dataset.density; document.querySelectorAll('.density button').forEach(b=>b.setAttribute('aria-pressed', b===den)); return; }
   const sig = e.target.closest('.sig, .sig-inline'); if(sig){ openDrawer(sig.dataset.ref); return; }
-  const fn = e.target.closest('.fnref'); if(fn){ const pv=fn.closest('.prov[id]'); if(pv){ openDrawer(pv.id.slice(2)); dTab='fn'; renderDrawer(); } return; }
+  const fn = e.target.closest('.fnref'); if(fn){ const pv=fn.closest('.prov[id]'); if(pv){ openDrawer(pv.id.slice(2)); dTab='fn'; dFnSel=parseInt(fn.textContent,10)||null; renderDrawer(); } return; }
   const n = e.target.closest('.n'); if(n){ openDrawer(n.dataset.ref); return; }
   const pf = e.target.closest('.pf-toggle'); if(pf){ pf.nextElementSibling.classList.toggle('open'); return; }
   const pm = e.target.closest('.pf-more'); if(pm){ const v=pm.nextElementSibling; v.classList.toggle('open'); pm.textContent = v.classList.contains('open')?'Hide full text ▴':'Show full text ▾'; return; }
