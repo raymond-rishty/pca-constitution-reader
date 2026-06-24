@@ -50,6 +50,38 @@ def clean(s):
     s = html.unescape(s).replace("’", "'").replace("“", '"').replace("”", '"')
     return re.sub(r"\s+", " ", s).strip()
 
+def strip_tags(s): return re.sub(r"<[^>]+>", "", s)
+
+def _balance(s):
+    """Drop orphan </b>/</i> (no matching open) and any unclosed open — e.g. a heading's
+    bold that got cut by a section slice leaves a stray </b>."""
+    out=[]; opens=[]
+    for tok in re.split(r"(</?[bi]>)", s):
+        if tok in ("<b>","<i>"): opens.append(len(out)); out.append(tok)
+        elif tok in ("</b>","</i>"):
+            want="<"+tok[2]+">"
+            for k in range(len(opens)-1,-1,-1):
+                if out[opens[k]]==want: out.append(tok); del opens[k]; break
+            # else: orphan close -> drop
+        else: out.append(tok)
+    for k in opens: out[k]=""                     # remove unclosed opens
+    return "".join(out)
+
+def clean_fmt(s):
+    """Like clean(), but keep inline emphasis: <strong>/<b> -> <b>, <em>/<i> -> <i>."""
+    s = re.sub(r"<br\s*/?>", " ", s)
+    s = re.sub(r"</?(?:strong|b)\b[^>]*>", lambda m: "</b>" if m.group(0)[1]=="/" else "<b>", s, flags=re.I)
+    s = re.sub(r"</?(?:em|i)\b[^>]*>",     lambda m: "</i>" if m.group(0)[1]=="/" else "<i>", s, flags=re.I)
+    s = re.sub(r"<(?!/?[bi]>)[^>]*>", "", s)                 # strip every tag except <b></b><i></i>
+    s = html.unescape(s).replace("’", "'").replace("“", '"').replace("”", '"')
+    s = re.sub(r"\s+", " ", s)
+    for _ in range(4):                                       # merge split emphasis, drop empties (keep inner whitespace)
+        s2 = s.replace("</b><b>", "").replace("</i><i>", "")
+        s2 = re.sub(r"<([bi])>(\s*)</\1>", r"\2", s2)
+        if s2 == s: break
+        s = s2
+    return _balance(s).strip()
+
 def build_catechism(name):
     src = fetch(SOURCES[name])
     # question marker: <p>Q. N. <i>question</i><br />.  The answer is everything up to the next
@@ -164,8 +196,8 @@ APPENDICES_URL = "https://www.pcaac.org/book-of-church-order/appendices/"
 def _paras(frag):
     out = []
     for p in re.split(r'</p>', frag, flags=re.I):
-        t = clean(p)
-        if t and not re.fullmatch(r'(I{1,3}|IV)\.?', t):   # skip stray roman-numeral-only fragments
+        t = clean_fmt(p)                                   # keep bold/italic in front-matter & appendix prose
+        if t and not re.fullmatch(r'(I{1,3}|IV)\.?', strip_tags(t)):   # skip stray roman-numeral-only fragments
             out.append(t)
     return out
 
@@ -185,7 +217,7 @@ def build_bco_front():
     principles = []
     for i, m in enumerate(pmarks):
         e = pmarks[i + 1].start() if i + 1 < len(pmarks) else len(pp)
-        body = re.sub(r'^\s*[1-8]\.\s*', '', clean(pp[m.start():e]))
+        body = re.sub(r'^\s*[1-8]\.\s*', '', clean_fmt(pp[m.start():e]))
         principles.append({"ref": f"PP-{m.group(1)}", "body": body})
     pp_intro = _paras(pp[:pmarks[0].start()])
     return [

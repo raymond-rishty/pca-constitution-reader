@@ -37,6 +37,18 @@ def clean(s):
     s = html.unescape(s).replace("’","'").replace("“",'"').replace("”",'"')
     return re.sub(r"\s+", " ", s).strip()
 
+def _balance(s):
+    out=[]; opens=[]
+    for tok in re.split(r"(</?[bi]>)", s):
+        if tok in ("<b>","<i>"): opens.append(len(out)); out.append(tok)
+        elif tok in ("</b>","</i>"):
+            want="<"+tok[2]+">"
+            for k in range(len(opens)-1,-1,-1):
+                if out[opens[k]]==want: out.append(tok); del opens[k]; break
+        else: out.append(tok)
+    for k in opens: out[k]=""
+    return "".join(out)
+
 def strip_tags(s): return re.sub(r"<[^>]+>", "", s)
 
 def clean_fmt(s):
@@ -52,7 +64,7 @@ def clean_fmt(s):
         s2 = re.sub(r"<([bi])>(\s*)</\1>", r"\2", s2)
         if s2==s: break
         s=s2
-    return s.strip()
+    return _balance(s).strip()
 
 _gap = r'(?:\s|<[^>]+>|&nbsp;)*'
 tok = re.compile(
@@ -160,7 +172,27 @@ for k,ch in bco.items():
         else:
             stats['drift']+=1; drift.append((ref, f"old={len(no)} new={len(nn)} startswith={no.startswith(nn)}"))
 
+# ── front matter (Preface) + appendices: re-derive formatted prose and splice in ──
+import build_content as bc
+astats={'paras':0,'pp':0}; appx_skip=[]                          # mismatches here are skipped (kept as committed), not fatal
+plain_list=lambda L:[norm(strip_tags(x)) for x in L]
+joined=lambda L:norm(strip_tags(' '.join(L)))
+for ne in bc.build_bco_front() + bc.build_bco_appendices():
+    old=bco.get(ne['id'])
+    if not old: appx_skip.append((ne['id'],'NOT IN bco.js')); continue
+    np, op = ne.get('paras',[]), old.get('paras',[])
+    if np or op:
+        if plain_list(np)==plain_list(op) or joined(np)==joined(op):   # identical text (even if split differently) -> add emphasis
+            old['paras']=np; astats['paras']+=1
+        else: appx_skip.append((ne['id'], f"paras old={len(op)} new={len(np)} (kept committed)"))
+    for ns in ne.get('sections',[]):                              # pref-2 Preliminary Principles bodies
+        os_=next((s for s in old.get('sections',[]) if s.get('ref')==ns.get('ref')), None)
+        if os_ is None: continue
+        if norm(strip_tags(ns['body']))==norm(strip_tags(os_['body'])): os_['body']=ns['body']; astats['pp']+=1
+        else: appx_skip.append((ns.get('ref'),'pp body (kept committed)'))
+
 print("RECONCILE:", stats)
+print("FRONT/APPX reformatted:", astats, "| skipped:", appx_skip)
 print("corrected (footer/over-capture):", fixes)
 print("REAL DRIFT:", drift[:40])
 nblk=sum(1 for ch in bco.values() if isinstance(ch,dict) for s in ch.get('sections',[]) if 'blocks' in s)
