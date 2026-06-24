@@ -1,6 +1,6 @@
 /* PCA Constitution — service worker: offline-first app shell + runtime-cached fonts.
    Bump VERSION when shipping new content/markup to roll the cache. */
-const VERSION = 'pcacon-v23';
+const VERSION = 'pcacon-v24';
 const CORE = VERSION + '-core';
 const FONTS = VERSION + '-fonts';
 
@@ -54,10 +54,24 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Same-origin app assets: cache-first, fall back to network, fall back to shell for navigations.
+  // Same-origin app assets.
   if (url.origin === self.location.origin) {
     e.respondWith((async () => {
       const cache = await caches.open(CORE);
+      // App shell (the HTML document): NETWORK-FIRST so code/markup updates roll out on the next
+      // online reload. Cache-first here meant a stale service worker kept serving old index.html —
+      // even after a hard refresh, which bypasses the browser cache but not the SW. Offline falls
+      // back to the cached shell.
+      if (req.mode === 'navigate') {
+        try {
+          const res = await fetch(req);
+          if (res && res.ok) cache.put('index.html', res.clone());
+          return res;
+        } catch (_) {
+          return (await cache.match('index.html')) || (await cache.match('.')) || Response.error();
+        }
+      }
+      // Static assets (content/*.js, icons): cache-first, keyed by VERSION (bumped on each change).
       const hit = await cache.match(req, {ignoreSearch: true});
       if (hit) return hit;
       try {
@@ -65,9 +79,6 @@ self.addEventListener('fetch', e => {
         if (res && res.ok) cache.put(req, res.clone());
         return res;
       } catch (_) {
-        if (req.mode === 'navigate') {
-          return (await cache.match('index.html')) || (await cache.match('.')) || Response.error();
-        }
         return Response.error();
       }
     })());
