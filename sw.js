@@ -1,6 +1,6 @@
 /* PCA Constitution — service worker: offline-first app shell + runtime-cached fonts.
    Bump VERSION when shipping new content/markup to roll the cache. */
-const VERSION = 'pcacon-v21';
+const VERSION = 'pcacon-v22';
 const CORE = VERSION + '-core';
 const FONTS = VERSION + '-fonts';
 

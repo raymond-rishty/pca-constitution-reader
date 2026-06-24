@@ -116,7 +116,7 @@
   .prov .n:hover{border-bottom-color:var(--accent)}
   .prov .body .lead{margin:0}
   .prov .body .bpara{margin-top:.6em; margin-bottom:.6em}
-  .prov .body .fnref{font-size:.62em; font-weight:600; color:var(--accent); vertical-align:super; padding:0 1px}
+  .prov .body .fnref{font-size:.62em; font-weight:600; color:var(--accent); vertical-align:super; padding:0 1px; cursor:pointer}
   .prov .body .fn{display:block; font-family:var(--sans); font-size:.8rem; line-height:1.55; color:var(--muted); border-top:1px solid var(--line); margin-top:.8em; padding-top:.5em}
   .prov .body .fn sup{color:var(--accent); font-weight:600; padding-right:2px}
   .prov .li{margin-top:.32em; margin-bottom:.32em; padding-left:1.5em; text-indent:-1.5em}
@@ -774,8 +774,8 @@ function buildChapter(book, o){
   if(COMPONENTS[book] && COMPONENTS[book].custom){
     const pd = pagedData(book), bc = pd && pd.map[o.ch];
     if(bc) return {kicker:COMPONENTS[book].name, title:(bc.title||("Chapter "+o.ch)), subtitle:"",
-      railSub:(bc.sections||[]).map(s=>s.ref).filter(Boolean),   // skip number-less prose (e.g. an essay appendix)
-      provs:(bc.sections||[]).map(s=>({ref:s.ref, body:s.body}))};
+      railSub:(bc.sections||[]).filter(s=>!s.prose).map(s=>s.ref).filter(Boolean),   // skip number-less prose (e.g. an essay appendix)
+      provs:(bc.sections||[]).map(s=>({ref:s.ref, body:s.body, prose:s.prose}))};
   }
   // bco — real text from window.BCO
   if(window.BCO && window.BCO[o.ch]){
@@ -1060,7 +1060,7 @@ function showChapter(book, o){
     + (ch.advisoryNote ? `<div class="advisory-note">${ch.advisoryNote}</div>` : '');
   let gut = '';
   ch.provs.forEach(p=>{
-    if(!p.ref){ doc += `<div class="prov prose"><span class="body">${p.body}</span></div>`; return; }  // prose (front/appendix)
+    if(p.prose || !p.ref){ doc += `<div class="prov prose"${p.ref?` id="p-${p.ref}"`:''}><span class="body">${p.body}</span></div>`; return; }  // prose (front/appendix); keep id if it has footnotes
     const d = dossierFor(p.ref), n = total(d);
     const rl = (book==='bco'?'BCO ':book.toUpperCase()+' ')+p.ref;
     const inline = n>0 ? `<a class="sig-inline" data-ref="${p.ref}" aria-hidden="true" tabindex="-1"><span class="dot"></span>${n}</a>` : '';
@@ -1392,6 +1392,7 @@ document.body.addEventListener('click', e=>{
   const pg = e.target.closest('.pgnav'); if(pg){ pg.hasAttribute('data-contents') ? showComponent(pg.dataset.book) : openFromEl(pg); return; }
   const den = e.target.closest('.density button'); if(den){ document.getElementById('doc').className='doc cat-'+den.dataset.density; document.querySelectorAll('.density button').forEach(b=>b.setAttribute('aria-pressed', b===den)); return; }
   const sig = e.target.closest('.sig, .sig-inline'); if(sig){ openDrawer(sig.dataset.ref); return; }
+  const fn = e.target.closest('.fnref'); if(fn){ const pv=fn.closest('.prov[id]'); if(pv){ openDrawer(pv.id.slice(2)); dTab='fn'; renderDrawer(); } return; }
   const n = e.target.closest('.n'); if(n){ openDrawer(n.dataset.ref); return; }
   const pf = e.target.closest('.pf-toggle'); if(pf){ pf.nextElementSibling.classList.toggle('open'); return; }
   const pm = e.target.closest('.pf-more'); if(pm){ const v=pm.nextElementSibling; v.classList.toggle('open'); pm.textContent = v.classList.contains('open')?'Hide full text ▴':'Show full text ▾'; return; }
