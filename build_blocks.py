@@ -37,6 +37,23 @@ def clean(s):
     s = html.unescape(s).replace("’","'").replace("“",'"').replace("”",'"')
     return re.sub(r"\s+", " ", s).strip()
 
+def strip_tags(s): return re.sub(r"<[^>]+>", "", s)
+
+def clean_fmt(s):
+    """Like clean(), but keep inline emphasis: <strong>/<b> -> <b>, <em>/<i> -> <i>."""
+    s = re.sub(r"<br\s*/?>", " ", s)
+    s = re.sub(r"</?(?:strong|b)\b[^>]*>", lambda m: "</b>" if m.group(0)[1]=="/" else "<b>", s, flags=re.I)
+    s = re.sub(r"</?(?:em|i)\b[^>]*>",     lambda m: "</i>" if m.group(0)[1]=="/" else "<i>", s, flags=re.I)
+    s = re.sub(r"<(?!/?[bi]>)[^>]*>", "", s)                 # strip every tag except <b></b><i></i>
+    s = html.unescape(s).replace("’","'").replace("“",'"').replace("”",'"')
+    s = re.sub(r"\s+", " ", s)
+    for _ in range(4):                                       # merge split emphasis (<b>35-</b><b>5</b>) and
+        s2 = s.replace("</b><b>","").replace("</i><i>","")   # drop empties, KEEPING any inner whitespace
+        s2 = re.sub(r"<([bi])>(\s*)</\1>", r"\2", s2)
+        if s2==s: break
+        s=s2
+    return s.strip()
+
 _gap = r'(?:\s|<[^>]+>|&nbsp;)*'
 tok = re.compile(
     r'<h2[^>]*>\s*CHAPTER\s+([A-Z–\-]+)\s*</h2>'
@@ -52,29 +69,38 @@ MARK = [
 def parse_section(frag):
     cut = re.search(r'Copyright\s*©|Get In Touch', frag)
     if cut: frag = frag[:cut.start()]
+    bq = [(m.start(), m.end()) for m in re.finditer(r'<blockquote\b.*?</blockquote>', frag, re.S|re.I)]
+    in_bq = lambda pos: any(a <= pos < b for a, b in bq)
     raw=[]; first=True
-    for tag, attrs, inner in re.findall(r'<(p|h4)\b([^>]*)>(.*?)</\1>', frag, re.S|re.I):
+    for m0 in re.finditer(r'<(p|h4)\b([^>]*)>(.*?)</\1>', frag, re.S|re.I):
+        tag, attrs, inner = m0.group(1), m0.group(2), m0.group(3)
         pm = re.search(r'padding-left:\s*(\d+)', attrs)
         pad = int(pm.group(1)) if pm else 0
-        txt = clean(inner)
+        quote = in_bq(m0.start())
+        txt = clean_fmt(inner)
         if not txt: continue
         if first:
             first=False
-            txt = re.sub(r'^\s*\d+\s*[–-]\s*\d+[A-Za-z]?\s*\.\s*', '', txt)
-            if txt: raw.append(('p', 0, None, txt, None))
+            txt = re.sub(r'^\s*(?:<b>\s*)?\d+\s*[–-]\s*\d+[A-Za-z]?(?:\s*</b>)?\s*\.\s*(?:</b>)?\s*', '', txt)
+            if txt: raw.append(('p', 0, None, txt, None, False))
             continue
+        if quote:                                            # blockquote -> indented quote paragraph
+            raw.append(('p', pad, None, txt, None, True)); continue
         for rx, style, disp in MARK:
-            m = rx.match(txt)
+            m = rx.match(txt)                                # markers are plain at the start; match on formatted text
             if m:
-                raw.append(('i', pad, disp(m.group(1)), m.group(2).strip(), style)); break
+                raw.append(('i', pad, disp(m.group(1)), m.group(2).strip(), style, False)); break
         else:
-            raw.append(('p', pad, None, txt, None))
+            raw.append(('p', pad, None, txt, None, False))
     # depth via style-transition stack
     blocks=[]; levels=[]; cur=0
-    for kind, pad, marker, text, style in raw:
+    for kind, pad, marker, text, style, quote in raw:
         if kind=='p':
-            if pad==0: levels=[]; cur=0
-            blocks.append(['p', cur, text])
+            if quote:
+                blocks.append(['p', min(cur+1, 4), text])    # indent the quote relative to its context
+            else:
+                if pad==0: levels=[]; cur=0
+                blocks.append(['p', cur, text])
         else:
             if style in levels:
                 idx=levels.index(style); del levels[idx+1:]; d=idx+1
@@ -119,14 +145,17 @@ for k,ch in bco.items():
         if not ref or 'body' not in sec: continue
         nb=PARSED.get(ref)
         if nb is None: stats['drift']+=1; drift.append((ref,'NOT IN SCRAPE')); continue
-        nn, no = norm(flatten(nb)), norm(sec['body'])
+        fmt = norm(flatten(nb))                              # formatted (keeps <b>/<i>)
+        nn  = norm(strip_tags(fmt))                          # plain, for drift comparison
+        no  = norm(strip_tags(sec['body']))
         if nn==no:
             stats['match']+=1
+            sec['body']=fmt                                  # add inline emphasis to the body
             if has_structure(nb): sec['blocks']=nb
             else: stats['nostruct']+=1
         elif no.startswith(nn) and (SECMARK.match(no[len(nn):].lstrip()) or FOOTER.search(no[len(nn):])):
             stats['corrected']+=1; fixes.append(ref)
-            sec['body']=flatten(nb)
+            sec['body']=fmt
             if has_structure(nb): sec['blocks']=nb
         else:
             stats['drift']+=1; drift.append((ref, f"old={len(no)} new={len(nn)} startswith={no.startswith(nn)}"))
