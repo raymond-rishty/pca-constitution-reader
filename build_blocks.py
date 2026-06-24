@@ -184,6 +184,9 @@ for ne in bc.build_bco_front() + bc.build_bco_appendices():
     if np or op:
         if plain_list(np)==plain_list(op) or joined(np)==joined(op):   # identical text (even if split differently) -> add emphasis
             old['paras']=np; astats['paras']+=1
+        elif joined(op).startswith(joined(np)) and re.match(r'^APPENDIX\s+[A-Z]\b',
+                 joined(op)[len(joined(np)):].strip(), re.I):           # committed over-captured into the next appendix -> use clean version
+            old['paras']=np; astats['paras']+=1; fixes.append(ne['id']+' (trimmed over-capture)')
         else: appx_skip.append((ne['id'], f"paras old={len(op)} new={len(np)} (kept committed)"))
     for ns in ne.get('sections',[]):                              # pref-2 Preliminary Principles bodies
         os_=next((s for s in old.get('sections',[]) if s.get('ref')==ns.get('ref')), None)
