@@ -774,7 +774,7 @@ function buildChapter(book, o){
   if(COMPONENTS[book] && COMPONENTS[book].custom){
     const pd = pagedData(book), bc = pd && pd.map[o.ch];
     if(bc) return {kicker:COMPONENTS[book].name, title:(bc.title||("Chapter "+o.ch)), subtitle:"",
-      railSub:(bc.sections||[]).map(s=>s.ref),
+      railSub:(bc.sections||[]).map(s=>s.ref).filter(Boolean),   // skip number-less prose (e.g. an essay appendix)
       provs:(bc.sections||[]).map(s=>({ref:s.ref, body:s.body}))};
   }
   // bco — real text from window.BCO
