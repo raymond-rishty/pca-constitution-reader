@@ -1265,7 +1265,11 @@ function renderDrawer(){
     body += `<div class="histtab">${d.amend.map(a=>`<div class="hrow"><b>${a.ga}</b> — ${a.n}</div>`).join('')}<p class="hnote">Compiled from the Digest (Part I) and verified against the minutes.</p></div>`;
   }
   document.getElementById('dBody').innerHTML = body;
-  if(dTab==='fn' && dFnSel){ const el=document.getElementById('dfn-'+dFnSel); if(el) el.scrollIntoView({block:'center'}); }
+  if(dTab==='fn' && dFnSel){            // scroll the drawer body to the clicked note (next frame: the panel may still be animating open)
+    const tgt='dfn-'+dFnSel;
+    requestAnimationFrame(()=>{ const el=document.getElementById(tgt), bd=document.getElementById('dBody');
+      if(el && bd) bd.scrollTop += el.getBoundingClientRect().top - bd.getBoundingClientRect().top - 16; });
+  }
 }
 let lastTrigger=null;
 function openDrawer(ref){
