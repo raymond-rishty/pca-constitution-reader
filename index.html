@@ -1205,6 +1205,8 @@ function renderDrawer(){
       .map(c=>({label:c.label, paras:c.entries[ref]}));
   const bp = isCustom ? window.BOOK_PACKS.find(b=>b.component.key===current) : null;
   const fnotes = (bp && bp.footnotes && bp.footnotes[ref]) || null;   // the book's own footnotes for this provision
+  if(bp && bp.commentary && Array.isArray(bp.commentary[ref]) && bp.commentary[ref].length)   // commentary bundled in the book pack
+    comms.push({label: bp.commentaryLabel || 'Commentary', paras: bp.commentary[ref], attrib: bp.commentaryAttribution || 'Commentary included with this document.'});
   const PRF = {wcf:window.WCF_PROOFS, wlc:window.WLC_PROOFS, wsc:window.WSC_PROOFS}[current];
   const proofs = PRF ? PRF[ref] : null;
   // custom books carry no GA citations / Scripture proofs — show only what applies
@@ -1252,7 +1254,7 @@ function renderDrawer(){
     if(comms.length>1)
       body += `<div class="csubtabs">${comms.map((c,i)=>`<button class="csub${i===sel?' on':''}" data-csub="${i}">${c.label.split(' — ')[0]}</button>`).join('')}</div>`;
     const c = comms[sel];
-    body += `<div class="commentary">${c.paras.map(p=>`<p>${p}</p>`).join('')}<p class="cattrib">${c.label} — imported pack, personal use.</p></div>`;
+    body += `<div class="commentary">${c.paras.map(p=>`<p>${p}</p>`).join('')}<p class="cattrib">${c.attrib || (c.label + ' — imported pack, personal use.')}</p></div>`;
   } else if(dTab==='fn'){
     body += `<div class="commentary">${fnotes.map((p,i)=>`<p><sup class="fnref">${i+1}</sup> ${p}</p>`).join('')}<p class="cattrib">Footnotes from the source document.</p></div>`;
   } else if(dTab==='notes'){
