@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
-"""Derive content/citations.js for the Constitution app from the GA-minutes
-corpus search_index.json (the authoritative provision->action index).
+"""Derive the Constitution app's citation data from the GA-minutes corpus
+search_index.json (the authoritative provision->action index).
 
-Output: window.CITATIONS keyed "component|ref" matching the Constitution app's
-own provision refs (bco "24-1", wcf "21.5", wlc/wsc "Q.158"), each value a list
-of {t,ttl,sub,yr,disp,url} sorted newest-first. URLs point at the live GA site.
+Output (split for lazy loading; see the app's loader):
+  content/citations-counts.js   window.CIT_COUNTS = { "comp|ref": <total>, ... }  (tiny, eager)
+  content/cit/bco-<NN>.js       window.CIT["bco-<NN>"] = { "<ref>": [rows], ... } (one per BCO chapter)
+  content/cit/{wcf,wlc,wsc}.js  window.CIT["<comp>"]   = { "<ref>": [rows], ... }
+Each row is {t,ttl,yr,disp,url}, sorted newest-first. URLs point at the live GA site.
 """
 import json, re, collections, sys, os, glob
 
 SRC = "/workspace/dist/pca-ga/app/search_index.json"
 CASES_DIR = "/workspace/dist/pca-ga/cases"
-CONTENT = "/workspace/constitution-app/content"
-OUT = "/workspace/constitution-app/content/citations.js"
+ROOT = os.path.dirname(os.path.abspath(__file__))   # repo root (works in a worktree too)
+CONTENT = os.path.join(ROOT, "content")
+CIT_DIR = os.path.join(CONTENT, "cit")
 GA_BASE = "https://raymond-rishty.github.io/pca-ga/"
 
 def valid_refs():
@@ -131,7 +134,7 @@ def scan_dir(add, subdir, type_code, westminster_only):
             disp = disp[:57].rstrip() + "…"
         rel = os.path.relpath(path, DIST)
         url = GA_BASE + re.sub(r'\.md$', '.html', rel)
-        entry = {"t": type_code, "ttl": title, "sub": "", "yr": year, "disp": disp, "url": url}
+        entry = {"t": type_code, "ttl": title, "yr": year, "disp": disp, "url": url}
         provset = set(inline_refs(txt, westminster_only))
         if provset:
             n_files += 1
@@ -172,7 +175,6 @@ def main():
         entry = {
             "t": t,
             "ttl": (r.get("title") or "").strip(),
-            "sub": (r.get("sub") or "").strip(),
             "yr": r.get("year"),
             "disp": (r.get("disposition") or "").strip(),
             "url": url,
@@ -200,25 +202,48 @@ def main():
     for key, rows in table.items():
         rows.sort(key=lambda e: (-(e["yr"] or 0), torder.get(e["t"],9)))
 
-    # emit
-    keys = sorted(table)
-    payload = "{\n" + ",\n".join(
-        f'  {json.dumps(k)}: {json.dumps(table[k], ensure_ascii=False, separators=(",",":"))}'
-        for k in keys
-    ) + "\n}"
-    js = (
-        "/* citations.js — derived from the PCA GA-minutes corpus search_index.json.\n"
-        "   Maps each Constitution provision to the real GA actions that cite it.\n"
-        "   Links resolve to the live GA Minutes site. Regenerate with build_citations.py. */\n"
-        f'window.GA_BASE = {json.dumps(GA_BASE)};\n'
-        f"window.CITATIONS = {payload};\n"
-    )
-    open(OUT, "w").write(js)
+    # ---- emit: a tiny eager counts manifest + lazy per-file row data ----
+    def fileid(comp, ref):
+        return f"bco-{ref.split('-')[0]}" if comp == "bco" else comp
+
+    # group rows into files; build the counts manifest
+    files = collections.defaultdict(dict)   # fileid -> { ref: [rows] }
+    counts = {}                             # "comp|ref" -> total
+    for key, rows in table.items():
+        comp, ref = key.split("|", 1)
+        counts[key] = len(rows)
+        files[fileid(comp, ref)][ref] = rows
+
+    # counts manifest (eager): powers reading-view badges + "has citations" checks
+    cnt_payload = "{" + ",".join(
+        f'{json.dumps(k)}:{counts[k]}' for k in sorted(counts)) + "}"
+    open(os.path.join(CONTENT, "citations-counts.js"), "w").write(
+        "/* citations-counts.js — per-provision GA-citation totals (eager; powers badges).\n"
+        "   Row data is split into content/cit/*.js, loaded on demand. Regenerate with build_citations.py. */\n"
+        f"window.GA_BASE = {json.dumps(GA_BASE)};\n"
+        f"window.CIT_COUNTS = {cnt_payload};\n")
+
+    # per-file row data (lazy): bco-<chapter>.js, wcf.js, wlc.js, wsc.js
+    os.makedirs(CIT_DIR, exist_ok=True)
+    for f in os.listdir(CIT_DIR):           # clear stale files so nothing orphans
+        if f.endswith(".js"):
+            os.remove(os.path.join(CIT_DIR, f))
+    for fid, refs in files.items():
+        body = "{" + ",".join(
+            f'{json.dumps(r)}:{json.dumps(refs[r], ensure_ascii=False, separators=(",",":"))}'
+            for r in sorted(refs)) + "}"
+        open(os.path.join(CIT_DIR, f"{fid}.js"), "w").write(
+            f'window.CIT=window.CIT||{{}};window.CIT[{json.dumps(fid)}]={body};\n')
+
+    # drop the obsolete monolithic file if present
+    old = os.path.join(CONTENT, "citations.js")
+    if os.path.exists(old):
+        os.remove(old)
 
     # report
     bycomp = collections.Counter(k.split("|")[0] for k in table)
     total_rows = sum(len(v) for v in table.values())
-    print(f"wrote {OUT}")
+    print(f"wrote citations-counts.js + {len(files)} cit/*.js files")
     print(f"provisions with citations: {len(table)}  ({dict(bycomp)})")
     print(f"total citation rows: {total_rows}")
     print(f"dropped phantom keys (not real provisions): {len(dropped_invalid)} distinct, "

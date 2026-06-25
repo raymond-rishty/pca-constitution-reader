@@ -203,6 +203,17 @@
   /* component (part title page) */
   .back{font-family:var(--sans); font-size:.8rem; color:var(--accent); text-decoration:none; cursor:pointer; display:inline-block; margin:0 0 22px}
   .back:hover{text-decoration:underline}
+  /* home edition line + About page */
+  .home-edition{font-family:var(--sans); font-size:.78rem; color:var(--muted); text-align:center; margin:40px auto 0; max-width:36rem; line-height:1.6}
+  .home-about{color:var(--accent); text-decoration:none; cursor:pointer; white-space:nowrap}
+  .home-about:hover{text-decoration:underline}
+  .about-title{font-weight:600; font-size:1.9rem; color:var(--navy); margin:0 0 14px; letter-spacing:-.01em}
+  .about-lead{font-size:1.1rem; line-height:1.55; color:var(--ink-soft); margin:0 0 26px}
+  .about-h{font-family:var(--sans); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin:26px 0 8px}
+  .about-list{margin:0 0 8px; padding-left:1.1rem; line-height:1.6; color:var(--ink); font-size:.96rem}
+  .about-list li{margin:0 0 9px}
+  .about-p{line-height:1.65; color:var(--ink); font-size:.96rem; margin:0}
+  .about-disclaimer{font-family:var(--sans); font-size:.8rem; color:var(--muted); line-height:1.6; margin:30px 0 0; padding-top:16px; border-top:1px solid var(--line)}
   .comp-eyebrow{font-family:var(--sans); font-size:.74rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 6px}
   .comp-title{font-weight:600; font-size:2.1rem; line-height:1.15; margin:0 0 12px; letter-spacing:-.01em}
   .comp-lede{font-size:1.08rem; color:var(--ink-soft); line-height:1.6; max-width:38rem; margin:0 0 14px}
@@ -513,7 +524,7 @@
 <script src="content/bco.js"></script>
 <script src="content/proofs.js"></script>
 <script src="content/verses.js"></script>
-<script src="content/citations.js"></script>
+<script src="content/citations-counts.js"></script>
 <script src="content/ramsay.js"></script>
 <script>
 /* ══════════ CONTENT: real where sourced (window.WSC), placeholder elsewhere ══════════ */
@@ -706,17 +717,33 @@ const CURATED = {
 };
 
 function esc(s){ return (s||"").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-// real GA citations for the provision currently being viewed (keyed component|ref)
-function citesFor(comp, ref){ return (window.CITATIONS && window.CITATIONS[comp+'|'+ref]) || []; }
+/* ── GA citations: tiny counts manifest is eager (window.CIT_COUNTS); the rows
+   are split into content/cit/*.js and loaded on demand (window.CIT[fileid]). ── */
+window.CIT = window.CIT || {};
+const _citPending = {};
+function citCount(comp, ref){ return (window.CIT_COUNTS && window.CIT_COUNTS[comp+'|'+ref]) || 0; }
+function citFileId(comp, ref){ return comp==='bco' ? 'bco-'+ref.split('-')[0] : comp; }
+function citRows(comp, ref){                         // loaded rows, or null if not yet fetched
+  const f = window.CIT[citFileId(comp, ref)];
+  return f ? (f[ref] || []) : null;
+}
+function loadCitFile(comp, ref){                      // inject the split file (works on file:// too)
+  const fid = citFileId(comp, ref);
+  if(window.CIT[fid]) return Promise.resolve();
+  if(_citPending[fid]) return _citPending[fid];
+  return _citPending[fid] = new Promise(res => {
+    const s = document.createElement('script');
+    s.src = 'content/cit/'+fid+'.js';
+    s.onload = () => res();
+    s.onerror = () => { window.CIT[fid] = {}; res(); };   // missing file ⇒ no citations
+    document.head.appendChild(s);
+  });
+}
 const dossierFor = r => {
   const base = DOSSIER[r] || {};
-  const rows = citesFor(current, r);
-  const c = {case:0, ov:0, inq:0, rpr:0, pp:0};
-  rows.forEach(e => { c[e.t] = (c[e.t]||0) + 1; });
-  return {quote: base.quote||"", amend: base.amend||[], rows,
-          cases:c.case, ov:c.ov, inq:c.inq, rpr:c.rpr, pp:c.pp};
+  return {quote: base.quote||"", amend: base.amend||[], count: citCount(current, r)};
 };
-const total = d => d.rows ? d.rows.length : 0;
+const total = d => d.count || 0;
 
 // proof texts: references shown by default, full verse text on demand (two-stage)
 function proofsBlock(o){
@@ -845,6 +872,7 @@ function applyRoute(){
   closeDrawer(); closePal(); closePacks();
   const raw = decodeURIComponent((location.hash || '').replace(/^#\/?/, ''));
   if(!raw){ showHome(); return; }
+  if(raw === 'about'){ showAbout(); return; }
   const i = raw.indexOf('/');
   const book = i < 0 ? raw : raw.slice(0, i);
   const rest = i < 0 ? '' : raw.slice(i + 1);
@@ -852,6 +880,37 @@ function applyRoute(){
   if(!rest){ showComponent(book); return; }
   if(COMPONENTS[book].mode === 'scroll') openTarget(book, {anchor: rest});
   else openTarget(book, {ch: rest});
+}
+
+const EDITION_LINE = "Book of Church Order through the 52nd General Assembly (2025) · Westminster Standards in the PCA-received text";
+
+function showAbout(){
+  setView("about"); setRoute('about');
+  document.getElementById('doc').innerHTML = `<div class="landing about">
+    <a class="back" data-home>‹ The PCA Constitution</a>
+    <h1 class="about-title">About &amp; Sources</h1>
+    <p class="about-lead">A study reader for the Constitution of the Presbyterian Church in America — the Westminster Standards and the Book of Church Order — with each provision linked to the General Assembly actions that have cited it.</p>
+
+    <h2 class="about-h">Edition &amp; currency</h2>
+    <ul class="about-list">
+      <li><b>Book of Church Order</b> — current through the <b>52nd General Assembly (2025)</b>, including the Preface, Preliminary Principles, and Appendices.</li>
+      <li><b>Westminster Confession &amp; Catechisms</b> — the PCA-received (American) text, presented with the Scripture proof texts.</li>
+    </ul>
+
+    <h2 class="about-h">Sources</h2>
+    <ul class="about-list">
+      <li><b>Westminster Standards &amp; proofs</b> — public domain; the text follows the standard received edition, proofs via westminsterstandards.org.</li>
+      <li><b>Book of Church Order</b> — © The Office of the Stated Clerk of the General Assembly of the PCA, all rights reserved. Included here for personal study; permission for wider use is being sought.</li>
+      <li><b>General Assembly citations</b> — drawn from a searchable corpus of the PCA <i>Minutes of the General Assembly</i> (cases, overtures, constitutional inquiries, and Review-of-Presbytery-Records exceptions) and linking out to it. Those citations belong to the PCA <i>Minutes</i>.</li>
+      <li><b>Commentary</b> — Ramsay's public-domain exposition is included; other commentaries load as separate import packs, to keep copyrighted text out of the app.</li>
+    </ul>
+
+    <h2 class="about-h">How citations work</h2>
+    <p class="about-p">A small numbered marker beside a provision shows how many General Assembly actions have cited it. Tap the provision to open its dossier and read each citation — with its year and disposition — linked to the verbatim record.</p>
+
+    <p class="about-disclaimer">Not affiliated with, sponsored by, or endorsed by the Presbyterian Church in America. If you hold rights in any included material and would like it removed, it will be taken down immediately.</p>
+  </div>`;
+  window.scrollTo(0,0);
 }
 
 function showHome(){
@@ -873,6 +932,7 @@ function showHome(){
     <button class="home-jump" id="homeJump"><span><span class="mag">⌕</span>&nbsp; Jump to a reference — WCF 21.5, BCO 24-1, WSC Q.1…</span></button>
     <div class="hentries">${entry('wcf')}${entry('wlc')}${entry('wsc')}${entry('bco')}</div>
     ${addedSection}
+    <p class="home-edition">${EDITION_LINE} · <a class="home-about" data-about>About &amp; sources</a></p>
   </div>`;
   window.scrollTo(0,0);
 }
@@ -1200,7 +1260,6 @@ function renderDrawer(){
     (auth ? `<span class="auth-pill ${auth}">${auth==='binding'?'Binding · constitutional':'Advisory'}</span>` : '')
     + `<button class="copy-cite" data-cite="${refLabel}">⧉ Copy citation</button>`
     + `<button class="copy-cite" data-copytext="1" data-cite="${refLabel}">⧉ Copy section text</button>`;
-  const counts={case:d.cases, ov:d.ov, inq:d.inq, rpr:d.rpr, pp:d.pp};
   const hasHist = d.amend && d.amend.length;
   const comms = window.BCO_COMMENTARIES                       // commentary packs targeting THIS corpus
       .filter(c=>(c.corpus||'bco')===current && Array.isArray(c.entries[ref]) && c.entries[ref].length)
@@ -1216,14 +1275,20 @@ function renderDrawer(){
   const tab=(k,label)=>`<button class="dtab${dTab===k?' on':''}" data-tab="${k}">${label}</button>`;
   let body = `<div class="dtabs">${isCustom?'':tab('cit','Citations'+(n?` (${n})`:''))}${proofs?tab('proofs','Proofs'):''}${comms.length?tab('comm','Commentary'+(comms.length>1?` (${comms.length})`:'')):''}${fnotes&&fnotes.length?tab('fn','Footnotes'+(fnotes.length>1?` (${fnotes.length})`:'')):''}${tab('notes','Notes')}${hasHist?tab('hist','History'):''}</div>`;
   if(dTab==='cit'){
+    const gaBrowse = `<a class="ga-browse" href="${(window.GA_BASE||'#')}app/" target="_blank" rel="noopener">Search the full GA Minutes corpus ↗</a>`;
+    const rows = citRows(current, ref);          // null until the split file loads
     if(n===0){
-      body += `<p class="empty-note">No General Assembly action in the corpus cites this provision. The text stands on its own — when a case, overture, inquiry, or record-review exception references it, it will surface here.</p>`
-        + `<a class="ga-browse" href="${(window.GA_BASE||'#')}app/" target="_blank" rel="noopener">Search the full GA Minutes corpus ↗</a>`;
+      body += `<p class="empty-note">No General Assembly action in the corpus cites this provision. The text stands on its own — when a case, overture, inquiry, or record-review exception references it, it will surface here.</p>` + gaBrowse;
+    } else if(rows === null){
+      body += `<p class="empty-note">Loading ${n} GA citation${n>1?'s':''}…</p>`;
+      loadCitFile(current, ref).then(()=>{ if(drawerRef===ref && dTab==='cit') renderDrawer(); });
     } else {
+      const counts={case:0, ov:0, inq:0, rpr:0, pp:0};
+      rows.forEach(r=>{ counts[r.t] = (counts[r.t]||0) + 1; });
       const parts = [counts.case&&`${counts.case} case${counts.case>1?'s':''}`, counts.ov&&`${counts.ov} overture${counts.ov>1?'s':''}`,
         counts.inq&&`${counts.inq} inquir${counts.inq>1?'ies':'y'}`, counts.rpr&&`${counts.rpr} RPR`, counts.pp&&`${counts.pp} study`].filter(Boolean);
       body += `<p class="dsum"><b>${n}</b> GA action${n>1?'s':''} — ${parts.join(' · ')}</p>`;
-      if(n>=12) body += histogram(d.rows);
+      if(n>=12) body += histogram(rows);
       const chip=(k,l,c)=>`<button class="fchip${dFilter===k?' on':''}" data-filter="${k}">${l}${c!=null?` ${c}`:''}</button>`;
       body += `<div class="fchips">${chip('all','All',n)}`
         + (counts.case?chip('case','Cases',counts.case):'') + (counts.ov?chip('ov','Overtures',counts.ov):'')
@@ -1233,11 +1298,11 @@ function renderDrawer(){
       types.forEach(t=>{
         if(!counts[t]) return;
         const [cls,label]=TYPE_META[t];
-        const rows=d.rows.filter(r=>r.t===t).sort((a,b)=>dSort==='desc'?(b.yr||0)-(a.yr||0):(a.yr||0)-(b.yr||0));
+        const trows=rows.filter(r=>r.t===t).sort((a,b)=>dSort==='desc'?(b.yr||0)-(a.yr||0):(a.yr||0)-(b.yr||0));
         body += `<div class="cgrp"><p class="cgrp-h"><span class="tag ${cls}">${label}</span><span class="cgrp-n">${counts[t]}</span></p>`
-          + rows.map(r=>`<a class="cite" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="yr">${r.yr||''}</span><span class="ctxt">${current==='bco'?spChip(ref,r.ttl):''}${esc(r.ttl)}${r.disp?`<span class="out">· ${esc(r.disp)}</span>`:''}</span><span class="arr">↗</span></a>`).join('') + `</div>`;
+          + trows.map(r=>`<a class="cite" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="yr">${r.yr||''}</span><span class="ctxt">${current==='bco'?spChip(ref,r.ttl):''}${esc(r.ttl)}${r.disp?`<span class="out">· ${esc(r.disp)}</span>`:''}</span><span class="arr">↗</span></a>`).join('') + `</div>`;
       });
-      body += `<a class="ga-browse" href="${(window.GA_BASE||'#')}app/" target="_blank" rel="noopener">Search the full GA Minutes corpus ↗</a>`;
+      body += gaBrowse;
     }
   } else if(dTab==='proofs'){
     const RM = window.PROOF_REFMAP||{};
@@ -1392,6 +1457,7 @@ document.body.addEventListener('click', e=>{
   if(e.target.closest('.home-jump')){ openPal(); return; }
   const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else if(mm.hasAttribute('data-install')) promptInstall(); else if(mm.hasAttribute('data-import')) openPacks(); else if(mm.hasAttribute('data-share')) shareApp(); else showComponent(mm.dataset.book); return; }
   const bn = e.target.closest('.bn'); if(bn){ const a=bn.dataset.bn; if(a==='library') showHome(); else if(a==='search') openPal(); else showComponent(current); return; }
+  const about = e.target.closest('[data-about]'); if(about){ showAbout(); return; }
   const home = e.target.closest('[data-home]'); if(home){ showHome(); return; }
   const railBack = e.target.closest('.rail-back,.read-back'); if(railBack){ showComponent(railBack.dataset.book); return; }
   const entry = e.target.closest('.entry,.hentry'); if(entry){ showComponent(entry.dataset.book); return; }

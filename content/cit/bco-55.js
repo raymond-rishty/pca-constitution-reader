@@ -1,0 +1,1 @@
+window.CIT=window.CIT||{};window.CIT["bco-55"]={"55-1":[{"t":"ov","ttl":"Amend BCO 55-1 & Add BCO 55-2 Distinguishing Confession and Catechizing","yr":2012,"disp":"Answered in the negative","url":"https://raymond-rishty.github.io/pca-ga/markdown/ga40_2012.html#ga40-p89"}]};

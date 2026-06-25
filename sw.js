@@ -1,6 +1,6 @@
 /* PCA Constitution — service worker: offline-first app shell + runtime-cached fonts.
    Bump VERSION when shipping new content/markup to roll the cache. */
-const VERSION = 'pcacon-v29';
+const VERSION = 'pcacon-v30';
 const CORE = VERSION + '-core';
 const FONTS = VERSION + '-fonts';
 
@@ -9,9 +9,11 @@ const SHELL = [
   '.', 'index.html', 'manifest.webmanifest',
   'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
   'content/wsc.js', 'content/wlc.js', 'content/wcf.js',
-  'content/bco.js', 'content/proofs.js', 'content/verses.js', 'content/citations.js',
+  'content/bco.js', 'content/proofs.js', 'content/verses.js', 'content/citations-counts.js',
   'content/ramsay.js',
 ];
+// content/cit/*.js (per-chapter GA citations) are loaded on demand and runtime-cached
+// by the same-origin handler below — no need to precache all of them up front.
 
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
