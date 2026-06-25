@@ -543,7 +543,7 @@ const COMPONENTS = {
   wcf:{abbr:"WCF", mode:"paged", name:"Westminster Confession of Faith", division:"doctrinal",
     tag:"The church's confession of what the Scriptures teach.",
     lede:"The Confession sets out, in thirty-three chapters, the system of doctrine the Scriptures teach — in the PCA's received (American) revision, each clause supported by Scripture proof-texts.",
-    meta:"33 chapters · American revision · Scripture proof-texts"},
+    meta:"33 chapters · American revision (1788) · Scripture proof-texts"},
   wlc:{abbr:"WLC", mode:"scroll", name:"Westminster Larger Catechism", division:"doctrinal",
     tag:"The fuller catechism — for exposition and teaching.",
     lede:"One hundred ninety-six questions and answers, expounding the faith more fully than the Shorter Catechism — long used for preaching and instruction.",
@@ -882,7 +882,7 @@ function applyRoute(){
   else openTarget(book, {ch: rest});
 }
 
-const EDITION_LINE = "Book of Church Order through the 52nd General Assembly (2025) · Westminster Standards in the PCA-received text";
+const EDITION_LINE = "Book of Church Order through the 52nd General Assembly (2025) · Westminster Standards in the American revision (received 1788)";
 
 function showAbout(){
   setView("about"); setRoute('about');
@@ -894,12 +894,12 @@ function showAbout(){
     <h2 class="about-h">Edition &amp; currency</h2>
     <ul class="about-list">
       <li><b>Book of Church Order</b> — current through the <b>52nd General Assembly (2025)</b>, including the Preface, Preliminary Principles, and Appendices.</li>
-      <li><b>Westminster Confession &amp; Catechisms</b> — the PCA-received (American) text, presented with the Scripture proof texts.</li>
+      <li><b>Westminster Confession &amp; Catechisms</b> — the American revision, as received in <b>1788</b> (the text held by the PCA), presented with the Scripture proof texts.</li>
     </ul>
 
     <h2 class="about-h">Sources</h2>
     <ul class="about-list">
-      <li><b>Westminster Standards &amp; proofs</b> — public domain; the text follows the standard received edition, proofs via westminsterstandards.org.</li>
+      <li><b>Westminster Standards &amp; proofs</b> — public domain; the American revision as received in 1788, with the PCA's official Scripture proof texts (pcaac.org).</li>
       <li><b>Book of Church Order</b> — © The Office of the Stated Clerk of the General Assembly of the PCA, all rights reserved. Included here for personal study; permission for wider use is being sought.</li>
       <li><b>General Assembly citations</b> — drawn from a searchable corpus of the PCA <i>Minutes of the General Assembly</i> (cases, overtures, constitutional inquiries, and Review-of-Presbytery-Records exceptions) and linking out to it. Those citations belong to the PCA <i>Minutes</i>.</li>
       <li><b>Commentary</b> — Ramsay's public-domain exposition is included; other commentaries load as separate import packs, to keep copyrighted text out of the app.</li>
