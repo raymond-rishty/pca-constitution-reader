@@ -1604,7 +1604,7 @@ window.BCO = {
 },
 {
 "ref": "18-2",
-"body": "Every applicant for the ministry must put himself under the care of Presbytery, which should ordinarily be the Presbytery that has jurisdiction of the church of which he is a member. The endorsement of his Session must be given to the Presbytery, consisting of testimonials regarding his Christian character and promise of usefulness in the ministry. The endorsement should also describe the activities of ministry the applicant has participated in with brief evaluation. Every applicant for care shall be a member of the congregation whose session provides an endorsement for at least six months before filing his application, except in those cases deemed extraordinary by the Presbytery. Every applicant must file his application with the clerk of the Presbytery at least one month before the meeting of the Presbytery. An applicant for care may not be received under care and examined for ordination at the same meeting of the Presbytery, since he must serve a period of at least one year of internship prior to ordination (see <i>BCO</i> 19-7 and 21-4). An applicant for internship is obliged to be under care and may be licensed to preach the Gospel; further, one who is not already under care may be taken under care, be licensed to preach the Gospel, and become an intern at the same meeting of Presbytery.",
+"body": "Every applicant for the ministry must put himself under the care of Presbytery, which should ordinarily be the Presbytery that has jurisdiction of the church of which he is a member. The endorsement of his Session must be given to the Presbytery, consisting of testimonials regarding his Christian character and promise of usefulness in the ministry. The endorsement should also describe the activities of ministry the applicant has participated in with brief evaluation. Every applicant for care shall be a member of the congregation whose session provides an endorsement for at least six months before filing his application, except in those cases deemed extraordinary by the Presbytery. Every applicant must file his application with the clerk of the Presbytery. An applicant for care may not be received under care and examined for ordination at the same meeting of the Presbytery, since he must serve a period of at least one year of internship prior to ordination (see <i>BCO</i> 19-7 and 21-4). An applicant for internship is obliged to be under care and may be licensed to preach the Gospel; further, one who is not already under care may be taken under care, be licensed to preach the Gospel, and become an intern at the same meeting of Presbytery.",
 "blocks": [
 [
 "p",
@@ -1619,7 +1619,7 @@ window.BCO = {
 [
 "p",
 0,
-"Every applicant must file his application with the clerk of the Presbytery at least one month before the meeting of the Presbytery. An applicant for care may not be received under care and examined for ordination at the same meeting of the Presbytery, since he must serve a period of at least one year of internship prior to ordination (see <i>BCO</i> 19-7 and 21-4). An applicant for internship is obliged to be under care and may be licensed to preach the Gospel; further, one who is not already under care may be taken under care, be licensed to preach the Gospel, and become an intern at the same meeting of Presbytery."
+"Every applicant must file his application with the clerk of the Presbytery. An applicant for care may not be received under care and examined for ordination at the same meeting of the Presbytery, since he must serve a period of at least one year of internship prior to ordination (see <i>BCO</i> 19-7 and 21-4). An applicant for internship is obliged to be under care and may be licensed to preach the Gospel; further, one who is not already under care may be taken under care, be licensed to preach the Gospel, and become an intern at the same meeting of Presbytery."
 ]
 ]
 },
@@ -4112,24 +4112,7 @@ window.BCO = {
 },
 {
 "ref": "36-8",
-"body": "When members of a court wish to consider the elevation of an indefinite suspension, whether from office or from the Sacraments (<i>BCO</i> 36-5) to the censure of deposition or excommunication respectively, it shall not be required to initiate process de novo according to <i>BCO</i> 31-2 or <i>BCO</i> 32-2. The indefinitely suspended person is not in good standing and has already been found impenitent, resulting in indefinite suspension (<i>BCO</i> 30-3). However, the indefinitely suspended person has a right to a hearing in the matter. The court supervising the indefinite suspension may consider a motion to find him \u201cincorrigible and contumacious\u201d (cf. <i>BCO</i> 30-4) and present evidence to that effect. The court shall give at least thirty (30) days' notice of such a motion to the indefinitely suspended person and permit him the privilege of the floor to plead and give evidence of his repentance before the court having jurisdiction (<i>BCO</i> 33-1, 34-1) and not any trial commission. The court, upon completing its hearing, shall vote to determine whether or not to elevate the indefinite suspension to deposition or excommunication. A person whose suspension is so elevated has the right of Appeal (<i>BCO</i> 42-2).",
-"blocks": [
-[
-"p",
-0,
-"When members of a court wish to consider the elevation of an indefinite suspension, whether from office or from the Sacraments (<i>BCO</i> 36-5) to the censure of deposition or excommunication respectively, it shall not be required to initiate process de novo according to <i>BCO</i> 31-2 or <i>BCO</i> 32-2. The indefinitely suspended person is not in good standing and has already been found impenitent, resulting in indefinite suspension (<i>BCO</i> 30-3)."
-],
-[
-"p",
-0,
-"However, the indefinitely suspended person has a right to a hearing in the matter. The court supervising the indefinite suspension may consider a motion to find him “incorrigible and contumacious” (cf. <i>BCO</i> 30-4) and present evidence to that effect. The court shall give at least thirty (30) days' notice of such a motion to the indefinitely suspended person and permit him the privilege of the floor to plead and give evidence of his repentance before the court having jurisdiction (<i>BCO</i> 33-1, 34-1) and not any trial commission."
-],
-[
-"p",
-0,
-"The court, upon completing its hearing, shall vote to determine whether or not to elevate the indefinite suspension to deposition or excommunication. A person whose suspension is so elevated has the right of Appeal (<i>BCO</i> 42-2)."
-]
-]
+"body": "When members of a court wish to consider the elevation of an indefinite suspension, whether from office or from the Sacraments (<i>BCO</i> 36-5) to the censure of deposition or excommunication respectively, it shall not be required to initiate process de novo according to <i>BCO</i> 31-2 or <i>BCO</i> 32-2. The indefinitely suspended person is not in good standing and has already been found impenitent, resulting in indefinite suspension (<i>BCO</i> 30-3). However, the indefinitely suspended person has a right to a hearing in the matter. The court supervising the indefinite suspension may consider a motion to find him \u201cincorrigible and contumacious\u201d (cf. <i>BCO</i> 30-4) and present evidence to that effect. The court shall give at least thirty (30) days' notice of such a motion to the indefinitely suspended person and permit him the privilege of the floor to plead and give evidence of his repentance before the court having jurisdiction (<i>BCO</i> 33-1, 34-1) and not any trial commission. The court, upon completing its hearing, shall vote to determine whether or not to elevate the indefinite suspension to deposition or excommunication. A person whose suspension is so elevated has the right of Appeal (<i>BCO</i> 42-2)."
 }
 ],
 "vacated": false
