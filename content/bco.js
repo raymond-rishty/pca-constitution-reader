@@ -5,7 +5,7 @@ window.BCO = {
 "part": "front",
 "title": "Preface",
 "paras": [
-"<b>Includes all amendments approved up to and including the 52nd General Assembly held in Chattanooga, Tennessee, June 23-27, 2025</b> <b>I. THE KING AND HEAD OF THE CHURCH</b>",
+"<b>Includes all amendments approved up to and including amendments ratified by the General Assembly in 2026</b> <b>I. THE KING AND HEAD OF THE CHURCH</b>",
 "Jesus Christ, upon whose shoulders the government rests, whose name is called Wonderful, Counselor, the Mighty God, the Everlasting Father, the Prince of Peace; of the increase of whose government and peace there shall be no end; who sits upon the throne of David, and upon His kingdom to order it and to establish it with judgment and justice from henceforth, even forever (Isaiah 9:6-7); having all power given unto Him in heaven and in earth by the Father, who raised Him from the dead and set Him at His own right hand, far above all principality and power, and might, and dominion, and every name that is named, not only in this world, but also in that which is to come, and has put all things under His feet, and gave Him to be the Head over all things to the Church, which is His body, the fullness of Him that filleth all in all (Ephesians 1:20-23); He, being ascended up far above all heavens, that He might fill all things, received gifts for His Church, and gave all offices necessary for the edification of His Church and the perfecting of His saints (Ephesians 4:10-13).",
 "Jesus, the Mediator, the sole Priest, Prophet, King, Saviour, and Head of the Church, contains in Himself, by way of eminency, all the offices in His Church, and has many of their names attributed to Him in the Scriptures. He is Apostle, Teacher, Pastor, Minister, Bishop and the only Lawgiver in Zion.",
 "It belongs to His Majesty from His throne of glory to rule and teach the Church through His Word and Spirit by the ministry of men; thus mediately exercising His own authority and enforcing His own laws, unto the edification and establishment of His Kingdom.",
@@ -61,7 +61,7 @@ window.BCO = {
 "title": "The Constitution Defined",
 "paras": [
 "The Constitution of the Presbyterian Church in America, which is subject to and subordinate to the Scriptures of the Old and New Testaments, the inerrant Word Of God, consists of its doctrinal standards set forth in the <i>Westminster Confession of Faith</i>, together with the <i>Larger and Shorter Catechisms</i>, and the <i>Book of Church Order</i>, comprising the Form of Government, the Rules of Discipline and the Directory for Worship; all as adopted by the Church.",
-"Copyright © 2025 by the Office of the Stated Clerk of the General Assembly of the Presbyterian Church in America All rights reserved"
+"Copyright © 2026 by the Office of the Stated Clerk of the General Assembly of the Presbyterian Church in America All rights reserved"
 ]
 },
 "1": {
@@ -759,7 +759,7 @@ window.BCO = {
 },
 {
 "ref": "12-3",
-"body": "When a church is without a pastor, the moderator of the Session may be either a minister appointed for that purpose by the Presbytery, with consent of the Session, or one invited by the Session to preside on a particular occasion, or one of its own members elected to preside. In judicial cases, the moderator shall be a minister of the Presbytery to which the church belongs."
+"body": "When a church is without a pastor, the moderator of the Session may be either a minister appointed for that purpose by the Presbytery, with consent of the Session, or one invited by the Session to preside on a particular occasion, or one of its own members elected to preside. In judicial cases, whether the church is with or without a pastor, the Session may elect one of its members to preside as moderator or invite a minister of the Presbytery to which the church belongs to preside as moderator."
 },
 {
 "ref": "12-4",
@@ -2689,7 +2689,7 @@ window.BCO = {
 "sections": [
 {
 "ref": "24-1",
-"body": "Every church shall elect persons to the offices of ruling elder and deacon in the following manner: At such times as determined by the Session, communicant members of the congregation may submit names to the Session, keeping in mind that each prospective officer should be an active male member who meets the qualifications set forth in 1 Timothy 3 and Titus 1. Nominees for the office of ruling elder and/or deacon shall receive instruction in the qualifications and work of the office. Each nominee shall be examined in: a. his Christian experience, especially his personal character and family management (based on the qualifications set out in 1 Timothy 3:1-7 and Titus 1:6-9), b. his knowledge of Bible content, c. his knowledge of the system of doctrine, government, discipline contained in the Constitution of the Presbyterian Church in America (<i>BCO</i> Preface III, The Constitution Defined), d. the duties of the office to which he has been nominated, and e. his willingness to give assent to the questions required for ordination. (<i>BCO</i> 24-6). In the examination of the nominee's personal character, the Session shall give specific attention to potential notorious concerns. Careful attention must be given to his practical struggle against sinful actions, as well as to persistent sinful desires. The nominee must give clear testimony of reliance upon his union with Christ and the benefits thereof by the Holy Spirit, depending on this work of grace to make progress over sin (Psalm 103:2-5, Romans 8:29) and to bear fruit (Psalm 1:3, Gal. 5:22-23). While imperfection will remain, when confessing sins and sinful temptations publicly, the nominee must exercise great care not to diminish the seriousness of those sins in the eyes of the congregation, as though they were matters of little consequence, but rather should testify to the work of the Holy Spirit in his progress in holiness (1 Cor. 6:9-11). Notwithstanding the above, the Session may render a decision on Christian experience at any point in the process, and based on that decision, may judge him ineligible for that election. If there are candidates eligible for the election, the Session shall report to the congregation those eligible, giving at least thirty (30) days prior notice of the time and place of a congregational meeting for elections. If one-fourth (1/4) of the persons entitled to vote shall at any time request the Session to call a congregational meeting for the purpose of electing additional officers, it shall be the duty of the Session to call such a meeting on the above procedure. The number of officers to be elected shall be determined by the congregation after hearing the Session's recommendation.",
+"body": "Every church shall elect persons to the offices of ruling elder and deacon in the following manner: At such times as determined by the Session, communicant members of the congregation may submit names to the Session, keeping in mind that each prospective officer should be an active male member who meets the qualifications set forth in 1 Timothy 3 and Titus 1. Nominees for the office of ruling elder and/or deacon shall receive instruction in the qualifications and work of the office. Each nominee shall be examined in: a. his Christian experience, especially his personal character and family management (based on the qualifications set out in 1 Timothy 3:1-7 and Titus 1:6-9), b. his knowledge of Bible content, c. his knowledge of the system of doctrine, government, discipline contained in the Constitution of the Presbyterian Church in America (<i>BCO</i> Preface III, The Constitution Defined), d. the duties of the office to which he has been nominated, and e. his willingness to give assent to the questions required for ordination. (<i>BCO</i> 24-6). In the examination of the nominee's personal character, the Session shall give specific attention to potential notorious concerns. Careful attention must be given to his practical struggle against sinful actions, as well as to persistent sinful desires. The nominee must give clear testimony of reliance upon his union with Christ and the benefits thereof by the Holy Spirit, depending on this work of grace to make progress over sin (Psalm 103:2-5, Romans 8:29) and to bear fruit (Psalm 1:3, Gal. 5:22-23). While imperfection will remain, when confessing sins and sinful temptations publicly, the nominee must exercise great care not to diminish the seriousness of those sins in the eyes of the congregation, as though they were matters of little consequence, but rather should testify to the work of the Holy Spirit in his progress in holiness (1 Cor. 6:9-11). Notwithstanding the above, the Session may render a decision on Christian experience at any point in the process, and based on that decision, may judge him, whether previously ordained or not, ineligible for that election. If there are candidates eligible for the election, the Session shall report to the congregation those eligible, giving at least thirty (30) days prior notice of the time and place of a congregational meeting for elections. If one-fourth (1/4) of the persons entitled to vote shall at any time request the Session to call a congregational meeting for the purpose of electing additional officers, it shall be the duty of the Session to call such a meeting on the above procedure. The number of officers to be elected shall be determined by the congregation after hearing the Session's recommendation.",
 "blocks": [
 [
 "p",
@@ -2734,7 +2734,7 @@ window.BCO = {
 [
 "p",
 0,
-"Notwithstanding the above, the Session may render a decision on Christian experience at any point in the process, and based on that decision, may judge him ineligible for that election."
+"Notwithstanding the above, the Session may render a decision on Christian experience at any point in the process, and based on that decision, may judge him, whether previously ordained or not, ineligible for that election."
 ],
 [
 "p",
@@ -3535,7 +3535,7 @@ window.BCO = {
 },
 {
 "ref": "31-10",
-"body": "When a member of a church court is under process, all his official functions may be suspended at the court's discretion; but this shall never be done in the way of censure, and this requires a two-thirds (2/3) majority."
+"body": "When a member of a church court is under process, all his official functions may be administratively suspended at the court's discretion; but this shall never be done in the way of censure, and this requires a two-thirds (2/3) majority of members present and voting (not counting abstentions) at the meeting of the Session or Presbytery, even if the process is being conducted by a commission."
 },
 {
 "ref": "31-11",
@@ -3949,7 +3949,7 @@ window.BCO = {
 },
 {
 "ref": "35-9",
-"body": "All testimony shall be recorded (transcription, audiotape, videotape, or some other electronic means) and witnesses informed of such prior to testifying. Such recording becomes part of the Record of the Case. However, in order to be referenced in written or oral briefs, such recording must be transcribed and the transcription authenticated by the trial court. The court of final appeal may assess the cost of transcription equitably among the parties."
+"body": "All parts of a trial other than deliberations shall be recorded (by transcription, audiotape, videotape, or some other electronic means) and witnesses informed of such prior to testifying. Such recording becomes part of the Record of the Case. However, in order to be referenced in written or oral briefs, such recording must be transcribed and the transcription authenticated by the trial court. The court of final appeal may assess the cost of transcription equitably among the parties."
 },
 {
 "ref": "35-10",
@@ -4008,11 +4008,28 @@ window.BCO = {
 },
 {
 "ref": "36-4",
-"body": "Definite suspension from office should be administered in the presence of the court alone or in open session of the court, as it may deem best, and public announcement thereof shall be at the court's discretion."
+"body": "Definite suspension from office should be administered in the presence of the court alone or in open session of the court, as it may deem best, and public announcement thereof shall be at the court's discretion. When the court has resolved to pass this sentence, the moderator shall address the offending brother to the following purpose: <b>Whereas, you, ___________________ (here describe the brother as a teaching elder, ruling elder, or deacon) are convicted by sufficient proof (or are guilty by your own confession) of the sin of ______________ (here insert the offense), and have satisfied the court as to your repentance by the grace of God; yet for the credit of religion, the honor of Christ, and your own good we the _______________________ (Presbytery (or Church Session) in the name and by the authority of the Lord Jesus Christ, do now declare you suspended from the exercise of your office, and all the functions thereof, for __________________ (here state the dates on which the suspension begins and ends).</b> To this shall be added such advice or admonition as may be judged necessary, and the whole shall be concluded with prayer to almighty God that He would follow this act of discipline with His blessing.",
+"blocks": [
+[
+"p",
+0,
+"Definite suspension from office should be administered in the presence of the court alone or in open session of the court, as it may deem best, and public announcement thereof shall be at the court's discretion. When the court has resolved to pass this sentence, the moderator shall address the offending brother to the following purpose:"
+],
+[
+"p",
+0,
+"<b>Whereas, you, ___________________ (here describe the brother as a teaching elder, ruling elder, or deacon) are convicted by sufficient proof (or are guilty by your own confession) of the sin of ______________ (here insert the offense), and have satisfied the court as to your repentance by the grace of God; yet for the credit of religion, the honor of Christ, and your own good we the _______________________ (Presbytery (or Church Session) in the name and by the authority of the Lord Jesus Christ, do now declare you suspended from the exercise of your office, and all the functions thereof, for __________________ (here state the dates on which the suspension begins and ends).</b>"
+],
+[
+"p",
+0,
+"To this shall be added such advice or admonition as may be judged necessary, and the whole shall be concluded with prayer to almighty God that He would follow this act of discipline with His blessing."
+]
+]
 },
 {
 "ref": "36-5",
-"body": "Indefinite suspension from office or the Sacraments should be administered after the manner prescribed for definite suspension, but with added solemnity, that the indefinite suspension may be the means of impressing the mind of the delinquent with a proper sense of his danger. Indefinite suspension should also be administered under the blessing of God of leading him to repentance. When the court has resolved to pass this sentence, the moderator shall address the offending brother to the following purpose: <b>Whereas, you, ___________________ (here describe the person as a teaching elder, ruling elder, deacon, or private member of the church) are convicted by sufficient proof (or are guilty by your own confession) of the sin of ______________ (here insert the offense), we the _______________________ Presbytery (or Church Session) in the name and by the authority of the Lord Jesus Christ, do now declare you suspended from the Sacraments of the Church (and from the exercise of your office), until you give satisfactory evidence of repentance.</b> To this shall be added such advice or admonition as may be judged necessary, and the whole shall be concluded with prayer to almighty God that He would follow this act of discipline with His blessing.",
+"body": "Indefinite suspension from office or the Sacraments should be administered after the manner prescribed for definite suspension, but with added solemnity, that the indefinite suspension may be the means of impressing the mind of the delinquent with a proper sense of his danger. Indefinite suspension should also be administered under the blessing of God of leading him to repentance. When the court has resolved to pass this sentence, the moderator shall address the offending brother to the following purpose: <b>Whereas, you, ___________________ (here describe the person as a teaching elder, ruling elder, deacon, or private member of the church) are convicted by sufficient proof (or are guilty by your own confession) of the sin of ___________________ (here insert the offense), we the ___________________ (Presbytery (or Church Session) in the name and by the authority of the Lord Jesus Christ, do now declare you suspended from the Sacraments of the Church (and/or from the exercise of your office), until you give satisfactory evidence of repentance.</b> To this shall be added such advice or admonition as may be judged necessary, and the whole shall be concluded with prayer to almighty God that He would follow this act of discipline with His blessing.",
 "blocks": [
 [
 "p",
@@ -4022,7 +4039,7 @@ window.BCO = {
 [
 "p",
 0,
-"<b>Whereas, you, ___________________ (here describe the person as a teaching elder, ruling elder, deacon, or private member of the church) are convicted by sufficient proof (or are guilty by your own confession) of the sin of ______________ (here insert the offense), we the _______________________ Presbytery (or Church Session) in the name and by the authority of the Lord Jesus Christ, do now declare you suspended from the Sacraments of the Church (and from the exercise of your office), until you give satisfactory evidence of repentance.</b>"
+"<b>Whereas, you, ___________________ (here describe the person as a teaching elder, ruling elder, deacon, or private member of the church) are convicted by sufficient proof (or are guilty by your own confession) of the sin of ___________________ (here insert the offense), we the ___________________ (Presbytery (or Church Session) in the name and by the authority of the Lord Jesus Christ, do now declare you suspended from the Sacraments of the Church (and/or from the exercise of your office), until you give satisfactory evidence of repentance.</b>"
 ],
 [
 "p",
@@ -4090,6 +4107,27 @@ window.BCO = {
 "p",
 0,
 "The sentence of deposition ought to be inflicted with solemnities similar to those already prescribed in the case of excommunication."
+]
+]
+},
+{
+"ref": "36-8",
+"body": "When members of a court wish to consider the elevation of an indefinite suspension, whether from office or from the Sacraments (<i>BCO</i> 36-5) to the censure of deposition or excommunication respectively, it shall not be required to initiate process de novo according to <i>BCO</i> 31-2 or <i>BCO</i> 32-2. The indefinitely suspended person is not in good standing and has already been found impenitent, resulting in indefinite suspension (<i>BCO</i> 30-3). However, the indefinitely suspended person has a right to a hearing in the matter. The court supervising the indefinite suspension may consider a motion to find him \u201cincorrigible and contumacious\u201d (cf. <i>BCO</i> 30-4) and present evidence to that effect. The court shall give at least thirty (30) days' notice of such a motion to the indefinitely suspended person and permit him the privilege of the floor to plead and give evidence of his repentance before the court having jurisdiction (<i>BCO</i> 33-1, 34-1) and not any trial commission. The court, upon completing its hearing, shall vote to determine whether or not to elevate the indefinite suspension to deposition or excommunication. A person whose suspension is so elevated has the right of Appeal (<i>BCO</i> 42-2).",
+"blocks": [
+[
+"p",
+0,
+"When members of a court wish to consider the elevation of an indefinite suspension, whether from office or from the Sacraments (<i>BCO</i> 36-5) to the censure of deposition or excommunication respectively, it shall not be required to initiate process de novo according to <i>BCO</i> 31-2 or <i>BCO</i> 32-2. The indefinitely suspended person is not in good standing and has already been found impenitent, resulting in indefinite suspension (<i>BCO</i> 30-3)."
+],
+[
+"p",
+0,
+"However, the indefinitely suspended person has a right to a hearing in the matter. The court supervising the indefinite suspension may consider a motion to find him “incorrigible and contumacious” (cf. <i>BCO</i> 30-4) and present evidence to that effect. The court shall give at least thirty (30) days' notice of such a motion to the indefinitely suspended person and permit him the privilege of the floor to plead and give evidence of his repentance before the court having jurisdiction (<i>BCO</i> 33-1, 34-1) and not any trial commission."
+],
+[
+"p",
+0,
+"The court, upon completing its hearing, shall vote to determine whether or not to elevate the indefinite suspension to deposition or excommunication. A person whose suspension is so elevated has the right of Appeal (<i>BCO</i> 42-2)."
 ]
 ]
 }
@@ -4498,7 +4536,26 @@ window.BCO = {
 },
 {
 "ref": "41-3",
-"body": "In making a reference the lower court may ask for advice only, or for final disposition of the matter referred; and in particular it may refer a judicial case with request for its trial and decision by the higher court."
+"body": "In making a reference the lower court may ask for advice only, or for final disposition of the matter referred; and in particular it may refer a judicial case with a request: a. That the higher court take original jurisdiction of the case, its trial, judgment, and whatever censure it deems warranted; or b. That the higher court provide additional teaching and/or ruling elders to serve with the lower court in a judicial case, as may seem prudent to the lower court, which additional elders, during their term of service on the case, shall have all the rights and responsibilities of judges in the lower court, subject to the rights of the parties under <i>BCO</i> 32-16.",
+"blocks": [
+[
+"p",
+0,
+"In making a reference the lower court may ask for advice only, or for final disposition of the matter referred; and in particular it may refer a judicial case with a request:"
+],
+[
+"i",
+1,
+"a.",
+"That the higher court take original jurisdiction of the case, its trial, judgment, and whatever censure it deems warranted; or"
+],
+[
+"i",
+1,
+"b.",
+"That the higher court provide additional teaching and/or ruling elders to serve with the lower court in a judicial case, as may seem prudent to the lower court, which additional elders, during their term of service on the case, shall have all the rights and responsibilities of judges in the lower court, subject to the rights of the parties under <i>BCO</i> 32-16."
+]
+]
 },
 {
 "ref": "41-4",
@@ -4537,7 +4594,7 @@ window.BCO = {
 },
 {
 "ref": "42-2",
-"body": "The only parties entitled to an appeal are those who have submitted to a regular trial, those appealing a censure in a <i>BCO</i> 38-1 case without process, and those appealing a <i>BCO</i> 34-10 divestiture without censure."
+"body": "The only parties entitled to an appeal are those who have submitted to a regular trial, those appealing a censure in a <i>BCO</i> 38-1 case without process, those appealing the elevation of a censure under <i>BCO</i> 36-8, and those appealing a <i>BCO</i> 34-10 divestiture without censure."
 },
 {
 "ref": "42-3",
