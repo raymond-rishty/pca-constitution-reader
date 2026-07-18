@@ -23,7 +23,7 @@ def valid_refs():
     noise or RAO refs) are dropped so they never inflate counts."""
     v = {"bco": set(), "wcf": set(), "wlc": set(), "wsc": set()}
     bco = open(f"{CONTENT}/bco.js").read()
-    v["bco"] = set(re.findall(r'"ref":\s*"(\d+-\d+)"', bco))
+    v["bco"] = set(re.findall(r'"ref":\s*"(?:\d+-\d+|PP-\d+)"', bco))
     wcf = open(f"{CONTENT}/wcf.js").read()
     v["wcf"] = set(re.findall(r'"ref":\s*"(\d+\.\d+)"', wcf))
     for comp, fn in (("wlc", "wlc.js"), ("wsc", "wsc.js")):
@@ -59,6 +59,12 @@ def norm(prov):
     # families we don't carry in the strict constitution
     if re.match(r'^(RAO|RONR|OMSJC|BOD|FG|RoD|DfW)\b', p, re.I):
         return None
+
+    # Preliminary Principles (front matter in the BCO) -----------------------
+    m = re.match(r'^(?:BCO\s*)?(?:PP|P\.P\.|Preliminary\s+Principles?)\s*'
+                 r'(?:#|-|\.)?\s*(?:II\.)?([1-8])\b', p, re.I)
+    if m:
+        return ("bco", f"PP-{int(m.group(1))}")
 
     # Westminster ------------------------------------------------------------
     m = re.match(r'^WCF\s*([0-9]{1,2})\s*[-.]\s*([0-9]{1,2})', p, re.I)
@@ -100,6 +106,9 @@ WLC_INLINE = re.compile(
     r'(?:WLC|W\.L\.C\.|Larger Catechism)[,\s]*(?:Q(?:uestion)?s?\.?\s*)?(\d{1,3})', re.I)
 WSC_INLINE = re.compile(
     r'(?:WSC|W\.S\.C\.|Shorter Catechism)[,\s]*(?:Q(?:uestion)?s?\.?\s*)?(\d{1,3})', re.I)
+PP_INLINE = re.compile(
+    r'(?:Preliminary\s+Principles?|PP|P\.P\.?)\s*(?:#|-|\.)?\s*(?:II\.)?\d'
+    r'(?:\s*(?:,|&|and)\s*(?:II\.)?\d)*', re.I)
 
 def inline_refs(txt, westminster_only):
     """Yield (comp, ref) for every Constitution reference found in a body."""
@@ -109,6 +118,11 @@ def inline_refs(txt, westminster_only):
         yield ("wlc", f"Q.{int(m.group(1))}")
     for m in WSC_INLINE.finditer(txt):
         yield ("wsc", f"Q.{int(m.group(1))}")
+    # Preliminary Principles are BCO front matter and may occur in any corpus
+    # body, including RPR exceptions (which otherwise use Westminster-only scans).
+    for m in PP_INLINE.finditer(txt):
+        for n in re.findall(r'\d+', m.group(0)):
+            yield ("bco", f"PP-{int(n)}")
     if not westminster_only:
         for m in BCO_INLINE.finditer(txt):
             nr = norm(f"BCO {m.group(1)}-{m.group(2)}")
@@ -223,7 +237,8 @@ def main():
         f"window.GA_BASE = {json.dumps(GA_BASE)};\n"
         f"window.CIT_COUNTS = {cnt_payload};\n")
 
-    # per-file row data (lazy): bco-<chapter>.js, wcf.js, wlc.js, wsc.js
+    # per-file row data (lazy): bco-<chapter>.js (including bco-PP.js),
+    # wcf.js, wlc.js, wsc.js
     os.makedirs(CIT_DIR, exist_ok=True)
     for f in os.listdir(CIT_DIR):           # clear stale files so nothing orphans
         if f.endswith(".js"):
@@ -255,7 +270,7 @@ def main():
     for s,c in top_skips:
         print(f"   {c:4d}  {s!r}")
     # spot-check a few
-    for probe in ["bco|24-1","bco|13-6","wcf|21.5","wlc|Q.158","bco|31-2"]:
+    for probe in ["bco|PP-1","bco|24-1","bco|13-6","wcf|21.5","wlc|Q.158"]:
         rows = table.get(probe, [])
         print(f"  {probe}: {len(rows)} rows" + (f"  e.g. {rows[0]['yr']} {rows[0]['t']} — {rows[0]['ttl'][:50]}" if rows else ""))
 
