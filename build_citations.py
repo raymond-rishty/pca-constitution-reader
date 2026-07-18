@@ -107,7 +107,7 @@ WLC_INLINE = re.compile(
 WSC_INLINE = re.compile(
     r'(?:WSC|W\.S\.C\.|Shorter Catechism)[,\s]*(?:Q(?:uestion)?s?\.?\s*)?(\d{1,3})', re.I)
 PP_INLINE = re.compile(
-    r'(?:Preliminary\s+Principles?|PP|P\.P\.?)\s*(?:#|-|\.)?\s*(?:II\.)?\d'
+    r'(?:_?Preliminary_?\s+_?Principles?_?|PP|P\.P\.?)\s*(?:#|-|\.)?\s*(?:II\.)?\d'
     r'(?:\s*(?:,|&|and)\s*(?:II\.)?\d)*', re.I)
 
 def inline_refs(txt, westminster_only):
