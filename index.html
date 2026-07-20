@@ -111,6 +111,8 @@
 
   /* provisions */
   .prov{position:relative; margin:0 0 24px; scroll-margin-top:70px}
+  .prov.route-target{background:var(--accent-soft); box-shadow:0 0 0 8px var(--accent-soft); transition:background-color .25s ease,box-shadow .25s ease}
+  @media (prefers-reduced-motion:reduce){.prov.route-target{transition:none}}
   .prov .body{font-size:1.22rem; line-height:1.72}
   .prov .n{font-weight:600; color:var(--navy); text-decoration:none; cursor:pointer; border-bottom:1px dotted transparent; padding-bottom:1px}
   .prov .n:hover{border-bottom-color:var(--accent)}
@@ -868,6 +870,14 @@ function resolveIcon(c){                          // pack-supplied icon -> SVG/g
 }
 /* ── URL routing: hash reflects the current location so it's linkable + survives reload ── */
 function setRoute(r){ try{ history.replaceState(null, '', r ? '#'+r : location.pathname + location.search); }catch(_){ } }
+function pagedRoute(book, rest){
+  if(book !== 'bco') return {ch:rest};
+  const match = /^(\d+)-(\d+)(?:\.[A-Za-z]|\([A-Za-z]\))?$/i.exec(rest);
+  if(!match) return {ch:rest};
+  const chapter = String(Number(match[1]));
+  const section = chapter + '-' + String(Number(match[2]));
+  return {ch:chapter, anchor:section};
+}
 function applyRoute(){
   closeDrawer(); closePal(); closePacks();
   const raw = decodeURIComponent((location.hash || '').replace(/^#\/?/, ''));
@@ -879,7 +889,7 @@ function applyRoute(){
   if(!COMPONENTS[book]){ showHome(); return; }
   if(!rest){ showComponent(book); return; }
   if(COMPONENTS[book].mode === 'scroll') openTarget(book, {anchor: rest});
-  else openTarget(book, {ch: rest});
+  else openTarget(book, pagedRoute(book, rest));
 }
 
 const EDITION_LINE = "Book of Church Order through the 52nd General Assembly (2025) · Westminster Standards in the American revision (received 1788)";
@@ -1108,7 +1118,7 @@ function renderBlocks(blocks, head){
   return out;
 }
 function showChapter(book, o){
-  setView("read"); current=book; cur={book,o}; setRoute(book+'/'+o.ch);
+  setView("read"); current=book; cur={book,o}; setRoute(book+'/'+(o.anchor || o.ch));
   document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', b.dataset.book===book));
   const ch = buildChapter(book, o);
   const c = COMPONENTS[book];
@@ -1153,7 +1163,16 @@ function showChapter(book, o){
   docEl.className = 'doc';   // clear any catechism density class
   docEl.innerHTML = doc;
   document.getElementById('gutter').innerHTML = gut;
-  window.scrollTo(0,0);
+  if(o.anchor){
+    requestAnimationFrame(()=>{
+      const target = document.getElementById('p-' + o.anchor);
+      if(!target){ window.scrollTo(0,0); return; }
+      target.scrollIntoView({block:'start'});
+      document.querySelectorAll('.rail .sub a').forEach(a=>a.classList.toggle('here', a.dataset.anchor===o.anchor));
+      target.classList.add('route-target');
+      window.setTimeout(()=>target.classList.remove('route-target'), 1800);
+    });
+  } else window.scrollTo(0,0);
   alignGutter();
   // gentle page-turn fade
   docEl.classList.remove('turn'); void docEl.offsetWidth; docEl.classList.add('turn');
