@@ -884,6 +884,14 @@ function resolveIcon(c){                          // pack-supplied icon -> SVG/g
 /* ── URL routing: hash reflects the current location so it's linkable + survives reload ── */
 function setRoute(r){ try{ history.replaceState(null, '', r ? '#'+r : location.pathname + location.search); }catch(_){ } }
 function pagedRoute(book, rest){
+  if(book === 'wcf'){
+    const match = /^(\d+)\s*(?:\.|[-\u2010\u2011\u2012\u2013\u2014\u2212])\s*(\d+)(?:\s*(?:\.\s*[A-Za-z]|\(\s*[A-Za-z]\s*\)))?$/i.exec(rest);
+    if(match){
+      const chapter = String(Number(match[1]));
+      const section = chapter + '.' + String(Number(match[2]));
+      return {ch:chapter, anchor:section};
+    }
+  }
   if(book !== 'bco') return {ch:rest};
   const match = /^(\d+)-(\d+)(?:\.[A-Za-z]|\([A-Za-z]\))?$/i.exec(rest);
   if(!match) return {ch:rest};
