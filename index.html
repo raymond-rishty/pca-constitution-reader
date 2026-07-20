@@ -650,7 +650,7 @@ const DOSSIER = {
 
 /* user-authored notes (distinct from derived citations) — keyed by the same provision ref */
 const NOTES = {
-  "Q.1":[{who:"You", when:"Apr 2026", text:"WLC Q.1 gives the fuller treatment of “enjoy him for ever.” Cross-reference for the membership class."}],
+  "wsc|Q.1":[{who:"You", when:"Apr 2026", text:"WLC Q.1 gives the fuller treatment of “enjoy him for ever.” Cross-reference for the membership class."}],
   "24-1":[{who:"You", when:"Mar 2026", text:"Note the link to BCO 21 on the manner of ordination."}],
 };
 
@@ -668,6 +668,9 @@ const PACK_FORMAT = "pca-constitution-pack";
   try{ const bk=localStorage.getItem("pcacon.books"); if(bk){ (JSON.parse(bk)||[]).forEach(p=>{ if(p&&p.component&&p.component.key) registerBook(p); }); } }catch(e){}
 })();
 const saveNotes = ()=>{ try{ localStorage.setItem("pcacon.notes", JSON.stringify(NOTES)); }catch(e){} };
+// Provision labels alone are not globally unique: WLC Q.1 and WSC Q.1 are
+// different texts. Keep private notes within their component namespace.
+const noteKey = ref => current+'|'+ref;
 const saveCommentaries = ()=>{ try{ localStorage.setItem("pcacon.commentaries", JSON.stringify(window.BCO_COMMENTARIES)); localStorage.removeItem("pcacon.commentary"); }catch(e){} };
 const noteDate = ()=>{ try{ return new Date().toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}); }catch(e){ return ""; } };
 function packDownload(name, obj){ const u=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:"application/json"})); const a=document.createElement("a"); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u); }
@@ -1250,7 +1253,7 @@ function histogram(rows){
     `<div class="hbar"><span class="hd">${String(d).slice(2)}s</span><span class="hbarfill" style="width:${Math.round(dec[d]/max*100)}%"></span><span>${dec[d]}</span></div>`).join('') + `</div>`;
 }
 function notesBlock(ref){
-  const list = NOTES[ref] || [];
+  const list = NOTES[noteKey(ref)] || [];
   const items = list.length
     ? list.map((nt,i)=>`<div class="note"><div class="note-meta">${nt.who} · ${nt.when}<button class="note-del" data-i="${i}" aria-label="Delete note">✕</button></div>${nt.text}</div>`).join('')
     : `<p class="note-empty">No notes yet.</p>`;
@@ -1503,8 +1506,8 @@ document.body.addEventListener('click', e=>{
   const mEl=document.getElementById('mobileMenu');          // click-off to dismiss the hamburger menu
   if(mEl && mEl.classList.contains('open') && !e.target.closest('#mobileMenu') && !e.target.closest('#hamburger')) closeMenu();
   const ja = e.target.closest('[data-anchor]'); if(ja){ const el=document.getElementById('p-'+ja.dataset.anchor); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); return; }
-  const ns = e.target.closest('.note-save'); if(ns){ const ta=document.querySelector('#drawer .note-input'); const v=ta&&ta.value.trim(); if(v){ (NOTES[drawerRef]=NOTES[drawerRef]||[]).push({who:"You", when:noteDate(), text:v}); saveNotes(); } dTab='notes'; renderDrawer(); return; }
-  const nd = e.target.closest('.note-del'); if(nd){ const i=+nd.dataset.i; if(NOTES[drawerRef]){ NOTES[drawerRef].splice(i,1); if(!NOTES[drawerRef].length) delete NOTES[drawerRef]; } saveNotes(); dTab='notes'; renderDrawer(); return; }
+  const ns = e.target.closest('.note-save'); if(ns){ const ta=document.querySelector('#drawer .note-input'); const v=ta&&ta.value.trim(), key=noteKey(drawerRef); if(v){ (NOTES[key]=NOTES[key]||[]).push({who:"You", when:noteDate(), text:v}); saveNotes(); } dTab='notes'; renderDrawer(); return; }
+  const nd = e.target.closest('.note-del'); if(nd){ const i=+nd.dataset.i, key=noteKey(drawerRef); if(NOTES[key]){ NOTES[key].splice(i,1); if(!NOTES[key].length) delete NOTES[key]; } saveNotes(); dTab='notes'; renderDrawer(); return; }
   const cb = e.target.closest('.csub'); if(cb){ dCommSel=+cb.dataset.csub; renderDrawer(); return; }
   const dt = e.target.closest('.dtab'); if(dt){ dTab=dt.dataset.tab; renderDrawer(); return; }
   const fc = e.target.closest('.fchip'); if(fc){ dFilter=fc.dataset.filter; renderDrawer(); return; }
