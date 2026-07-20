@@ -541,6 +541,7 @@
 <script src="content/verses.js"></script>
 <script src="content/citations-counts.js"></script>
 <script src="content/ramsay.js"></script>
+<script src="content/rao.js"></script>
 <script>
 /* ══════════ CONTENT: real where sourced (window.WSC), placeholder elsewhere ══════════ */
 const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.";
@@ -632,6 +633,7 @@ const DIVISIONS = {                     // home groupings (order = display order
   doctrinal:{label:"Doctrinal Standards", one:"Doctrinal Standard", order:1},
   order:{label:"Church Order", one:"Church Order", order:2},
   local:{label:"Local Rules & Courts", one:"Local Rule", order:3},
+  supplemental:{label:"Supplementary PCA Materials", one:"Supplementary PCA Material", order:4},
 };
 
 /* dossiers (drive the margin counts); refs not listed → empty state */
@@ -819,7 +821,7 @@ function buildChapter(book, o){
     const pd = pagedData(book), bc = pd && pd.map[o.ch];
     if(bc) return {kicker:COMPONENTS[book].name, title:(bc.title||("Chapter "+o.ch)), subtitle:"",
       railSub:(bc.sections||[]).filter(s=>!s.prose).map(s=>s.ref).filter(Boolean),   // skip number-less prose (e.g. an essay appendix)
-      provs:(bc.sections||[]).map(s=>({ref:s.ref, body:s.body, prose:s.prose}))};
+      provs:(bc.sections||[]).map(s=>({ref:s.ref, body:s.body, blocks:s.blocks, prose:s.prose}))};
   }
   // bco — real text from window.BCO
   if(window.BCO && window.BCO[o.ch]){
@@ -892,7 +894,10 @@ function pagedRoute(book, rest){
       return {ch:chapter, anchor:section};
     }
   }
-  if(book !== 'bco') return {ch:rest};
+  if(book !== 'bco'){
+    const match = /^(\d+)(?:-(\d+))?(?:\.[A-Za-z0-9]+|\([A-Za-z0-9]+\))?$/i.exec(rest);
+    return {ch: match ? String(Number(match[1])) : rest, anchor: match && match[2] ? String(Number(match[1]))+'-'+String(Number(match[2])) : undefined};
+  }
   const match = /^(\d+)-(\d+)(?:\.[A-Za-z]|\([A-Za-z]\))?$/i.exec(rest);
   if(!match) return {ch:rest};
   const chapter = String(Number(match[1]));
@@ -907,6 +912,10 @@ function applyRoute(){
   const i = raw.indexOf('/');
   const book = i < 0 ? raw : raw.slice(0, i);
   const rest = i < 0 ? '' : raw.slice(i + 1);
+  if(!COMPONENTS[book]){
+    const bundled = (window.BUNDLED_PACKS||[]).find(p=>p.kind==='book' && p.component && p.component.key===book);
+    if(bundled){ registerBook(bundled); saveBooks(); SEARCH=null; refreshNav(); }
+  }
   if(!COMPONENTS[book]){ showHome(); return; }
   if(!rest){ showComponent(book); return; }
   if(COMPONENTS[book].mode === 'scroll') openTarget(book, {anchor: rest});
@@ -953,9 +962,14 @@ function showHome(){
     return `<a class="hentry" data-book="${k}"><span class="hicon">${HOME_ICONS[k]||resolveIcon(c)}</span><span class="hname">${c.name}</span><span class="hdesc">${HOME_DESC[k]||c.tag||''}</span></a>`;
   };
   const added = window.BOOK_PACKS.map(b=>b.component.key);
-  const addedSection = added.length
-    ? `<div class="home-added"><p class="division-h">${DIVISIONS.local.label}</p><p class="home-added-note">Added by you — local governing documents, not part of the Constitution.</p><div class="hentries">${added.map(entry).join('')}</div></div>`
-    : '';
+  const addedByDivision = added.reduce((groups,key)=>{
+    const division=(COMPONENTS[key]||{}).division||'local';
+    (groups[division]||(groups[division]=[])).push(key); return groups;
+  },{});
+  const addedSection = Object.entries(addedByDivision).map(([division, keys])=>{
+    const supplementary=division==='supplemental';
+    return `<div class="home-added"><p class="division-h">${(DIVISIONS[division]||DIVISIONS.local).label}</p><p class="home-added-note">${supplementary?'Current supplementary PCA material — not part of the Constitution.':'Added by you — local governing documents, not part of the Constitution.'}</p><div class="hentries">${keys.map(entry).join('')}</div></div>`;
+  }).join('');
   document.getElementById('doc').innerHTML = `<div class="landing home">
     <p class="home-eyebrow">The Standards of the</p>
     <h1 class="home-title">The Constitution of the Presbyterian Church in America</h1>
@@ -1026,7 +1040,7 @@ function showComponent(book){
       : ((book==='wsc'&&window.WSC)||(book==='wlc'&&window.WLC)||(book==='wcf'&&window.WCF))
       ? 'Full text — public-domain OPC edition (the standard the PCA has adopted). Scripture proof texts are pending a proof-text source (WCF 21 shows a sample).'
       : c.custom
-      ? 'Imported document — added from a pack and stored on this device; a local governing document, not part of the PCA Constitution.'
+      ? (c.nonConstitutional ? 'Supplementary PCA material — current text through the 52nd General Assembly (2025); not part of the PCA Constitution.' : 'Imported document — added from a pack and stored on this device; a local governing document, not part of the PCA Constitution.')
       : c.mode==='scroll'
       ? 'Design prototype — placeholder text. The catechism opens as one long-scrolling page; every question is individually anchored and deep-linkable.'
       : 'Design prototype — text is placeholder and the chapter list is illustrative. The chapter marked “sample” opens a live reading view.'}</p>
@@ -1154,7 +1168,11 @@ function showChapter(book, o){
     + (ch.advisoryNote ? `<div class="advisory-note">${ch.advisoryNote}</div>` : '');
   let gut = '';
   ch.provs.forEach(p=>{
-    if(p.prose || !p.ref){ doc += `<div class="prov prose"${p.ref?` id="p-${p.ref}"`:''}><span class="body">${p.body}</span></div>`; return; }  // prose (front/appendix); keep id if it has footnotes
+    if(p.prose || !p.ref){
+      const proseBody = p.blocks ? `<div class="body">${renderBlocks(p.blocks, '')}</div>` : `<span class="body">${p.body||''}</span>`;
+      doc += `<div class="prov prose"${p.ref?` id="p-${p.ref}"`:''}>${proseBody}</div>`;
+      return;
+    }  // prose (front/appendix); keep id if it has footnotes
     const d = dossierFor(p.ref), n = total(d);
     const rl = (book==='bco'?'BCO ':book.toUpperCase()+' ')+p.ref;
     const inline = n>0 ? `<a class="sig-inline" data-ref="${p.ref}" aria-hidden="true" tabindex="-1"><span class="dot"></span>${n}</a>` : '';
@@ -1545,7 +1563,7 @@ function renderPacks(){
       `<div class="pack-row"><div><b>My notes</b><span class="pack-sub">${nc} note${nc!==1?'s':''} · stored on this device</span></div><button class="pack-btn" data-act="export-notes"${nc?'':' disabled'}>Export…</button></div>`
     + window.BCO_COMMENTARIES.map((c,i)=>`<div class="pack-row"><div><b>${c.label}</b><span class="pack-sub">Commentary · ${Object.keys(c.entries).length} sections</span></div><button class="pack-btn" data-act="rm-comm" data-i="${i}">Remove</button></div>`).join('')
     + window.BOOK_PACKS.map(b=>`<div class="pack-row"><div><b>${b.component.name}</b><span class="pack-sub">Book · ${bookSecs(b)} sections</span></div><button class="pack-btn" data-act="rm-book" data-key="${b.component.key}">Remove</button></div>`).join('')
-    + available.map(p=>`<div class="pack-row"><div><b>${p.kind==='book'?p.component.name:p.label}</b><span class="pack-sub">${p.kind==='book'?'Book · '+bookSecs(p):'Commentary · '+Object.keys(p.entries).length} sections · public domain, included</span></div><button class="pack-btn" data-act="add-bundled" data-label="${p.label}">Add</button></div>`).join('')
+    + available.map(p=>`<div class="pack-row"><div><b>${p.kind==='book'?p.component.name:p.label}</b><span class="pack-sub">${p.notice||((p.kind==='book'?'Book · '+bookSecs(p):'Commentary · '+Object.keys(p.entries).length)+' sections · public domain, included')}</span></div><button class="pack-btn" data-act="add-bundled" data-label="${p.label}">Add</button></div>`).join('')
     + `<button class="pack-btn import" data-act="import">Import a pack…</button>`
     + `<p class="packs-note">Notes and imported packs are kept in this browser's local storage and survive reloads. Public-domain packs (Ramsay commentary; a sample book) are included — just tap <b>Add</b>. Copyrighted commentary (e.g. Smith) isn't bundled; import it as your own JSON file. Book packs add a whole new document (presbytery rules, session standing rules, bylaws) alongside the four standards. Everything exports/imports as portable JSON.</p>`;
 }
