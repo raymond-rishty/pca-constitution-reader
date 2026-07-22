@@ -2,7 +2,7 @@ diff --git a/build_content.py b/build_content.py
 index 9eaf084..d277688 100755
 --- a/build_content.py
 +++ b/build_content.py
-@@ -160,9 +160,14 @@ def build_bco():
+@@ -160,9 +160,15 @@ def build_bco():
                  chapters.setdefault(str(cur), {"part": part, "title": "", "sections": []})
                  continue
              if m.group(4) is not None:                                  # chapter title
@@ -20,7 +20,7 @@ index 9eaf084..d277688 100755
                  continue
              ch = int(m.group(2))                                        # numbered section
              if ch != cur:
-@@ -190,6 +195,9 @@ def build_bco():
+@@ -190,6 +196,9 @@ def build_bco():
          if missing:
              gaps.append(f"BCO {k} missing {missing}")
      assert not gaps, "BCO section gaps (incomplete extraction): " + "; ".join(gaps)
