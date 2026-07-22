@@ -2649,7 +2649,7 @@ window.BCO = {
 },
 "23": {
 "part": "fog",
-"title": "The Dissolution of the Pastoral Relation and",
+"title": "The Dissolution of the Pastoral Relation and The Procedure for Honorable Retirement",
 "sections": [
 {
 "ref": "23-1",

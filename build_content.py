@@ -159,8 +159,14 @@ def build_bco():
                 continue
             if m.group(4) is not None:                                  # chapter title
                 t = clean(m.group(4))
-                if cur and not chapters[str(cur)]["title"] and t:
-                    chapters[str(cur)]["title"] = t
+                if cur and not chapters[str(cur)]["sections"] and t:
+                    title = chapters[str(cur)]["title"]
+                    # pcaac.org occasionally wraps one chapter title across consecutive
+                    # h4 elements (BCO 23 currently breaks after "and"). Join only when
+                    # the first fragment is grammatically unfinished so an internal h4
+                    # subheading cannot be mistaken for part of the chapter title.
+                    if not title or title.endswith((" and", " or", " of", " for", " to", " in", " on", " with")):
+                        chapters[str(cur)]["title"] = f"{title} {t}".strip()
                 continue
             ch = int(m.group(2))                                        # numbered section
             if ch != cur:
@@ -188,6 +194,9 @@ def build_bco():
         if missing:
             gaps.append(f"BCO {k} missing {missing}")
     assert not gaps, "BCO section gaps (incomplete extraction): " + "; ".join(gaps)
+    expected_23_title = "The Dissolution of the Pastoral Relation and The Procedure for Honorable Retirement"
+    assert chapters["23"]["title"] == expected_23_title, \
+        f"BCO 23 title truncated: {chapters['23']['title']!r}"
     return chapters
 
 PREFACE_URL = "https://www.pcaac.org/book-of-church-order/preface/"
