@@ -6,6 +6,11 @@ on:
       - agent/fix-bco-23-heading
     paths:
       - .github/bco23-heading-fix.patch
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/bco23-heading-fix.patch
 
 permissions:
   contents: write
