@@ -28,11 +28,6 @@ The reader uses URL fragments after `#`:
 3. For interpretation, application, amendment, or historical development, follow the link to the [PCA General Assembly Records map](https://raymond-rishty.github.io/pca-ga/llms.txt) and search its relevant catalogues and underlying Minutes.
 4. Distinguish constitutional text from a judicial holding, CCB advice, RPR exception, committee recommendation, overture, study report, or other historical record. Check predecessor provision numbers when the historical source uses older numbering.
 
-## Cross-corpus examples
-
-- For a question about a confession or case handled without process under BCO 38-1, read [BCO 38-1](https://raymond-rishty.github.io/pca-constitution-reader/#bco/38-1), then search the General Assembly cases, cases-by-provision catalogue, constitutional inquiries, overtures, RPR, and underlying Minutes.
-- For an elder who is perpetually inactive, read BCO 17-3, BCO 34-10, and the relevant Chapter 24 provisions, then search the General Assembly corpus for cases, inquiries, overtures, RPR exceptions, and related Assembly or study-report action.
-
 ## Machine-readable assets
 
 The page loads static JavaScript data files. They are useful for retrieval or parsing, but the public hash routes are better user-facing citations:
