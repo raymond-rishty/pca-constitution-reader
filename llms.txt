@@ -8,11 +8,7 @@ The reader is a single-page application. Use URL fragments after `#`: `#wcf/<cha
 
 ## Constitutional texts
 
-- [Reader home](https://raymond-rishty.github.io/pca-constitution-reader/): browse the four built-in texts.
-- [Westminster Confession 21.1](https://raymond-rishty.github.io/pca-constitution-reader/#wcf/21.1): WCF chapter/section route example.
-- [Westminster Larger Catechism Q.1](https://raymond-rishty.github.io/pca-constitution-reader/#wlc/Q.1): WLC question route example.
-- [Westminster Shorter Catechism Q.1](https://raymond-rishty.github.io/pca-constitution-reader/#wsc/Q.1): WSC question route example.
-- [BCO 38-1](https://raymond-rishty.github.io/pca-constitution-reader/#bco/38-1): BCO provision route example.
+- [Reader home](https://raymond-rishty.github.io/pca-constitution-reader/): browse the four built-in texts using the hash routes described in the reader guide.
 
 ## Machine-readable assets
 
@@ -23,7 +19,7 @@ The reader is a single-page application. Use URL fragments after `#`: `#wcf/<cha
 
 ## Related sources
 
-- [Reader guide](https://raw.githubusercontent.com/raymond-rishty/pca-constitution-reader/main/README.md): detailed scope, authority, routes, retrieval workflow, and cross-corpus examples.
+- [Reader guide](https://raw.githubusercontent.com/raymond-rishty/pca-constitution-reader/main/README.md): detailed scope, authority, routes, and retrieval workflow.
 - [About and sources](https://raymond-rishty.github.io/pca-constitution-reader/#about): displayed edition and source notes.
 - [PCA General Assembly Records map](https://raymond-rishty.github.io/pca-ga/llms.txt): historical cases, inquiries, overtures, RPR, studies, and Minutes.
 - [Official current PCA BCO](https://www.pcaac.org/book-of-church-order/): present-wording authority.

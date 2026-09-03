@@ -16,10 +16,10 @@ The deployed reader is a single-page application. Its compact agent map is [`llm
 
 The reader uses URL fragments after `#`:
 
-- Westminster Confession: `#wcf/<chapter>` or `#wcf/<chapter>.<section>`, for example [WCF 21.1](https://raymond-rishty.github.io/pca-constitution-reader/#wcf/21.1).
-- Westminster Larger Catechism: `#wlc/Q.<number>`, for example [WLC Q.1](https://raymond-rishty.github.io/pca-constitution-reader/#wlc/Q.1).
-- Westminster Shorter Catechism: `#wsc/Q.<number>`, for example [WSC Q.1](https://raymond-rishty.github.io/pca-constitution-reader/#wsc/Q.1).
-- BCO: `#bco/<chapter>` or `#bco/<chapter>-<section>`. Form of Government is chapters 1–26; Rules of Discipline is chapters 27–46; Directory for Worship is chapters 47–63. Examples: [BCO 17-3](https://raymond-rishty.github.io/pca-constitution-reader/#bco/17-3), [BCO 34-10](https://raymond-rishty.github.io/pca-constitution-reader/#bco/34-10), [BCO 38-1](https://raymond-rishty.github.io/pca-constitution-reader/#bco/38-1), and [BCO 24](https://raymond-rishty.github.io/pca-constitution-reader/#bco/24).
+- Westminster Confession: `#wcf/<chapter>` or `#wcf/<chapter>.<section>`.
+- Westminster Larger Catechism: `#wlc/Q.<number>`.
+- Westminster Shorter Catechism: `#wsc/Q.<number>`.
+- BCO: `#bco/<chapter>` or `#bco/<chapter>-<section>`. Form of Government is chapters 1–26; Rules of Discipline is chapters 27–46; Directory for Worship is chapters 47–63.
 
 ## Agent retrieval workflow
 
