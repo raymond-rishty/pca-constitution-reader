@@ -1,0 +1,30 @@
+# PCA Constitution Reader
+
+> Hash-routed study reader for the Presbyterian Church in America (PCA) constitutional texts: the Westminster Confession of Faith, Westminster Larger Catechism, Westminster Shorter Catechism, and Book of Church Order (BCO).
+
+This site presents constitutional text, not a Minutes archive or legal advice. The Westminster Standards are the American revision received by the PCA in 1788. The BCO edition shown by the reader and its source notes are linked below; the official current BCO controls present wording. Directory for Worship provisions marked binding are constitutional; other portions are approved guidance.
+
+The reader is a single-page application. Use URL fragments after `#`: `#wcf/<chapter>.<section>`, `#wlc/Q.<number>`, `#wsc/Q.<number>`, or `#bco/<chapter>-<section>`.
+
+## Constitutional texts
+
+- [Reader home](https://raymond-rishty.github.io/pca-constitution-reader/): browse the four built-in texts using the hash routes described in the reader guide.
+
+## Machine-readable assets
+
+- [Westminster Shorter Catechism data](https://raymond-rishty.github.io/pca-constitution-reader/content/wsc.js): JavaScript assignment containing the WSC questions and answers.
+- [Westminster Larger Catechism data](https://raymond-rishty.github.io/pca-constitution-reader/content/wlc.js): JavaScript assignment containing the WLC questions and answers.
+- [Westminster Confession data](https://raymond-rishty.github.io/pca-constitution-reader/content/wcf.js): JavaScript assignment containing WCF chapters and sections.
+- [BCO data](https://raymond-rishty.github.io/pca-constitution-reader/content/bco.js): JavaScript assignments containing BCO provisions and the chapter order.
+
+## Related sources
+
+- [Reader guide](https://raw.githubusercontent.com/raymond-rishty/pca-constitution-reader/main/README.md): detailed scope, authority, routes, and retrieval workflow.
+- [About and sources](https://raymond-rishty.github.io/pca-constitution-reader/#about): displayed edition and source notes.
+- [PCA General Assembly Records map](https://raymond-rishty.github.io/pca-ga/llms.txt): historical cases, inquiries, overtures, RPR, studies, and Minutes.
+- [Official current PCA BCO](https://www.pcaac.org/book-of-church-order/): present-wording authority.
+
+## Optional
+
+- [Scripture proof references](https://raymond-rishty.github.io/pca-constitution-reader/content/proofs.js): proof-text data used by the reader.
+- [Scripture verse data](https://raymond-rishty.github.io/pca-constitution-reader/content/verses.js): verse text displayed for proof references.
