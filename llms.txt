@@ -2,7 +2,7 @@
 
 > Hash-routed study reader for the Presbyterian Church in America (PCA) constitutional texts: the Westminster Confession of Faith, Westminster Larger Catechism, Westminster Shorter Catechism, and Book of Church Order (BCO).
 
-This site presents constitutional text, not a Minutes archive or legal advice. The Westminster Standards are the American revision received by the PCA in 1788. The BCO edition shown by the reader is described on [About & Sources](https://raymond-rishty.github.io/pca-constitution-reader/#about); the [official current PCA BCO](https://www.pcaac.org/book-of-church-order/) controls present wording. Directory for Worship provisions marked binding are constitutional; other portions are approved guidance. For detailed use, see the [reader guide](https://raw.githubusercontent.com/raymond-rishty/pca-constitution-reader/main/README.md). For historical interpretation and application, use the [PCA General Assembly Records map](https://raymond-rishty.github.io/pca-ga/llms.txt).
+This site presents constitutional text, not a Minutes archive or legal advice. The Westminster Standards are the American revision received by the PCA in 1788. The BCO edition shown by the reader and its source notes are linked below; the official current BCO controls present wording. Directory for Worship provisions marked binding are constitutional; other portions are approved guidance.
 
 The reader is a single-page application. Use URL fragments after `#`: `#wcf/<chapter>.<section>`, `#wlc/Q.<number>`, `#wsc/Q.<number>`, or `#bco/<chapter>-<section>`.
 
