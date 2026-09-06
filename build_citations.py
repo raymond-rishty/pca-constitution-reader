@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-"""Derive the Constitution app's citation data from the GA-minutes corpus
-search_index.json (the authoritative provision->action index).
+"""Derive the Constitution app's citation data from the GA-minutes corpus.
+
+Non-judicial citations come from ``app/search_index.json``. Judicial case
+citations come from the canonical ``index/case_provision_index.json`` reverse
+index; the case Markdown files are audited separately and are not a second
+source of emitted rows.
 
 Output (split for lazy loading; see the app's loader):
   content/citations-counts.js   window.CIT_COUNTS = { "comp|ref": <total>, ... }  (tiny, eager)
@@ -10,8 +14,13 @@ Each row is {t,ttl,yr,disp,url}, sorted newest-first. URLs point at the live GA 
 """
 import json, re, collections, sys, os, glob
 
-SRC = "/workspace/dist/pca-ga/app/search_index.json"
-CASES_DIR = "/workspace/dist/pca-ga/cases"
+# The Pages build mounts the GA repository at /workspace/dist/pca-ga.  Keeping
+# the root configurable makes the generator reproducible locally as well as in
+# CI, while all derived citation assets still live in this repository.
+DIST = os.environ.get("PCA_GA_DIST", "/workspace/dist/pca-ga")
+SRC = os.path.join(DIST, "app", "search_index.json")
+CASES_DIR = os.path.join(DIST, "cases")
+CASE_PROVISION_INDEX = os.path.join(DIST, "index", "case_provision_index.json")
 ROOT = os.path.dirname(os.path.abspath(__file__))   # repo root (works in a worktree too)
 CONTENT = os.path.join(ROOT, "content")
 CIT_DIR = os.path.join(CONTENT, "cit")
@@ -23,7 +32,7 @@ def valid_refs():
     noise or RAO refs) are dropped so they never inflate counts."""
     v = {"bco": set(), "wcf": set(), "wlc": set(), "wsc": set()}
     bco = open(f"{CONTENT}/bco.js").read()
-    v["bco"] = set(re.findall(r'"ref":\s*"(?:\d+-\d+|PP-\d+)"', bco))
+    v["bco"] = set(re.findall(r'"ref":\s*"((?:\d+-\d+|PP-\d+))"', bco))
     wcf = open(f"{CONTENT}/wcf.js").read()
     v["wcf"] = set(re.findall(r'"ref":\s*"(\d+\.\d+)"', wcf))
     for comp, fn in (("wlc", "wlc.js"), ("wsc", "wsc.js")):
@@ -93,7 +102,118 @@ def norm(prov):
         return ("bco", f"{int(m.group(2))}-{int(m.group(3))}")
     return None
 
-DIST = "/workspace/dist/pca-ga"
+
+# The GA case-provision index preserves the wording found in the source, so a
+# Westminster Larger Catechism reference may be a single question, a range,
+# or a question with a letter suffix (e.g. WLC 166B).  The Constitution Reader
+# has one route per question; normalize those forms at this boundary.
+WLC_INDEX_RE = re.compile(
+    r"^\s*WLC\s+(?P<start>\d{1,3})(?:[A-Za-z])?"
+    r"(?:\s*[-–]\s*(?P<end>\d{1,3})(?:[A-Za-z])?)?\s*$",
+    re.I,
+)
+
+
+def index_wlc_refs(value):
+    """Return Constitution Reader WLC routes represented by an index value.
+
+    Letter suffixes identify a variant of the same question (166B -> Q.166).
+    Ranges are expanded, including abbreviated endings such as 65-6 -> 65-66.
+    """
+    match = WLC_INDEX_RE.fullmatch(str(value or ""))
+    if not match:
+        return []
+    start = int(match.group("start"))
+    end_text = match.group("end")
+    if not end_text:
+        end = start
+    else:
+        end = int(end_text)
+        if end < start:
+            # Interpret an abbreviated ending using the same digit place as
+            # the ending token: 65-6 => 66, 170-5 => 175.
+            place = 10 ** len(end_text)
+            end = (start // place) * place + end
+            while end < start:
+                end += place
+    # A malformed OCR range should not explode into an enormous citation set.
+    if end - start > 32:
+        return [f"Q.{start}"]
+    return [f"Q.{number}" for number in range(start, end + 1)]
+
+
+def ga_url(value):
+    """Convert a GA-relative Markdown path to its stable public HTML URL."""
+    path = str(value or "").replace("\\", "/")
+    if path.startswith("http://") or path.startswith("https://"):
+        return re.sub(r"\.md(#|$)", r".html\1", path)
+    return GA_BASE + re.sub(r"\.md(#|$)", r".html\1", path.lstrip("./"))
+
+
+def display_case_number(value):
+    value = str(value or "").strip()
+    match = re.fullmatch(r"(\d{4})-(\d+)", value)
+    if match:
+        return f"{match.group(1)}-{int(match.group(2)):02d}"
+    return value
+
+
+def case_title(row):
+    title = (row.get("title") or "").strip()
+    numbers = [display_case_number(n) for n in (row.get("case_numbers") or []) if str(n).strip()]
+    label = "/".join(numbers)
+    if label and title and not title.startswith(label):
+        return f"{label} — {title}"
+    return title or label or "Judicial case"
+
+
+def load_case_provision_rows():
+    """Load canonical judicial-case citations from the GA reverse index."""
+    if not os.path.exists(CASE_PROVISION_INDEX):
+        raise FileNotFoundError(
+            f"Missing prebuilt GA case-provision index: {CASE_PROVISION_INDEX}"
+        )
+    rows = json.load(open(CASE_PROVISION_INDEX, encoding="utf-8"))
+    for row in rows:
+        if not str(row.get("url", "")).startswith("cases/"):
+            continue
+        provision = row.get("provision")
+        # WLC ranges and letter suffixes need expansion because the app has
+        # one route per question. Other provision families are already
+        # represented by the normalizer's canonical component/ref pair.
+        if re.match(r"^\s*WLC\b", str(provision or ""), re.I):
+            refs = [("wlc", ref) for ref in index_wlc_refs(provision)]
+        else:
+            normalized = norm(str(provision or ""))
+            refs = [normalized] if normalized else []
+        for normalized in refs:
+            comp, ref = normalized
+            yield comp, ref, {
+                "t": "case",
+                "ttl": case_title(row),
+                "yr": row.get("year"),
+                "disp": (row.get("disposition") or "").strip(),
+                "url": ga_url(row.get("url")),
+            }
+
+
+def audit_case_markdown(case_keys):
+    """Report Markdown-only case refs without using them as build input."""
+    if not os.path.isdir(CASES_DIR):
+        print("case Markdown audit: skipped (cases directory unavailable)")
+        return
+    observed = set()
+    for path in sorted(glob.glob(os.path.join(CASES_DIR, "*.md"))):
+        txt = open(path, encoding="utf-8").read()
+        url = ga_url(os.path.relpath(path, DIST))
+        for comp, ref in inline_refs(txt, westminster_only=False):
+            if comp == "wlc":
+                observed.add((ref, url))
+    uncovered = observed - case_keys
+    print(
+        f"case Markdown audit: {len(observed)} inline WLC links; "
+        f"{len(uncovered)} not represented by the prebuilt index (not emitted)"
+    )
 
 # Inline reference patterns for document bodies. The corpus index barely tags
 # Westminster refs (3 WSC strings in all of search_index), yet the prose cites
@@ -136,7 +256,7 @@ def scan_dir(add, subdir, type_code, westminster_only):
     its canonical URLs) to avoid double-counting."""
     n_files = n_refs = 0
     for path in sorted(glob.glob(os.path.join(DIST, subdir, "*.md"))):
-        txt = open(path).read()
+        txt = open(path, encoding="utf-8").read()
         head = txt[:800]
         mt = re.search(r'^#\s+(.+)', txt, re.M)
         title = mt.group(1).strip() if mt else os.path.basename(path)
@@ -146,8 +266,8 @@ def scan_dir(add, subdir, type_code, westminster_only):
         disp = md.group(1).strip() if md else ""
         if len(disp) > 60:
             disp = disp[:57].rstrip() + "…"
-        rel = os.path.relpath(path, DIST)
-        url = GA_BASE + re.sub(r'\.md$', '.html', rel)
+        rel = os.path.relpath(path, DIST).replace(os.sep, "/")
+        url = ga_url(rel)
         entry = {"t": type_code, "ttl": title, "yr": year, "disp": disp, "url": url}
         provset = set(inline_refs(txt, westminster_only))
         if provset:
@@ -158,7 +278,7 @@ def scan_dir(add, subdir, type_code, westminster_only):
     return n_files, n_refs
 
 def main():
-    data = json.load(open(SRC))
+    data = json.load(open(SRC, encoding="utf-8"))
     table = collections.defaultdict(list)   # "comp|ref" -> [entry,...]
     seen = collections.defaultdict(set)      # dedupe (key, url)
     skipped = collections.Counter()
@@ -180,12 +300,17 @@ def main():
         provs = r.get("provisions") or []
         if not provs:
             continue
+        # Judicial cases are supplied by the canonical reverse index below.
+        # Keeping them out of this generic feed avoids stale/noncanonical case
+        # rows and gives range/suffix normalization one authoritative path.
+        if r.get("type") == "Judicial case":
+            continue
         t = TYPE_CODE.get(r.get("type"), None)
         if t is None:
             continue
         # overtures point at the verbatim minutes page with a #page anchor;
         # catalogue pages are clean .md — convert .md→.html in both shapes.
-        url = GA_BASE + re.sub(r'\.md(#|$)', r'.html\1', r.get("url", ""))
+        url = ga_url(r.get("url", ""))
         entry = {
             "t": t,
             "ttl": (r.get("title") or "").strip(),
@@ -202,11 +327,18 @@ def main():
             kept_provstrings.add(prov)
             add(comp, ref, entry)
 
-    # Body scans. Cases aren't in the index at all → take all refs (BCO + WS).
-    # The other types ARE indexed for BCO, but their Westminster references are
-    # almost entirely untagged, so we harvest those from the bodies.
-    cf, cr = scan_dir(add, "cases", "case", westminster_only=False)
-    print(f"scanned cases: {cf} files, {cr} provision links (BCO + Westminster)")
+    # Judicial cases come from the canonical GA reverse index.  It contains
+    # audited case pages, evidence, and normalized case metadata; the Markdown
+    # pass remains an audit only and cannot add citation rows.
+    case_keys = set()
+    for comp, ref, entry in load_case_provision_rows():
+        add(comp, ref, entry)
+        if comp == "wlc":
+            case_keys.add((ref, entry["url"]))
+    audit_case_markdown(case_keys)
+
+    # The other types are indexed for BCO, but their Westminster references are
+    # largely untagged, so we continue harvesting those from their bodies.
     for subdir, code in (("overtures","ov"), ("inquiries","inq"), ("rpr/exc","rpr"), ("studies","pp")):
         f, r = scan_dir(add, subdir, code, westminster_only=True)
         print(f"scanned {subdir}: {f} files, {r} Westminster links")
