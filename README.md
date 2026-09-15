@@ -21,6 +21,10 @@ The reader uses URL fragments after `#`:
 - Westminster Shorter Catechism: `#wsc/Q.<number>`.
 - BCO: `#bco/<chapter>` or `#bco/<chapter>-<section>`. Form of Government is chapters 1–26; Rules of Discipline is chapters 27–46; Directory for Worship is chapters 47–63.
 
+## Search
+
+The search control (or <kbd>Ctrl/⌘ K</kbd>) searches the full text of every provision in the built-in library and installed book packs. Results rank exact references first, accept common document names and reference punctuation, and tolerate minor spelling mistakes in words of four or more letters. Put wording in quotation marks to require an exact phrase, and use the document chips to narrow the results.
+
 ## Agent retrieval workflow
 
 1. Use the hash routes to open the exact book, chapter, question, or BCO provision.
