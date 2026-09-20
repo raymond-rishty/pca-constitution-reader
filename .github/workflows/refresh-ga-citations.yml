@@ -1,0 +1,46 @@
+name: Refresh GA citations
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - build_citations.py
+      - .github/workflows/refresh-ga-citations.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Constitution Reader
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check out PCA GA corpus
+        uses: actions/checkout@v4
+        with:
+          repository: raymond-rishty/pca-ga
+          path: pca-ga
+
+      - name: Rebuild citation assets
+        env:
+          PCA_GA_DIST: ${{ github.workspace }}/pca-ga
+        run: python build_citations.py
+
+      - name: Verify generated diff
+        run: git diff --check
+
+      - name: Commit refreshed citations
+        run: |
+          if git diff --quiet -- content/citations-counts.js content/cit; then
+            echo "Citation assets are already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/citations-counts.js content/cit
+          git commit -m "Refresh GA citation assets"
+          git push
