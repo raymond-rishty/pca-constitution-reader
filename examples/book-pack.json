@@ -1,0 +1,76 @@
+{
+  "format": "pca-constitution-pack",
+  "version": 1,
+  "kind": "book",
+  "label": "Example Rules",
+  "notice": "Example content pack for documentation and validation.",
+  "component": {
+    "key": "example-rules",
+    "abbr": "ER",
+    "name": "Example Rules",
+    "division": "local",
+    "icon": "scroll",
+    "tag": "Rules of the Example body.",
+    "lede": "A compact example showing both simple body sections and structured blocks.",
+    "meta": "2 chapters · example"
+  },
+  "order": [
+    "1",
+    "2"
+  ],
+  "chapters": {
+    "1": {
+      "title": "Organization",
+      "sections": [
+        {
+          "ref": "1-1",
+          "body": "The body shall meet annually."
+        }
+      ]
+    },
+    "2": {
+      "title": "Officers",
+      "sections": [
+        {
+          "ref": "2",
+          "body": "Article 2: Officers. See the numbered provisions below.",
+          "prose": true
+        },
+        {
+          "ref": "2-1",
+          "blocks": [
+            [
+              "p",
+              0,
+              "The officers shall be:"
+            ],
+            [
+              "i",
+              1,
+              "a.",
+              "a Moderator"
+            ],
+            [
+              "i",
+              1,
+              "b.",
+              "a Clerk"
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "footnotes": {
+    "2-1": [
+      "This is an example footnote attached to section 2-1."
+    ]
+  },
+  "commentary": {
+    "1-1": [
+      "This is example commentary bundled with the book pack."
+    ]
+  },
+  "commentaryLabel": "Example Commentary",
+  "commentaryAttribution": "Included only to demonstrate the pack format."
+}
