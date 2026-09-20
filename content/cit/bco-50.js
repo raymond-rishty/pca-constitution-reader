@@ -1,1 +1,0 @@
-window.CIT=window.CIT||{};window.CIT["bco-50"]={"50-1":[{"t":"case","ttl":"1999-01 — Request to General Assembly (re: Teaching Elder from Western Carolina Presbytery)","yr":2000,"disp":"dismissed","url":"https://raymond-rishty.github.io/pca-ga/cases/ga28_2000__1999-01.html"}]};
