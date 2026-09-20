@@ -271,6 +271,7 @@
   .t-case{background:#f6dfe2; color:#7a2230}
   .t-ov{background:#e0eede; color:#2f5130}
   .t-inq{background:#dde7f1; color:#28486a}
+  .t-ccb{background:#e3edf0; color:#28515d}
   .t-rpr{background:#f4e6d6; color:#7a4a12}
   .t-pp{background:#e7e2ef; color:#4a3a6a}
   .grp summary .lbl{flex:1}
@@ -1285,7 +1286,7 @@ function openFromEl(el){
 /* ───────────── drawer (provision dossier) ───────────── */
 // authority for DfW provisions (binding = constitutional; advisory = not binding)
 const AUTH = {"51-1":"advisory","51-2":"advisory","51-3":"binding","58-4":"binding"};
-const TYPE_META = {case:["t-case","Judicial cases"], ov:["t-ov","Overtures"], inq:["t-inq","Inquiries"], rpr:["t-rpr","RPR exceptions"], pp:["t-pp","Study reports"]};
+const TYPE_META = {case:["t-case","Judicial cases"], inq:["t-inq","Inquiries"], ccb:["t-ccb","CCB overture advice"], ov:["t-ov","Overtures"], rpr:["t-rpr","RPR exceptions"], pp:["t-pp","Study reports"]};
 function histogram(rows){
   const dec={}; rows.forEach(r=>{ if(!r.yr) return; const d=Math.floor(r.yr/10)*10; dec[d]=(dec[d]||0)+1; });
   const ds=Object.keys(dec).map(Number).sort((a,b)=>a-b); if(!ds.length) return '';
