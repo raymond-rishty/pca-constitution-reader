@@ -32,6 +32,10 @@ The search control (or <kbd>Ctrl/⌘ K</kbd>) searches the full text of every pr
 3. For interpretation, application, amendment, or historical development, follow the link to the [PCA General Assembly Records map](https://raymond-rishty.github.io/pca-ga/llms.txt) and search its relevant catalogues and underlying Minutes.
 4. Distinguish constitutional text from a judicial holding, CCB advice, RPR exception, committee recommendation, overture, study report, or other historical record. Check predecessor provision numbers when the historical source uses older numbering.
 
+## Content packs
+
+The reader can import portable JSON packs for notes, commentary, and whole added books. See the [content pack v1 specification](docs/content-packs.md) for the supported fields, examples, replacement behavior, and current validation rules.
+
 ## Machine-readable assets
 
 The page loads static JavaScript data files. They are useful for retrieval or parsing, but the public hash routes are better user-facing citations:
