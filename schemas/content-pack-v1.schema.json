@@ -1,0 +1,365 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raymond-rishty.github.io/pca-constitution-reader/schemas/content-pack-v1.schema.json",
+  "title": "PCA Constitution Reader Content Pack v1",
+  "description": "Machine-checkable companion to docs/content-packs.md. This schema defines the well-formed v1 producer contract, which is intentionally stricter than the reader's permissive importer.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/notesPack"
+    },
+    {
+      "$ref": "#/$defs/commentaryPack"
+    },
+    {
+      "$ref": "#/$defs/bookPack"
+    }
+  ],
+  "$defs": {
+    "base": {
+      "type": "object",
+      "required": [
+        "format",
+        "version",
+        "kind"
+      ],
+      "properties": {
+        "format": {
+          "const": "pca-constitution-pack"
+        },
+        "version": {
+          "const": 1
+        },
+        "kind": {
+          "enum": [
+            "notes",
+            "commentary",
+            "book"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notice": {
+          "type": "string"
+        }
+      }
+    },
+    "note": {
+      "type": "object",
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "who": {
+          "type": "string"
+        },
+        "when": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "notesPack": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "entries"
+          ],
+          "properties": {
+            "kind": {
+              "const": "notes"
+            },
+            "entries": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/note"
+                }
+              }
+            }
+          },
+          "unevaluatedProperties": false
+        }
+      ]
+    },
+    "commentaryPack": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "label",
+            "entries"
+          ],
+          "properties": {
+            "kind": {
+              "const": "commentary"
+            },
+            "corpus": {
+              "type": "string",
+              "minLength": 1,
+              "default": "bco"
+            },
+            "entries": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "unevaluatedProperties": false
+        }
+      ]
+    },
+    "component": {
+      "type": "object",
+      "required": [
+        "key",
+        "abbr",
+        "name",
+        "division"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "not": {
+            "enum": [
+              "bco",
+              "wcf",
+              "wlc",
+              "wsc"
+            ]
+          }
+        },
+        "abbr": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "division": {
+          "enum": [
+            "doctrinal",
+            "order",
+            "local",
+            "supplemental"
+          ]
+        },
+        "icon": {
+          "type": "string"
+        },
+        "nonConstitutional": {
+          "type": "boolean"
+        },
+        "tag": {
+          "type": "string"
+        },
+        "lede": {
+          "type": "string"
+        },
+        "meta": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "paragraphBlock": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "p"
+        },
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "itemBlock": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "i"
+        },
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "block": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/paragraphBlock"
+        },
+        {
+          "$ref": "#/$defs/itemBlock"
+        }
+      ]
+    },
+    "section": {
+      "type": "object",
+      "required": [
+        "ref"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "string"
+        },
+        "blocks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/block"
+          }
+        },
+        "prose": {
+          "type": "boolean"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "body"
+          ],
+          "not": {
+            "required": [
+              "blocks"
+            ]
+          }
+        },
+        {
+          "required": [
+            "blocks"
+          ],
+          "not": {
+            "required": [
+              "body"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "chapter": {
+      "type": "object",
+      "required": [
+        "title",
+        "sections"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/section"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "stringArrayMap": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "bookPack": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "label",
+            "component",
+            "order",
+            "chapters"
+          ],
+          "properties": {
+            "kind": {
+              "const": "book"
+            },
+            "component": {
+              "$ref": "#/$defs/component"
+            },
+            "order": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "chapters": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "$ref": "#/$defs/chapter"
+              }
+            },
+            "footnotes": {
+              "$ref": "#/$defs/stringArrayMap"
+            },
+            "commentary": {
+              "$ref": "#/$defs/stringArrayMap"
+            },
+            "commentaryLabel": {
+              "type": "string"
+            },
+            "commentaryAttribution": {
+              "type": "string"
+            }
+          },
+          "unevaluatedProperties": false
+        }
+      ]
+    }
+  }
+}
