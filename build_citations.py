@@ -21,6 +21,8 @@ DIST = os.environ.get("PCA_GA_DIST", "/workspace/dist/pca-ga")
 SRC = os.path.join(DIST, "app", "search_index.json")
 CASES_DIR = os.path.join(DIST, "cases")
 CASE_PROVISION_INDEX = os.path.join(DIST, "index", "case_provision_index.json")
+BCO_MANIFEST_INDEX = os.path.join(DIST, "api", "bco", "index.json")
+BCO_MANIFEST_DIR = os.path.join(DIST, "api", "bco")
 ROOT = os.path.dirname(os.path.abspath(__file__))   # repo root (works in a worktree too)
 CONTENT = os.path.join(ROOT, "content")
 CIT_DIR = os.path.join(CONTENT, "cit")
@@ -46,6 +48,13 @@ TYPE_CODE = {
     "Constitutional inquiry": "inq",
     "RPR exception": "rpr",
     "Position paper": "pp",
+}
+
+BCO_MANIFEST_TYPE_CODE = {
+    "case": "case",
+    "inquiry": "inq",
+    "overture": "ov",
+    "rpr_exception": "rpr",
 }
 
 SCRIPTURE = {"acts","hebrews","romans","ephesians","exodus","daniel","luke",
@@ -197,6 +206,43 @@ def load_case_provision_rows():
             }
 
 
+def load_bco_manifest_rows():
+    """Load numbered BCO authority citations from pca-ga's canonical manifests.
+
+    The manifests supersede the older search-index path for numbered BCO
+    provisions. CCB overture advice is intentionally omitted here. Chapter-
+    only and malformed provision keys are ignored by norm()/valid_refs().
+    """
+    if not os.path.exists(BCO_MANIFEST_INDEX):
+        return []
+    index = json.load(open(BCO_MANIFEST_INDEX, encoding="utf-8"))
+    rows = []
+    for item in index.get("provisions", []):
+        provision = item.get("provision")
+        normalized = norm(str(provision or ""))
+        if not normalized or normalized[0] != "bco":
+            continue
+        slug = item.get("slug")
+        if not slug:
+            continue
+        path = os.path.join(BCO_MANIFEST_DIR, f"{slug}.json")
+        if not os.path.exists(path):
+            continue
+        manifest = json.load(open(path, encoding="utf-8"))
+        for artifact in manifest.get("artifacts", []):
+            code = BCO_MANIFEST_TYPE_CODE.get(artifact.get("type"))
+            if not code:
+                continue
+            rows.append((normalized[0], normalized[1], {
+                "t": code,
+                "ttl": (artifact.get("title") or "").strip(),
+                "yr": artifact.get("year"),
+                "disp": (artifact.get("disposition") or "").strip(),
+                "url": ga_url(artifact.get("url")),
+            }))
+    return rows
+
+
 def audit_case_markdown(case_keys):
     """Report Markdown-only case refs without using them as build input."""
     if not os.path.isdir(CASES_DIR):
@@ -279,6 +325,7 @@ def scan_dir(add, subdir, type_code, westminster_only):
 
 def main():
     data = json.load(open(SRC, encoding="utf-8"))
+    use_bco_manifests = os.path.exists(BCO_MANIFEST_INDEX)
     table = collections.defaultdict(list)   # "comp|ref" -> [entry,...]
     seen = collections.defaultdict(set)      # dedupe (key, url)
     skipped = collections.Counter()
@@ -324,6 +371,8 @@ def main():
                 skipped[prov] += 1
                 continue
             comp, ref = nr
+            if use_bco_manifests and comp == "bco" and not ref.startswith("PP-"):
+                continue
             kept_provstrings.add(prov)
             add(comp, ref, entry)
 
@@ -332,10 +381,20 @@ def main():
     # pass remains an audit only and cannot add citation rows.
     case_keys = set()
     for comp, ref, entry in load_case_provision_rows():
+        if use_bco_manifests and comp == "bco" and not ref.startswith("PP-"):
+            continue
         add(comp, ref, entry)
         if comp == "wlc":
             case_keys.add((ref, entry["url"]))
     audit_case_markdown(case_keys)
+
+    if use_bco_manifests:
+        manifest_rows = load_bco_manifest_rows()
+        for comp, ref, entry in manifest_rows:
+            add(comp, ref, entry)
+        print(f"loaded BCO manifests: {len(manifest_rows)} authority rows")
+    else:
+        print("BCO manifests unavailable; using legacy search-index BCO rows")
 
     # The other types are indexed for BCO, but their Westminster references are
     # largely untagged, so we continue harvesting those from their bodies.
@@ -344,7 +403,7 @@ def main():
         print(f"scanned {subdir}: {f} files, {r} Westminster links")
 
     # sort each provision's actions newest-first, then by type
-    torder = {"case":0,"ov":1,"inq":2,"rpr":3,"pp":4}
+    torder = {"case":0,"inq":1,"ov":2,"rpr":3,"pp":4}
     for key, rows in table.items():
         rows.sort(key=lambda e: (-(e["yr"] or 0), torder.get(e["t"],9)))
 
