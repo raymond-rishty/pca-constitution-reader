@@ -13,6 +13,9 @@ This document describes the format currently consumed by the reader. The format 
 
 The current importer requires `format` to equal `"pca-constitution-pack"`. Version 1 is the documented contract; the importer currently does not reject another `version` value, so producers should still emit `version: 1` for compatibility.
 
+
+A machine-checkable companion is available at [`schemas/content-pack-v1.schema.json`](../schemas/content-pack-v1.schema.json). For LLM or automated conversion workflows, use this document for semantic guidance and validate the resulting JSON against the schema. A compact canonical example is available at [`examples/book-pack.json`](../examples/book-pack.json).
+
 ## Common fields
 
 All packs are JSON objects.
@@ -251,3 +254,6 @@ The current importer intentionally remains permissive:
 - book packs: `component.key` must exist.
 
 It does not currently perform JSON Schema validation, enforce `version === 1`, validate reference syntax, or verify that every `order` entry has a corresponding chapter. Producers should follow this specification even where the current reader is more forgiving.
+
+
+The schema is intentionally stricter than the importer: it requires the fields a well-formed producer should emit, constrains block tuple shapes and divisions, and disallows unknown fields within the documented v1 structures. Some cross-field invariants — especially that every `order` value names a key in `chapters` — are documented requirements that standard JSON Schema cannot conveniently enforce without additional validation logic.
