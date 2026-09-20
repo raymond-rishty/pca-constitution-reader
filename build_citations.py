@@ -53,7 +53,6 @@ TYPE_CODE = {
 BCO_MANIFEST_TYPE_CODE = {
     "case": "case",
     "inquiry": "inq",
-    "ccb_advice": "ccb",
     "overture": "ov",
     "rpr_exception": "rpr",
 }
@@ -210,8 +209,8 @@ def load_case_provision_rows():
 def load_bco_manifest_rows():
     """Load numbered BCO authority citations from pca-ga's canonical manifests.
 
-    The manifests merge the authority index with CCB overture advice, so they
-    supersede the older search-index path for numbered BCO provisions.  Chapter-
+    The manifests supersede the older search-index path for numbered BCO
+    provisions. CCB overture advice is intentionally omitted here. Chapter-
     only and malformed provision keys are ignored by norm()/valid_refs().
     """
     if not os.path.exists(BCO_MANIFEST_INDEX):
@@ -404,7 +403,7 @@ def main():
         print(f"scanned {subdir}: {f} files, {r} Westminster links")
 
     # sort each provision's actions newest-first, then by type
-    torder = {"case":0,"inq":1,"ccb":2,"ov":3,"rpr":4,"pp":5}
+    torder = {"case":0,"inq":1,"ov":2,"rpr":3,"pp":4}
     for key, rows in table.items():
         rows.sort(key=lambda e: (-(e["yr"] or 0), torder.get(e["t"],9)))
 
