@@ -14,7 +14,7 @@ Sources (OPC edition = the same standard the PCA has adopted):
 
 Usage:  python3 build_content.py wsc
 """
-import difflib, html, json, os, re, subprocess, sys
+import html, json, os, re, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "content")
@@ -255,196 +255,6 @@ def build_bco_appendices():
         title = f"Appendix {L}" + (f" — {t.title().replace(chr(39)+'S', chr(39)+'s')}" if t else "")
         out.append({"id": f"app{L}", "part": "appx", "title": title, "paras": _paras(src[m.end():e])})
     return out
-
-# Morton H. Smith, Commentary on the BCO, 6th ed. (2007) — PERSONAL USE ONLY (© GPTS/Presbyterian Press).
-COMMENTARY_PDF = "/workspaces/personal/inbox/Commentary+on+the+book+of+CO.pdf"
-# hand-set commentary start for sections where the auto-strip can't cleanly find the boundary
-# (real commentary that the algorithm left after a quote sentence). Value = phrase the comment opens with.
-COMMENTARY_OVERRIDES = {
-    "26-6": "Provision is made to continue the voting",
-    "35-2": "The rights of the husband or wife",
-}
-def _cut_at(block, phrase):
-    bn = re.sub(r"[^a-z0-9]", "", phrase.lower())
-    kn, kmap = [], []
-    for i, ch in enumerate(block):
-        if ch.isalnum():
-            kn.append(ch.lower()); kmap.append(i)
-    i = "".join(kn).find(bn)
-    return block if i == -1 else block[kmap[i]:].lstrip(" .,;:­\n")
-def _bco_bodies():
-    """section ref -> verbatim BCO text, read from the already-built content/bco.js."""
-    path = os.path.join(OUT, "bco.js")
-    if not os.path.exists(path):
-        return {}
-    m = re.search(r"window\.BCO\s*=\s*(\{.*?\});\s*\nwindow\.BCO_ORDER", open(path).read(), re.S)
-    B = json.loads(m.group(1)) if m else {}
-    return {s["ref"]: s["body"] for v in B.values() for s in (v.get("sections") or [])}
-
-def _strip_quote(block, body):
-    """Smith quotes the provision before commenting; remove that leading quote via char-level
-    prefix alignment (ignores spaces/punct, so OCR 'o f' splits don't matter). Never over-cuts."""
-    bn = re.sub(r"[^a-z0-9]", "", body.lower())
-    if len(bn) < 15:
-        return block
-    kn, kmap = [], []
-    for idx, ch in enumerate(block):
-        if ch.isalnum():
-            kn.append(ch.lower()); kmap.append(idx)
-    kn = "".join(kn)
-    bl = [bk for bk in difflib.SequenceMatcher(None, kn, bn, autojunk=False).get_matching_blocks() if bk.size >= 3]
-    if not bl or bl[0].a > 12 or bl[0].b > 12:
-        return block                                       # doesn't open with the provision -> nothing to strip
-    # the quote tracks the body: block-pos and body-pos advance together. When commentary begins,
-    # the block races ahead of the body (offset jumps). Cut at the end of that synchronized run.
-    base = bl[0].a - bl[0].b
-    qend, matched = bl[0].a + bl[0].size, bl[0].size
-    for bk in bl[1:]:
-        if (bk.a - bk.b) - base > 60:
-            break
-        qend, matched = bk.a + bk.size, matched + bk.size
-    if matched < 30:
-        return block
-    cut = kmap[qend - 1] + 1 if qend - 1 < len(kmap) else len(block)
-    while cut < len(block) and block[cut] not in " \n\t":  # snap to a word boundary (never mid-word)
-        cut += 1
-    rest = block[cut:].lstrip(" .,;:­\n")
-    return rest if len(rest) > 20 else block
-
-def _desplit(s):
-    """Rejoin the handful of OCR word-splits that are never valid unsplit (o f -> of, etc.).
-    Restricted to bigrams whose split form is never a real token, so this can't merge words
-    across a legitimate boundary. 'o f' alone accounts for ~3700 occurrences."""
-    s = re.sub(r"\bo f\b", "of", s)
-    s = re.sub(r"(?<=[.!?] )O f\b", "Of", s)   # sentence-initial -> keep the capital
-    s = re.sub(r"\bO f\b", "of", s)            # "Word O f God" -> "Word of God"
-    s = re.sub(r"\bI f\b", "If", s)            # sentence-initial "If" (~110x)
-    s = re.sub(r"\bi f\b", "if", s)
-    s = re.sub(r"\bfo r\b", "for", s)
-    s = re.sub(r"\bi t\b", "it", s)
-    s = re.sub(r"\bM r\b", "Mr", s)
-    return s
-
-def _clean_para(p):
-    p = re.sub(r"­\s*", "", p)                  # rejoin soft-hyphen line breaks
-    p = re.sub(r"\s+", " ", p).strip()
-    return _desplit(re.sub(r"^[.\s]+", "", p))
-
-# Running page-heads the OCR interleaved into the prose. Anchored full-line so a head is dropped
-# whether it stands alone (its own paragraph) or got joined onto adjacent text by the para builder;
-# never matches the same words inside a real sentence.
-_HEADS = (r"FORM OF GOVER+NMENT|RULES OF DISCIPLINE|RULES FOR ASSEMBLY OPERATIONS?|"
-          r"OPERATING MANUAL FOR STANDING JUDICIAL COMMISSION|DIRECTORY FOR THE WORSHIP OF GOD|"
-          r"CORPORATE BYLAWS|PROCEDURES FOR PRESBYTERY JUDICIAL COMMISSIONS|"
-          r"SUGGESTED FORMS FOR (?:USE IN CONNECTION WITH THE )?RULES OF DISCIPLINE|"
-          r"BIBLICAL CONFLICT RESOLUTION|PRELIMINARY PRINCIPLES|CONSTITUTION DEFINED")
-COMMENTARY_SKIP = re.compile(
-    r"(^§?\s*[0-9lIO]+\s*[-–]\s*[0-9lIO]+\s*$)|(^\d{1,3}$)|(^(PART|CHAPTER)\b)|"
-    r"(COMMENTARY O[NF] THE BOOK)|(^(?:" + _HEADS + r")\s*$)", re.I)
-
-def build_front_commentary(txt, bodies):
-    """Smith comments on the Preface before Chapter 1, but the chapter parser starts at the first
-    'l-l.' marker and drops everything before it. Recover the Preliminary Principles: the section
-    intro (origins) -> pref-2, and each numbered principle's commentary -> PP-1..PP-8 (quoted
-    provision stripped exactly as for chapter sections)."""
-    lines = txt.splitlines()
-    def find(pred, start=0):
-        for i in range(start, len(lines)):
-            if pred(lines[i]):
-                return i
-        return -1
-    head = lambda l: l.strip() == "PREFACE TO THE BOOK OF CHURCH ORDER"
-    s0 = find(head, find(head) + 1)                                 # body heading (1st hit is the TOC)
-    s2 = find(lambda l: l.strip() == "II. PRELIMINARY PRINCIPLES", s0) if s0 >= 0 else -1
-    s3 = find(lambda l: l.strip() == "III. THE CONSTITUTION DEFINED", s2) if s2 >= 0 else -1
-    if s2 < 0 or s3 < 0:
-        return {}
-    sec2 = lines[s2 + 1:s3]
-    def paras_of(seg):
-        out, para = [], []
-        for ln in seg:
-            t = ln.strip()
-            if not t:
-                if para: out.append(" ".join(para)); para = []
-                continue
-            if COMMENTARY_SKIP.search(t): continue
-            para.append(t)
-        if para: out.append(" ".join(para))
-        return [c for c in (_clean_para(p) for p in out) if len(c) > 1]
-    mk = re.compile(r"^\s*([1-8])\.(?:\s|$)")
-    marks, expect = [], 1
-    for i, ln in enumerate(sec2):
-        m = mk.match(ln)
-        if m and int(m.group(1)) == expect:
-            marks.append((expect, i)); expect += 1
-    if len(marks) != 8:
-        return {}
-    out = {}
-    intro = " ".join(paras_of(sec2[:marks[0][1]]))                  # origins prose (one OCR paragraph)
-    intro = re.split(r"\s+The Presbyterian Church in America, in setting forth the form", intro)[0].strip()
-    if len(intro) > 20:
-        out["pref-2"] = [intro]
-    for j, (n, i) in enumerate(marks):
-        nxt = marks[j + 1][1] if j + 1 < len(marks) else len(sec2)
-        full = "\n\n".join(paras_of(sec2[i:nxt]))
-        joined = _strip_quote(full, bodies.get(f"PP-{n}", ""))
-        cps = [p.strip() for p in joined.split("\n\n") if len(p.strip()) > 1]
-        if cps:
-            out[f"PP-{n}"] = cps
-    return out
-
-def build_commentary():
-    txt = subprocess.run(["pdftotext", COMMENTARY_PDF, "-"], capture_output=True, text=True).stdout
-    norm = lambda t: t.replace("l", "1").replace("I", "1").replace("O", "0")
-    mark = re.compile(r"^\s*([0-9lIO]{1,2})\s*[-–]\s*([0-9lIO]{1,2})\s*\.+")   # marker may sit alone on its line
-    skip = COMMENTARY_SKIP
-    comm, cur, lastC, lastS, paras, para = {}, None, 0, 0, [], []
-    def end_para():
-        if para: paras.append(" ".join(para)); para.clear()
-    def flush():
-        end_para()
-        if cur and paras: comm.setdefault(cur, list(paras))
-    for ln in txt.splitlines():
-        m = mark.match(ln); ok = False
-        if m:
-            try: c, s = int(norm(m.group(1))), int(norm(m.group(2)))
-            except ValueError: c = s = -1
-            if 1 <= c <= 63 and 1 <= s <= 40 and (c > lastC or (c == lastC and s > lastS)) and c <= lastC + 2:
-                ok = True
-        if ok:
-            flush(); cur = f"{c}-{s}"; lastC, lastS = c, s; paras = []; para = [ln[m.end():].strip()]
-            continue
-        if cur is None: continue
-        t = ln.strip()
-        if not t: end_para(); continue
-        if skip.search(t): continue
-        para.append(t)
-    flush()
-    bodies = _bco_bodies()
-    clean = _clean_para
-    out = dict(build_front_commentary(txt, bodies))   # Preface (Preliminary Principles) before Chapter 1
-    for r, ps in comm.items():
-        body = bodies.get(r, "")
-        full = "\n\n".join(clean(p) for p in ps)
-        joined = _cut_at(full, COMMENTARY_OVERRIDES[r]) if r in COMMENTARY_OVERRIDES else _strip_quote(full, body)
-        joined = re.sub(r"\s*THE [A-Z][A-Z ]+ ENDS\.?\s*$", "", joined)   # drop leaked part-end markers
-        cps = [p.strip() for p in joined.split("\n\n") if len(p.strip()) > 1]
-        if not cps:
-            continue
-        # skip entries that are essentially just the provision/form restated (no real commentary):
-        # show no Commentary tab there rather than a redundant restatement. (overrides are trusted.)
-        if r not in COMMENTARY_OVERRIDES and body and _coverage(" ".join(cps), body) >= 0.8:
-            continue
-        out[r] = cps
-    return out
-
-def _coverage(text, body):
-    """fraction of `text` that is provision (BCO) text — high => it's a restatement, not commentary."""
-    tn = re.sub(r"[^a-z0-9]", "", text.lower()); bn = re.sub(r"[^a-z0-9]", "", body.lower())
-    if len(tn) < 5 or len(bn) < 5:
-        return 0.0
-    matched = sum(b.size for b in difflib.SequenceMatcher(None, tn, bn, autojunk=False).get_matching_blocks())
-    return matched / len(tn)
 
 # F. P. Ramsay, An Exposition of the Form of Government and the Rules of Discipline (1898) — PUBLIC DOMAIN.
 # Sourced from the PCA Historical Center's "Historical Development of the BCO" project, which reprints the
@@ -709,22 +519,6 @@ def do(name):
             f.write("window.BCO_ORDER = " + json.dumps(order) + ";\n")
         nsec = sum(len(c.get('sections', [])) for c in ch.values())
         print(f"BCO: {len(ch)} chapters / {nsec} sections + {len(front)} front + {len(appx)} appendices → {path}")
-    elif name == "commentary":
-        comm = build_commentary()
-        # emit as an IMPORT-ONLY content pack (copyrighted — NOT bundled into the app)
-        os.makedirs(os.path.join(OUT, "packs"), exist_ok=True)
-        path = os.path.join(OUT, "packs", "commentary-smith.pack.json")
-        pack = {
-            "format": "pca-constitution-pack", "version": 1, "kind": "commentary",
-            "label": "Morton H. Smith — Commentary on the BCO (6th ed., 2007)",
-            "attribution": ("Morton H. Smith, Commentary on the Book of Church Order of the PCA, 6th ed. (2007), "
-                            "Greenville Presbyterian Theological Seminary. Personal use only — do not redistribute."),
-            "corpus": "bco",
-            "entries": comm,
-        }
-        with open(path, "w") as f:
-            json.dump(pack, f, ensure_ascii=False, indent=0)
-        print(f"Commentary pack: {len(comm)} sections → {path}")
     elif name == "ramsay":
         comm = build_ramsay()
         os.makedirs(os.path.join(OUT, "packs"), exist_ok=True)
@@ -762,6 +556,6 @@ def do(name):
 if __name__ == "__main__":
     targets = sys.argv[1:] or ["wsc"]
     if targets == ["all"]:
-        targets = ["wsc", "wlc", "wcf", "bco", "commentary", "ramsay"]  # proofs/verses: build_proofs/build.sh
+        targets = ["wsc", "wlc", "wcf", "bco", "ramsay"]  # proofs/verses: build_proofs/build.sh
     for t in targets:
         do(t)
