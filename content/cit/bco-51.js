@@ -1,1 +1,1 @@
-window.CIT=window.CIT||{};window.CIT["bco-51"]={"51-5":[{"t":"case","ttl":"Hathaway v. Grace Presbytery","yr":1991,"disp":"denied","url":"https://raymond-rishty.github.io/pca-ga/cases/ga19_1991__1990-09.html"}]};
+window.CIT=window.CIT||{};window.CIT["bco-51"]={"51-5":[{"t":"case","ttl":"1990-09 — Hathaway v. Grace Presbytery","yr":1991,"disp":"denied","url":"https://raymond-rishty.github.io/pca-ga/cases/ga19_1991__1990-09.html"}]};

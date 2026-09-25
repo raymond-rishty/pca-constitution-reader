@@ -1,0 +1,73 @@
+[
+  {
+    "provision": "BCO 43-1",
+    "type": "Judicial case",
+    "title": "RE J. Lance Acree v. Tennessee Valley Presbytery",
+    "year": 2023,
+    "disposition": "denied",
+    "record_id": "case:cases/ga50_2023__stub_2021-07.md",
+    "relationship_id": "bco:43-1--case:cases/ga50_2023__stub_2021-07.md",
+    "reader_scope": "primary",
+    "case_numbers": ["2021-7"],
+    "url": "cases/ga50_2023__stub_2021-07.md",
+    "occurrences": [
+      {
+        "url": "cases/ga50_2023__stub_2021-07.md",
+        "relationship_kind": "explicit_citation",
+        "reader_scope": "primary"
+      }
+    ]
+  },
+  {
+    "provision": "BCO 11-3",
+    "type": "Judicial case",
+    "title": "Contextual citation excluded from Reader",
+    "record_id": "case:contextual",
+    "reader_scope": "candidate",
+    "url": "cases/contextual.md"
+  },
+  {
+    "provision": "BCO 11-4",
+    "type": "CCB advice",
+    "title": "CCB advice excluded from primary Reader feed",
+    "record_id": "ccb_advice:example",
+    "reader_scope": "contextual",
+    "url": "inquiries/ccb.md"
+  },
+  {
+    "provision": "BCO Preliminary Principle 1",
+    "type": "Overture",
+    "title": "Adopted preliminary-principle proposal",
+    "record_id": "overture:ga51_2024:10",
+    "reader_scope": "primary",
+    "url": "markdown/ga51_2024.md#ga51-p1277",
+    "occurrences": [
+      {
+        "url": "markdown/ga51_2024.md#ga51-p1277",
+        "relationship_kind": "proposal_target",
+        "reader_scope": "primary"
+      },
+      {
+        "url": "markdown/ga51_2024.md#ga51-p1278",
+        "relationship_kind": "explicit_citation",
+        "reader_scope": "candidate"
+      }
+    ]
+  },
+  {
+    "provision": "WLC 65-6",
+    "type": "Constitutional inquiry",
+    "title": "Range normalization fixture",
+    "record_id": "inquiry:range",
+    "reader_scope": "primary",
+    "url": "inquiries/range.md"
+  },
+  {
+    "provision": "WSC Q.95",
+    "type": "Judicial case",
+    "title": "Question route normalization fixture",
+    "record_id": "case:wsc-route",
+    "reader_scope": "primary",
+    "url": "cases/wsc.md"
+  }
+]
