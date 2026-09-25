@@ -2,14 +2,17 @@
 """Derive citations from the GA repository's curated authority projection.
 
 The generated ``index/authority_index.json`` is the only relationship source.
-Rows enter the Reader feed only when ``reader_scope`` is ``primary``. This
+Rows for record types supported by the Reader are included across all
+``reader_scope`` values; the scope and evidence labels are retained so
+contextual and candidate matches stay visible without appearing primary. This
 builder does not scan record bodies or reinterpret provision references.
 
 Output (split for lazy loading; see the app's loader):
   content/citations-counts.js   window.CIT_COUNTS = { "comp|ref": <total>, ... }  (tiny, eager)
   content/cit/bco-<NN>.js       window.CIT["bco-<NN>"] = { "<ref>": [rows], ... } (one per BCO chapter)
   content/cit/{wcf,wlc,wsc}.js  window.CIT["<comp>"]   = { "<ref>": [rows], ... }
-Each row is {t,ttl,yr,disp,url}, sorted newest-first. URLs point at the live GA site.
+Each row carries record, scope, and evidence metadata and is sorted newest-first.
+URLs point at the live GA site.
 """
 import json, re, collections, os
 from pathlib import Path
@@ -42,6 +45,8 @@ TYPE_CODE = {
     "Judicial case": "case",
     "Overture": "ov",
     "Constitutional inquiry": "inq",
+    "CCB advice": "ccb",
+    "RPR exception": "rpr",
 }
 
 SCRIPTURE = {"acts","hebrews","romans","ephesians","exodus","daniel","luke",
@@ -163,31 +168,36 @@ def case_title(row):
     return title or label or "Judicial case"
 
 
-def primary_occurrence(row):
-    """Select a Reader-approved source location from a projected relationship."""
-    occurrences = [item for item in (row.get("occurrences") or [])
-                   if item.get("reader_scope") == "primary" and item.get("url")]
+def reader_occurrence(row):
+    """Select a source location matching the relationship's displayed scope."""
+    occurrences = [item for item in (row.get("occurrences") or []) if item.get("url")]
     if not occurrences:
         return None
+    preferred_scope = row.get("reader_scope")
+    scoped = [item for item in occurrences if item.get("reader_scope") == preferred_scope]
+    pool = scoped or occurrences
+    scope_rank = {"primary": 0, "contextual": 1, "candidate": 2}
     kind_rank = {"proposal_target": 0, "explicit_citation": 1,
-                 "structured_provision_tag": 2, "structured_case_reference": 3}
-    return min(occurrences, key=lambda item: (
+                 "structured_exception_tag": 2, "structured_provision_tag": 3,
+                 "structured_case_reference": 4, "body_mention": 5}
+    return min(pool, key=lambda item: (
+        scope_rank.get(item.get("reader_scope"), 9),
         kind_rank.get(item.get("relationship_kind"), 9),
         str(item.get("url") or ""),
         int((item.get("locator") or {}).get("line") or 0),
     ))
 
 
-def load_primary_authority_rows():
+def load_authority_rows():
     if not os.path.exists(AUTHORITY_INDEX):
         raise FileNotFoundError(f"Missing generated GA authority index: {AUTHORITY_INDEX}")
     with open(AUTHORITY_INDEX, encoding="utf-8") as source:
         return json.load(source)
 
 def main():
-    data = load_primary_authority_rows()
+    data = load_authority_rows()
     table = collections.defaultdict(list)   # "comp|ref" -> [entry,...]
-    seen = collections.defaultdict(set)      # dedupe (provision, record identity)
+    seen = collections.defaultdict(dict)     # dedupe records while merging their evidence scopes
     skipped = collections.Counter()
     kept_provstrings = set()
     VALID = valid_refs()
@@ -199,14 +209,21 @@ def main():
             return
         key = f"{comp}|{ref}"
         identity = identity or entry["url"]
-        if identity in seen[key]:
+        previous = seen[key].get(identity)
+        if previous:
+            scope_order = {"primary": 0, "contextual": 1, "candidate": 2}
+            previous["scopes"] = sorted(set(previous.get("scopes", [])) | set(entry.get("scopes", [])),
+                                        key=lambda scope: scope_order.get(scope, 9))
+            for field in ("relationship_kinds", "evidence_bases", "match_methods", "match_confidences"):
+                previous[field] = sorted(set(previous.get(field, [])) | set(entry.get(field, [])))
+            if scope_order.get(entry.get("scope"), 9) < scope_order.get(previous.get("scope"), 9):
+                for field in ("scope", "url", "relationship_kind", "evidence_basis", "match_method", "match_confidence"):
+                    previous[field] = entry.get(field)
             return
-        seen[key].add(identity)
+        seen[key][identity] = entry
         table[key].append(entry)
 
     for row in data:
-        if row.get("reader_scope") != "primary":
-            continue
         type_code = TYPE_CODE.get(row.get("type"))
         if type_code is None:
             continue
@@ -222,24 +239,49 @@ def main():
             skipped[provision] += 1
             continue
         occurrences = row.get("occurrences") or []
-        occurrence = primary_occurrence(row)
+        occurrence = reader_occurrence(row)
         if occurrences and occurrence is None:
             continue
         url_value = (occurrence or {}).get("url") or row.get("url") or ""
         record_id = str(row.get("record_id") or row.get("relationship_id") or url_value)
+        scope = row.get("reader_scope") or (occurrence or {}).get("reader_scope") or "candidate"
+        scope_order = {"primary": 0, "contextual": 1, "candidate": 2}
+        scopes = set(row.get("scopes") or [scope])
+        scopes.update(item.get("reader_scope") for item in occurrences if item.get("reader_scope"))
+        scopes = sorted(scopes, key=lambda value: scope_order.get(value, 9))
+        relationship_kind = (occurrence or {}).get("relationship_kind") or row.get("relationship_kind") or ""
+        evidence_basis = (occurrence or {}).get("evidence_basis") or row.get("evidence_basis") or ""
+        match_method = (occurrence or {}).get("match_method") or row.get("match_method") or ""
+        match_confidence = (occurrence or {}).get("match_confidence") or row.get("match_confidence") or ""
         entry = {
             "t": type_code,
             "ttl": case_title(row) if row.get("type") == "Judicial case" else (row.get("title") or "").strip(),
             "yr": row.get("year"),
             "disp": (row.get("disposition") or "").strip(),
             "url": ga_url(url_value),
+            "scope": scope,
+            "scopes": scopes,
+            "relationship_kind": relationship_kind,
+            "relationship_kinds": list(row.get("relationship_kinds") or ([relationship_kind] if relationship_kind else [])),
+            "evidence_basis": evidence_basis,
+            "evidence_bases": list(row.get("evidence_bases") or ([evidence_basis] if evidence_basis else [])),
+            "match_method": match_method,
+            "match_methods": list(row.get("match_methods") or ([match_method] if match_method else [])),
+            "match_confidence": match_confidence,
+            "match_confidences": [match_confidence] if match_confidence else [],
         }
         for comp, ref in refs:
             kept_provstrings.add(provision)
             add(comp, ref, entry, record_id)
 
+    if not table:
+        raise ValueError(
+            "No supported authority-index records map to displayed provisions; "
+            "existing citation assets were left untouched."
+        )
+
     # sort each provision's actions newest-first, then by type
-    torder = {"case":0,"ov":1,"inq":2}
+    torder = {"case":0,"ov":1,"inq":2,"ccb":3,"rpr":4}
     for key, rows in table.items():
         rows.sort(key=lambda e: (-(e["yr"] or 0), torder.get(e["t"],9)))
 

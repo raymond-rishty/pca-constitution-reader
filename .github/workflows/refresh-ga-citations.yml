@@ -27,7 +27,34 @@ jobs:
           repository: raymond-rishty/pca-ga
           path: pca-ga
 
+      - name: Check for compatible authority rows
+        id: authority-index
+        env:
+          PCA_GA_DIST: ${{ github.workspace }}/pca-ga
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ["PCA_GA_DIST"]) / "index" / "authority_index.json"
+          try:
+              rows = json.loads(path.read_text(encoding="utf-8"))
+          except (OSError, json.JSONDecodeError):
+              rows = []
+          supported = {"Judicial case", "Overture", "Constitutional inquiry", "CCB advice", "RPR exception"}
+          available = isinstance(rows, list) and any(
+              isinstance(row, dict) and row.get("type") in supported and row.get("provision")
+              for row in rows
+          )
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"available={str(available).lower()}\n")
+          if not available:
+              print("::notice::No compatible PCA GA authority rows are available; keeping the current citation assets.")
+          PY
+
       - name: Rebuild citation assets
+        if: steps.authority-index.outputs.available == 'true'
         env:
           PCA_GA_DIST: ${{ github.workspace }}/pca-ga
         run: python build_citations.py

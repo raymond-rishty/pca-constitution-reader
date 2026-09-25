@@ -21,7 +21,7 @@
   {
     "provision": "BCO 11-3",
     "type": "Judicial case",
-    "title": "Contextual citation excluded from Reader",
+    "title": "Candidate citation retained in Reader",
     "record_id": "case:contextual",
     "reader_scope": "candidate",
     "url": "cases/contextual.md"
@@ -29,7 +29,7 @@
   {
     "provision": "BCO 11-4",
     "type": "CCB advice",
-    "title": "CCB advice excluded from primary Reader feed",
+    "title": "CCB advice retained as contextual evidence",
     "record_id": "ccb_advice:example",
     "reader_scope": "contextual",
     "url": "inquiries/ccb.md"
