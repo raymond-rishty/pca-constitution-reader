@@ -282,9 +282,6 @@
   .grp .items a:hover{color:var(--accent)}
   .grp .items .yr{color:var(--muted); font-variant-numeric:tabular-nums; margin-right:6px}
   .grp .items .out{display:inline-block; margin-left:6px; font-size:.72rem; color:var(--muted)}
-  .grp .items .cite-scope{display:inline-block; margin:0 6px 0 0; padding:1px 5px; border-radius:2px; font-size:.66rem; font-weight:600; letter-spacing:.02em; vertical-align:1px; color:#46515d; background:#edf0f3}
-  .grp .items .cite-scope.scope-contextual{color:#28486a; background:#dde7f1}
-  .grp .items .cite-scope.scope-candidate{color:#7a4a12; background:#f4e6d6}
   .grp .items .arr{float:right; color:var(--line-2)}
   .grp .items a:hover .arr{color:var(--accent)}
   .amend{margin-top:18px}
@@ -1290,19 +1287,6 @@ function openFromEl(el){
 // authority for DfW provisions (binding = constitutional; advisory = not binding)
 const AUTH = {"51-1":"advisory","51-2":"advisory","51-3":"binding","58-4":"binding"};
 const TYPE_META = {case:["t-case","Judicial cases"], ov:["t-ov","Overtures"], inq:["t-inq","Inquiries"], ccb:["t-ccb","CCB advice"], rpr:["t-rpr","RPR exceptions"], pp:["t-pp","Study reports"]};
-const SCOPE_LABEL = {primary:"Primary", contextual:"Contextual", candidate:"Candidate"};
-function citeScope(r){
-  const scopes=[...new Set((Array.isArray(r.scopes)&&r.scopes.length?r.scopes:[r.scope||"primary"]).filter(s=>SCOPE_LABEL[s]))];
-  const label=scopes.map(s=>SCOPE_LABEL[s]).join(" · ")||"Unclassified";
-  const classes=scopes.filter(s=>s!=="primary").map(s=>`scope-${s}`).join(" ")||"scope-primary";
-  const details=[];
-  if(scopes.length) details.push(`Scope: ${label}`);
-  for(const [key,title] of [["relationship_kinds","Relationship"],["evidence_bases","Evidence"],["match_methods","Match method"],["match_confidences","Confidence"]]){
-    const vals=Array.isArray(r[key])?r[key].filter(Boolean):[];
-    if(vals.length) details.push(`${title}: ${[...new Set(vals)].join(", ")}`);
-  }
-  return `<span class="cite-scope ${classes}" title="${esc(details.join(" · "))}">${esc(label)}</span>`;
-}
 function histogram(rows){
   const dec={}; rows.forEach(r=>{ if(!r.yr) return; const d=Math.floor(r.yr/10)*10; dec[d]=(dec[d]||0)+1; });
   const ds=Object.keys(dec).map(Number).sort((a,b)=>a-b); if(!ds.length) return '';
@@ -1425,7 +1409,7 @@ function renderDrawer(){
         const [cls,label]=TYPE_META[t];
         const trows=rows.filter(r=>r.t===t).sort((a,b)=>dSort==='desc'?(b.yr||0)-(a.yr||0):(a.yr||0)-(b.yr||0));
         body += `<div class="cgrp"><p class="cgrp-h"><span class="tag ${cls}">${label}</span><span class="cgrp-n">${counts[t]}</span></p>`
-          + trows.map(r=>`<a class="cite" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="yr">${r.yr||''}</span>${current==='bco'?'':citeScope(r)}<span class="ctxt">${current==='bco'?spChip(ref,r.ttl):''}${esc(r.ttl)}${r.disp?`<span class="out">· ${esc(r.disp)}</span>`:''}</span><span class="arr">↗</span></a>`).join('') + `</div>`;
+          + trows.map(r=>`<a class="cite" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="yr">${r.yr||''}</span><span class="ctxt">${current==='bco'?spChip(ref,r.ttl):''}${esc(r.ttl)}${r.disp?`<span class="out">· ${esc(r.disp)}</span>`:''}</span><span class="arr">↗</span></a>`).join('') + `</div>`;
       });
       body += gaBrowse;
     }
