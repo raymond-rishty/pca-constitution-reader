@@ -27,7 +27,47 @@ jobs:
           repository: raymond-rishty/pca-ga
           path: pca-ga
 
+      - name: Check for high-confidence BCO authority rows
+        id: authority-index
+        env:
+          PCA_GA_DIST: ${{ github.workspace }}/pca-ga
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, str(Path.cwd()))
+          import build_citations as builder
+
+          try:
+              rows = builder.load_authority_rows()
+          except (OSError, ValueError):
+              rows = []
+          valid_bco = builder.valid_refs()["bco"]
+          available = False
+          for row in rows if isinstance(rows, list) else []:
+              if not isinstance(row, dict) or row.get("type") not in builder.TYPE_CODE:
+                  continue
+              normalized = builder.norm(str(row.get("provision") or ""))
+              if not normalized or normalized[0] != "bco" or normalized[1] not in valid_bco:
+                  continue
+              occurrences = row.get("occurrences") or []
+              occurrence = builder.reader_occurrence(row)
+              if occurrences and occurrence is None:
+                  continue
+              confidence = (occurrence or {}).get("match_confidence") or row.get("match_confidence") or ""
+              if builder.MATCH_CONFIDENCE_RANK.get(confidence, -1) >= builder.MATCH_CONFIDENCE_RANK[builder.BCO_MATCH_CONFIDENCE_THRESHOLD]:
+                  available = True
+                  break
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"available={str(available).lower()}\n")
+          if not available:
+              print("::notice::No valid high-confidence BCO rows are available in the PCA GA authority index; keeping the current citation assets.")
+          PY
+
       - name: Rebuild citation assets
+        if: steps.authority-index.outputs.available == 'true'
         env:
           PCA_GA_DIST: ${{ github.workspace }}/pca-ga
         run: python build_citations.py

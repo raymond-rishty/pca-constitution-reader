@@ -272,6 +272,7 @@
   .t-ov{background:#e0eede; color:#2f5130}
   .t-inq{background:#dde7f1; color:#28486a}
   .t-rpr{background:#f4e6d6; color:#7a4a12}
+  .t-ccb{background:#e9e3f4; color:#514078}
   .t-pp{background:#e7e2ef; color:#4a3a6a}
   .grp summary .lbl{flex:1}
   .grp summary .num{color:var(--muted); font-variant-numeric:tabular-nums}
@@ -281,6 +282,9 @@
   .grp .items a:hover{color:var(--accent)}
   .grp .items .yr{color:var(--muted); font-variant-numeric:tabular-nums; margin-right:6px}
   .grp .items .out{display:inline-block; margin-left:6px; font-size:.72rem; color:var(--muted)}
+  .grp .items .cite-scope{display:inline-block; margin:0 6px 0 0; padding:1px 5px; border-radius:2px; font-size:.66rem; font-weight:600; letter-spacing:.02em; vertical-align:1px; color:#46515d; background:#edf0f3}
+  .grp .items .cite-scope.scope-contextual{color:#28486a; background:#dde7f1}
+  .grp .items .cite-scope.scope-candidate{color:#7a4a12; background:#f4e6d6}
   .grp .items .arr{float:right; color:var(--line-2)}
   .grp .items a:hover .arr{color:var(--accent)}
   .amend{margin-top:18px}
@@ -797,7 +801,7 @@ function proofsBlock(o){
 }
 // accessible attributes for a provision's drill-in trigger (the number)
 function nAttrs(refLabel, n){
-  return `role="button" tabindex="0" aria-label="${refLabel}${n>0?` — ${n} GA action${n>1?'s':''}, open citations and notes`:` — open citations and notes`}"`;
+  return `role="button" tabindex="0" aria-label="${refLabel}${n>0?` — ${n} linked GA record${n>1?'s':''}, open citations and notes`:` — open citations and notes`}"`;
 }
 
 let view = "home";
@@ -968,12 +972,12 @@ function showAbout(){
       <li><b>Westminster Standards &amp; proofs</b> — public domain; the American revision as received in 1788, with the PCA's official proof-text selection.</li>
       <li><b>Scripture text</b> — verses shown for the proofs are from the <b>Berean Standard Bible</b> (BSB), bereanbible.com, dedicated to the public domain.</li>
       <li><b>Book of Church Order</b> — © The Office of the Stated Clerk of the General Assembly of the PCA, all rights reserved. Included here for personal study; permission for wider use is being sought.</li>
-      <li><b>General Assembly citations</b> — drawn from a searchable corpus of the PCA <i>Minutes of the General Assembly</i> (cases, overtures, constitutional inquiries, and Review-of-Presbytery-Records exceptions) and linking out to it. Those citations belong to the PCA <i>Minutes</i>.</li>
+      <li><b>General Assembly records</b> — drawn from the PCA <i>Minutes of the General Assembly</i> (cases, overtures, constitutional inquiries, Church Care and Discipleship Committee advice, and Review-of-Presbytery-Records exceptions) and linking to the source. BCO pages show high-confidence matches only.</li>
       <li><b>Commentary</b> — Ramsay's public-domain exposition is included; other commentaries load as separate import packs, to keep copyrighted text out of the app.</li>
     </ul>
 
     <h2 class="about-h">How citations work</h2>
-    <p class="about-p">A small numbered marker beside a provision shows how many General Assembly actions have cited it. Tap the provision to open its dossier and read each citation — with its year and disposition — linked to the verbatim record.</p>
+    <p class="about-p">A small numbered marker beside a provision shows how many General Assembly records are linked to it. Tap the provision to see each included record, its year, disposition, and source. BCO pages show high-confidence matches only.</p>
 
     <p class="about-disclaimer">Not affiliated with, sponsored by, or endorsed by the Presbyterian Church in America. If you hold rights in any included material and would like it removed, it will be taken down immediately.</p>
   </div>`;
@@ -1114,8 +1118,8 @@ function renderCatechism(book, anchor){
     const aText = real ? real.a : (k ? k.body : SHORT_LOREM);
     doc += `<div class="prov q" id="p-${ref}"><span class="body"><a class="n" data-ref="${ref}" ${nAttrs(rl,n)}>${ref}</a>${inline} ${qText}</span><span class="ans">${aText}</span></div>`;
     gut += n>0
-      ? `<a class="sig" data-ref="${ref}" aria-hidden="true" tabindex="-1" title="${n} GA actions cite ${ref}"><span class="dot"></span>${n}</a>`
-      : `<a class="sig empty" data-ref="${ref}" aria-hidden="true" tabindex="-1" title="No GA actions on file"><span class="dot"></span></a>`;
+      ? `<a class="sig" data-ref="${ref}" aria-hidden="true" tabindex="-1" title="${n} linked GA records for ${ref}"><span class="dot"></span>${n}</a>`
+      : `<a class="sig empty" data-ref="${ref}" aria-hidden="true" tabindex="-1" title="No linked GA records on file"><span class="dot"></span></a>`;
   }
   const other = book==='wsc' ? 'wlc' : 'wsc';
   doc += `<nav class="pager">`
@@ -1212,8 +1216,8 @@ function showChapter(book, o){
       doc += `<div class="prov${p.con===true?' binding':''}" id="p-${p.ref}"><span class="body"><a class="n" data-ref="${p.ref}" ${nAttrs(rl,n)}>${p.ref}.</a>${inline}${tag} ${p.body}</span></div>`;
     }
     gut += n>0
-      ? `<a class="sig" data-ref="${p.ref}" aria-hidden="true" tabindex="-1" title="${n} GA actions cite ${p.ref}"><span class="dot"></span>${n}</a>`
-      : `<a class="sig empty" data-ref="${p.ref}" aria-hidden="true" tabindex="-1" title="No GA actions on file"><span class="dot"></span></a>`;
+      ? `<a class="sig" data-ref="${p.ref}" aria-hidden="true" tabindex="-1" title="${n} linked GA records for ${p.ref}"><span class="dot"></span>${n}</a>`
+      : `<a class="sig empty" data-ref="${p.ref}" aria-hidden="true" tabindex="-1" title="No linked GA records on file"><span class="dot"></span></a>`;
   });
   // footer pager (sequential nav) — flows across BCO parts, stops at component edges
   const s = SPINE[book], i = spineIndex(book, o);
@@ -1285,12 +1289,25 @@ function openFromEl(el){
 /* ───────────── drawer (provision dossier) ───────────── */
 // authority for DfW provisions (binding = constitutional; advisory = not binding)
 const AUTH = {"51-1":"advisory","51-2":"advisory","51-3":"binding","58-4":"binding"};
-const TYPE_META = {case:["t-case","Judicial cases"], ov:["t-ov","Overtures"], inq:["t-inq","Inquiries"], rpr:["t-rpr","RPR exceptions"], pp:["t-pp","Study reports"]};
+const TYPE_META = {case:["t-case","Judicial cases"], ov:["t-ov","Overtures"], inq:["t-inq","Inquiries"], ccb:["t-ccb","CCB advice"], rpr:["t-rpr","RPR exceptions"], pp:["t-pp","Study reports"]};
+const SCOPE_LABEL = {primary:"Primary", contextual:"Contextual", candidate:"Candidate"};
+function citeScope(r){
+  const scopes=[...new Set((Array.isArray(r.scopes)&&r.scopes.length?r.scopes:[r.scope||"primary"]).filter(s=>SCOPE_LABEL[s]))];
+  const label=scopes.map(s=>SCOPE_LABEL[s]).join(" · ")||"Unclassified";
+  const classes=scopes.filter(s=>s!=="primary").map(s=>`scope-${s}`).join(" ")||"scope-primary";
+  const details=[];
+  if(scopes.length) details.push(`Scope: ${label}`);
+  for(const [key,title] of [["relationship_kinds","Relationship"],["evidence_bases","Evidence"],["match_methods","Match method"],["match_confidences","Confidence"]]){
+    const vals=Array.isArray(r[key])?r[key].filter(Boolean):[];
+    if(vals.length) details.push(`${title}: ${[...new Set(vals)].join(", ")}`);
+  }
+  return `<span class="cite-scope ${classes}" title="${esc(details.join(" · "))}">${esc(label)}</span>`;
+}
 function histogram(rows){
   const dec={}; rows.forEach(r=>{ if(!r.yr) return; const d=Math.floor(r.yr/10)*10; dec[d]=(dec[d]||0)+1; });
   const ds=Object.keys(dec).map(Number).sort((a,b)=>a-b); if(!ds.length) return '';
   const max=Math.max(...ds.map(d=>dec[d]));
-  return `<div class="histo"><p class="hcap">GA citations by decade</p>` + ds.map(d=>
+  return `<div class="histo"><p class="hcap">Linked GA records by decade</p>` + ds.map(d=>
     `<div class="hbar"><span class="hd">${String(d).slice(2)}s</span><span class="hbarfill" style="width:${Math.round(dec[d]/max*100)}%"></span><span>${dec[d]}</span></div>`).join('') + `</div>`;
 }
 function notesBlock(ref){
@@ -1380,29 +1397,35 @@ function renderDrawer(){
     const gaBrowse = `<a class="ga-browse" href="${(window.GA_BASE||'#')}app/" target="_blank" rel="noopener">Search the full GA Minutes corpus ↗</a>`;
     const rows = citRows(current, ref);          // null until the split file loads
     if(n===0){
-      body += `<p class="empty-note">No General Assembly action in the corpus cites this provision. The text stands on its own — when a case, overture, inquiry, or record-review exception references it, it will surface here.</p>` + gaBrowse;
+      const emptyMessage = current==='bco'
+        ? 'No high-confidence matches meet the current display cutoff. Lower-confidence links are hidden.'
+        : 'No linked General Assembly records are in the authority index for this provision. The text stands on its own — when a case, overture, inquiry, committee advice, or record-review exception references it, it will surface here.';
+      body += `<p class="empty-note">${emptyMessage}</p>` + gaBrowse;
     } else if(rows === null){
       body += `<p class="empty-note">Loading ${n} GA citation${n>1?'s':''}…</p>`;
       loadCitFile(current, ref).then(()=>{ if(drawerRef===ref && dTab==='cit') renderDrawer(); });
     } else {
-      const counts={case:0, ov:0, inq:0, rpr:0, pp:0};
+      const counts={case:0, ov:0, inq:0, ccb:0, rpr:0, pp:0};
       rows.forEach(r=>{ counts[r.t] = (counts[r.t]||0) + 1; });
       const parts = [counts.case&&`${counts.case} case${counts.case>1?'s':''}`, counts.ov&&`${counts.ov} overture${counts.ov>1?'s':''}`,
-        counts.inq&&`${counts.inq} inquir${counts.inq>1?'ies':'y'}`, counts.rpr&&`${counts.rpr} RPR`, counts.pp&&`${counts.pp} study`].filter(Boolean);
-      body += `<p class="dsum"><b>${n}</b> GA action${n>1?'s':''} — ${parts.join(' · ')}</p>`;
+        counts.inq&&`${counts.inq} inquir${counts.inq>1?'ies':'y'}`, counts.ccb&&`${counts.ccb} CCB advice item${counts.ccb>1?'s':''}`, counts.rpr&&`${counts.rpr} RPR`, counts.pp&&`${counts.pp} study`].filter(Boolean);
+      const recordLabel = current==='bco'
+        ? 'high-confidence GA match'+(n===1?'':'es')
+        : 'linked GA record'+(n===1?'':'s');
+      body += `<p class="dsum"><b>${n}</b> ${recordLabel} — ${parts.join(' · ')}</p>`;
       if(n>=12) body += histogram(rows);
       const chip=(k,l,c)=>`<button class="fchip${dFilter===k?' on':''}" data-filter="${k}">${l}${c!=null?` ${c}`:''}</button>`;
       body += `<div class="fchips">${chip('all','All',n)}`
         + (counts.case?chip('case','Cases',counts.case):'') + (counts.ov?chip('ov','Overtures',counts.ov):'')
-        + (counts.inq?chip('inq','Inquiries',counts.inq):'') + (counts.rpr?chip('rpr','RPR',counts.rpr):'') + (counts.pp?chip('pp','Studies',counts.pp):'')
+        + (counts.inq?chip('inq','Inquiries',counts.inq):'') + (counts.ccb?chip('ccb','CCB advice',counts.ccb):'') + (counts.rpr?chip('rpr','RPR',counts.rpr):'') + (counts.pp?chip('pp','Studies',counts.pp):'')
         + `<button class="sortbtn" data-sort>${dSort==='desc'?'Newest first':'Oldest first'} ⇅</button></div>`;
-      const types = dFilter==='all' ? ['case','ov','inq','rpr','pp'] : [dFilter];
+      const types = dFilter==='all' ? ['case','ov','inq','ccb','rpr','pp'] : [dFilter];
       types.forEach(t=>{
         if(!counts[t]) return;
         const [cls,label]=TYPE_META[t];
         const trows=rows.filter(r=>r.t===t).sort((a,b)=>dSort==='desc'?(b.yr||0)-(a.yr||0):(a.yr||0)-(b.yr||0));
         body += `<div class="cgrp"><p class="cgrp-h"><span class="tag ${cls}">${label}</span><span class="cgrp-n">${counts[t]}</span></p>`
-          + trows.map(r=>`<a class="cite" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="yr">${r.yr||''}</span><span class="ctxt">${current==='bco'?spChip(ref,r.ttl):''}${esc(r.ttl)}${r.disp?`<span class="out">· ${esc(r.disp)}</span>`:''}</span><span class="arr">↗</span></a>`).join('') + `</div>`;
+          + trows.map(r=>`<a class="cite" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="yr">${r.yr||''}</span>${current==='bco'?'':citeScope(r)}<span class="ctxt">${current==='bco'?spChip(ref,r.ttl):''}${esc(r.ttl)}${r.disp?`<span class="out">· ${esc(r.disp)}</span>`:''}</span><span class="arr">↗</span></a>`).join('') + `</div>`;
       });
       body += gaBrowse;
     }

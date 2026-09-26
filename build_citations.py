@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
-"""Derive the Constitution app's citation data from the GA-minutes corpus.
+"""Derive citations from the GA repository's curated authority projection.
 
-Non-judicial citations come from ``app/search_index.json``. Judicial case
-citations come from the canonical ``index/case_provision_index.json`` reverse
-index; the case Markdown files are audited separately and are not a second
-source of emitted rows.
+The generated ``index/authority_index.json`` is the only relationship source.
+For BCO provisions, only matches at or above the high-confidence threshold
+pass the display cutoff; other constitutional books retain all scopes. Scope
+and evidence metadata remain in the derived rows for provenance, but BCO pages
+do not display scope labels.
+This builder does not scan record bodies or reinterpret provision references.
 
 Output (split for lazy loading; see the app's loader):
   content/citations-counts.js   window.CIT_COUNTS = { "comp|ref": <total>, ... }  (tiny, eager)
   content/cit/bco-<NN>.js       window.CIT["bco-<NN>"] = { "<ref>": [rows], ... } (one per BCO chapter)
   content/cit/{wcf,wlc,wsc}.js  window.CIT["<comp>"]   = { "<ref>": [rows], ... }
-Each row is {t,ttl,yr,disp,url}, sorted newest-first. URLs point at the live GA site.
+Each row carries record, scope, and evidence metadata and is sorted newest-first.
+URLs point at the live GA site.
 """
-import json, re, collections, sys, os, glob
+import json, re, collections, os
+from pathlib import Path
 
 # The Pages build mounts the GA repository at /workspace/dist/pca-ga.  Keeping
 # the root configurable makes the generator reproducible locally as well as in
 # CI, while all derived citation assets still live in this repository.
 DIST = os.environ.get("PCA_GA_DIST", "/workspace/dist/pca-ga")
-SRC = os.path.join(DIST, "app", "search_index.json")
-CASES_DIR = os.path.join(DIST, "cases")
-CASE_PROVISION_INDEX = os.path.join(DIST, "index", "case_provision_index.json")
-BCO_MANIFEST_INDEX = os.path.join(DIST, "api", "bco", "index.json")
-BCO_MANIFEST_DIR = os.path.join(DIST, "api", "bco")
+AUTHORITY_INDEX = os.path.join(DIST, "index", "authority_index.json")
 ROOT = os.path.dirname(os.path.abspath(__file__))   # repo root (works in a worktree too)
 CONTENT = os.path.join(ROOT, "content")
 CIT_DIR = os.path.join(CONTENT, "cit")
@@ -33,12 +33,12 @@ def valid_refs():
     component. Citations to anything outside this set (phantom keys from OCR
     noise or RAO refs) are dropped so they never inflate counts."""
     v = {"bco": set(), "wcf": set(), "wlc": set(), "wsc": set()}
-    bco = open(f"{CONTENT}/bco.js").read()
+    bco = Path(CONTENT, "bco.js").read_text(encoding="utf-8")
     v["bco"] = set(re.findall(r'"ref":\s*"((?:\d+-\d+|PP-\d+))"', bco))
-    wcf = open(f"{CONTENT}/wcf.js").read()
+    wcf = Path(CONTENT, "wcf.js").read_text(encoding="utf-8")
     v["wcf"] = set(re.findall(r'"ref":\s*"(\d+\.\d+)"', wcf))
     for comp, fn in (("wlc", "wlc.js"), ("wsc", "wsc.js")):
-        txt = open(f"{CONTENT}/{fn}").read()
+        txt = Path(CONTENT, fn).read_text(encoding="utf-8")
         v[comp] = {f"Q.{n}" for n in re.findall(r'"n":\s*(\d+)', txt)}
     return v
 
@@ -46,16 +46,12 @@ TYPE_CODE = {
     "Judicial case": "case",
     "Overture": "ov",
     "Constitutional inquiry": "inq",
+    "CCB advice": "ccb",
     "RPR exception": "rpr",
-    "Position paper": "pp",
 }
 
-BCO_MANIFEST_TYPE_CODE = {
-    "case": "case",
-    "inquiry": "inq",
-    "overture": "ov",
-    "rpr_exception": "rpr",
-}
+MATCH_CONFIDENCE_RANK = {"low": 0, "medium": 1, "high": 2}
+BCO_MATCH_CONFIDENCE_THRESHOLD = "high"
 
 SCRIPTURE = {"acts","hebrews","romans","ephesians","exodus","daniel","luke",
              "philippians","revelation","matthew","john","psalm","psalms",
@@ -88,10 +84,10 @@ def norm(prov):
     m = re.match(r'^WCF\s*([0-9]{1,2})\s*[-.]\s*([0-9]{1,2})', p, re.I)
     if m:
         return ("wcf", f"{int(m.group(1))}.{int(m.group(2))}")
-    m = re.match(r'^(?:WLC|LC)\s*([0-9]{1,3})', p, re.I)
+    m = re.match(r'^(?:WLC|LC)\s*(?:Q\.?\s*)?([0-9]{1,3})', p, re.I)
     if m:
         return ("wlc", f"Q.{int(m.group(1))}")
-    m = re.match(r'^(?:WSC|SC)\s*([0-9]{1,3})', p, re.I)
+    m = re.match(r'^(?:WSC|SC)\s*(?:Q\.?\s*)?([0-9]{1,3})', p, re.I)
     if m:
         return ("wsc", f"Q.{int(m.group(1))}")
 
@@ -117,7 +113,7 @@ def norm(prov):
 # or a question with a letter suffix (e.g. WLC 166B).  The Constitution Reader
 # has one route per question; normalize those forms at this boundary.
 WLC_INDEX_RE = re.compile(
-    r"^\s*WLC\s+(?P<start>\d{1,3})(?:[A-Za-z])?"
+    r"^\s*WLC\s+(?:Q\.?\s*)?(?P<start>\d{1,3})(?:[A-Za-z])?"
     r"(?:\s*[-–]\s*(?P<end>\d{1,3})(?:[A-Za-z])?)?\s*$",
     re.I,
 )
@@ -176,234 +172,127 @@ def case_title(row):
     return title or label or "Judicial case"
 
 
-def load_case_provision_rows():
-    """Load canonical judicial-case citations from the GA reverse index."""
-    if not os.path.exists(CASE_PROVISION_INDEX):
-        raise FileNotFoundError(
-            f"Missing prebuilt GA case-provision index: {CASE_PROVISION_INDEX}"
-        )
-    rows = json.load(open(CASE_PROVISION_INDEX, encoding="utf-8"))
-    for row in rows:
-        if not str(row.get("url", "")).startswith("cases/"):
-            continue
-        provision = row.get("provision")
-        # WLC ranges and letter suffixes need expansion because the app has
-        # one route per question. Other provision families are already
-        # represented by the normalizer's canonical component/ref pair.
-        if re.match(r"^\s*WLC\b", str(provision or ""), re.I):
-            refs = [("wlc", ref) for ref in index_wlc_refs(provision)]
-        else:
-            normalized = norm(str(provision or ""))
-            refs = [normalized] if normalized else []
-        for normalized in refs:
-            comp, ref = normalized
-            yield comp, ref, {
-                "t": "case",
-                "ttl": case_title(row),
-                "yr": row.get("year"),
-                "disp": (row.get("disposition") or "").strip(),
-                "url": ga_url(row.get("url")),
-            }
+def reader_occurrence(row):
+    """Select a source location matching the relationship's displayed scope."""
+    occurrences = [item for item in (row.get("occurrences") or []) if item.get("url")]
+    if not occurrences:
+        return None
+    preferred_scope = row.get("reader_scope")
+    scoped = [item for item in occurrences if item.get("reader_scope") == preferred_scope]
+    pool = scoped or occurrences
+    scope_rank = {"primary": 0, "contextual": 1, "candidate": 2}
+    kind_rank = {"proposal_target": 0, "explicit_citation": 1,
+                 "structured_exception_tag": 2, "structured_provision_tag": 3,
+                 "structured_case_reference": 4, "body_mention": 5}
+    return min(pool, key=lambda item: (
+        scope_rank.get(item.get("reader_scope"), 9),
+        kind_rank.get(item.get("relationship_kind"), 9),
+        str(item.get("url") or ""),
+        int((item.get("locator") or {}).get("line") or 0),
+    ))
 
 
-def load_bco_manifest_rows():
-    """Load numbered BCO authority citations from pca-ga's canonical manifests.
-
-    The manifests supersede the older search-index path for numbered BCO
-    provisions. CCB overture advice is intentionally omitted here. Chapter-
-    only and malformed provision keys are ignored by norm()/valid_refs().
-    """
-    if not os.path.exists(BCO_MANIFEST_INDEX):
-        return []
-    index = json.load(open(BCO_MANIFEST_INDEX, encoding="utf-8"))
-    rows = []
-    for item in index.get("provisions", []):
-        provision = item.get("provision")
-        normalized = norm(str(provision or ""))
-        if not normalized or normalized[0] != "bco":
-            continue
-        slug = item.get("slug")
-        if not slug:
-            continue
-        path = os.path.join(BCO_MANIFEST_DIR, f"{slug}.json")
-        if not os.path.exists(path):
-            continue
-        manifest = json.load(open(path, encoding="utf-8"))
-        for artifact in manifest.get("artifacts", []):
-            code = BCO_MANIFEST_TYPE_CODE.get(artifact.get("type"))
-            if not code:
-                continue
-            rows.append((normalized[0], normalized[1], {
-                "t": code,
-                "ttl": (artifact.get("title") or "").strip(),
-                "yr": artifact.get("year"),
-                "disp": (artifact.get("disposition") or "").strip(),
-                "url": ga_url(artifact.get("url")),
-            }))
-    return rows
-
-
-def audit_case_markdown(case_keys):
-    """Report Markdown-only case refs without using them as build input."""
-    if not os.path.isdir(CASES_DIR):
-        print("case Markdown audit: skipped (cases directory unavailable)")
-        return
-    observed = set()
-    for path in sorted(glob.glob(os.path.join(CASES_DIR, "*.md"))):
-        txt = open(path, encoding="utf-8").read()
-        url = ga_url(os.path.relpath(path, DIST))
-        for comp, ref in inline_refs(txt, westminster_only=False):
-            if comp == "wlc":
-                observed.add((ref, url))
-    uncovered = observed - case_keys
-    print(
-        f"case Markdown audit: {len(observed)} inline WLC links; "
-        f"{len(uncovered)} not represented by the prebuilt index (not emitted)"
-    )
-
-# Inline reference patterns for document bodies. The corpus index barely tags
-# Westminster refs (3 WSC strings in all of search_index), yet the prose cites
-# the Confession and Catechisms inline under many spellings — so we mine bodies.
-BCO_INLINE = re.compile(r'_?BCO_?\s*(\d{1,2})-(\d{1,2})[A-Za-z.]*', re.I)
-WCF_INLINE = re.compile(
-    r'(?:WCF|W\.C\.F\.|(?:Westminster )?Confession(?: of Faith)?)[,\s]*'
-    r'(?:ch(?:apter)?\.?\s*)?(\d{1,2})\s*[-.]\s*(\d{1,2})', re.I)
-WLC_INLINE = re.compile(
-    r'(?:WLC|W\.L\.C\.|Larger Catechism)[,\s]*(?:Q(?:uestion)?s?\.?\s*)?(\d{1,3})', re.I)
-WSC_INLINE = re.compile(
-    r'(?:WSC|W\.S\.C\.|Shorter Catechism)[,\s]*(?:Q(?:uestion)?s?\.?\s*)?(\d{1,3})', re.I)
-PP_INLINE = re.compile(
-    r'(?:_?Preliminary_?\s+_?Principles?_?|PP|P\.P\.?)\s*(?:#|-|\.)?\s*(?:II\.)?\d'
-    r'(?:\s*(?:,|&|and)\s*(?:II\.)?\d)*', re.I)
-
-def inline_refs(txt, westminster_only):
-    """Yield (comp, ref) for every Constitution reference found in a body."""
-    for m in WCF_INLINE.finditer(txt):
-        yield ("wcf", f"{int(m.group(1))}.{int(m.group(2))}")
-    for m in WLC_INLINE.finditer(txt):
-        yield ("wlc", f"Q.{int(m.group(1))}")
-    for m in WSC_INLINE.finditer(txt):
-        yield ("wsc", f"Q.{int(m.group(1))}")
-    # Preliminary Principles are BCO front matter and may occur in any corpus
-    # body, including RPR exceptions (which otherwise use Westminster-only scans).
-    for m in PP_INLINE.finditer(txt):
-        for n in re.findall(r'\d+', m.group(0)):
-            yield ("bco", f"PP-{int(n)}")
-    if not westminster_only:
-        for m in BCO_INLINE.finditer(txt):
-            nr = norm(f"BCO {m.group(1)}-{m.group(2)}")
-            if nr:
-                yield nr
-
-def scan_dir(add, subdir, type_code, westminster_only):
-    """Parse a catalogue dir (cases/overtures/inquiries/rpr/studies) for header
-    metadata + inline refs; link each to the catalogue page. For the indexed
-    types we take Westminster refs only (BCO already comes from the index, with
-    its canonical URLs) to avoid double-counting."""
-    n_files = n_refs = 0
-    for path in sorted(glob.glob(os.path.join(DIST, subdir, "*.md"))):
-        txt = open(path, encoding="utf-8").read()
-        head = txt[:800]
-        mt = re.search(r'^#\s+(.+)', txt, re.M)
-        title = mt.group(1).strip() if mt else os.path.basename(path)
-        my = re.search(r'\((\d{4})\)', head)                       # Assembly/First-raised year
-        year = int(my.group(1)) if my else None
-        md = re.search(r'\*\*(?:Final [Dd]isposition|Disposition)\:\*\*\s*([^\n·]+)', head)
-        disp = md.group(1).strip() if md else ""
-        if len(disp) > 60:
-            disp = disp[:57].rstrip() + "…"
-        rel = os.path.relpath(path, DIST).replace(os.sep, "/")
-        url = ga_url(rel)
-        entry = {"t": type_code, "ttl": title, "yr": year, "disp": disp, "url": url}
-        provset = set(inline_refs(txt, westminster_only))
-        if provset:
-            n_files += 1
-        for comp, ref in provset:
-            add(comp, ref, entry)
-            n_refs += 1
-    return n_files, n_refs
+def load_authority_rows():
+    if not os.path.exists(AUTHORITY_INDEX):
+        raise FileNotFoundError(f"Missing generated GA authority index: {AUTHORITY_INDEX}")
+    with open(AUTHORITY_INDEX, encoding="utf-8") as source:
+        return json.load(source)
 
 def main():
-    data = json.load(open(SRC, encoding="utf-8"))
-    use_bco_manifests = os.path.exists(BCO_MANIFEST_INDEX)
+    data = load_authority_rows()
     table = collections.defaultdict(list)   # "comp|ref" -> [entry,...]
-    seen = collections.defaultdict(set)      # dedupe (key, url)
+    seen = collections.defaultdict(dict)     # dedupe records while merging their evidence scopes
     skipped = collections.Counter()
     kept_provstrings = set()
     VALID = valid_refs()
     dropped_invalid = collections.Counter()
 
-    def add(comp, ref, entry):
+    def add(comp, ref, entry, identity=None):
         if ref not in VALID.get(comp, ()):    # phantom key (OCR noise / RAO) — not a real provision
             dropped_invalid[f"{comp}|{ref}"] += 1
             return
         key = f"{comp}|{ref}"
-        if entry["url"] in seen[key]:
+        identity = identity or entry["url"]
+        previous = seen[key].get(identity)
+        if previous:
+            scope_order = {"primary": 0, "contextual": 1, "candidate": 2}
+            previous["scopes"] = sorted(set(previous.get("scopes", [])) | set(entry.get("scopes", [])),
+                                        key=lambda scope: scope_order.get(scope, 9))
+            for field in ("relationship_kinds", "evidence_bases", "match_methods", "match_confidences"):
+                previous[field] = sorted(set(previous.get(field, [])) | set(entry.get(field, [])))
+            if scope_order.get(entry.get("scope"), 9) < scope_order.get(previous.get("scope"), 9):
+                for field in ("scope", "url", "relationship_kind", "evidence_basis", "match_method", "match_confidence"):
+                    previous[field] = entry.get(field)
             return
-        seen[key].add(entry["url"])
+        seen[key][identity] = entry
         table[key].append(entry)
 
-    for r in data:
-        provs = r.get("provisions") or []
-        if not provs:
+    for row in data:
+        type_code = TYPE_CODE.get(row.get("type"))
+        if type_code is None:
             continue
-        # Judicial cases are supplied by the canonical reverse index below.
-        # Keeping them out of this generic feed avoids stale/noncanonical case
-        # rows and gives range/suffix normalization one authoritative path.
-        if r.get("type") == "Judicial case":
+        provision = str(row.get("provision") or "")
+        if not provision:
             continue
-        t = TYPE_CODE.get(r.get("type"), None)
-        if t is None:
+        if re.match(r"^\s*WLC\b", provision, re.I):
+            refs = [("wlc", ref) for ref in index_wlc_refs(provision)]
+        else:
+            normalized = norm(provision)
+            refs = [normalized] if normalized else []
+        if not refs:
+            skipped[provision] += 1
             continue
-        # overtures point at the verbatim minutes page with a #page anchor;
-        # catalogue pages are clean .md — convert .md→.html in both shapes.
-        url = ga_url(r.get("url", ""))
+        occurrences = row.get("occurrences") or []
+        occurrence = reader_occurrence(row)
+        if occurrences and occurrence is None:
+            continue
+        url_value = (occurrence or {}).get("url") or row.get("url") or ""
+        record_id = str(row.get("record_id") or row.get("relationship_id") or url_value)
+        scope = row.get("reader_scope") or (occurrence or {}).get("reader_scope") or "candidate"
+        scope_order = {"primary": 0, "contextual": 1, "candidate": 2}
+        scopes = set(row.get("scopes") or [scope])
+        scopes.update(item.get("reader_scope") for item in occurrences if item.get("reader_scope"))
+        scopes = sorted(scopes, key=lambda value: scope_order.get(value, 9))
+        relationship_kind = (occurrence or {}).get("relationship_kind") or row.get("relationship_kind") or ""
+        evidence_basis = (occurrence or {}).get("evidence_basis") or row.get("evidence_basis") or ""
+        match_method = (occurrence or {}).get("match_method") or row.get("match_method") or ""
+        match_confidence = (occurrence or {}).get("match_confidence") or row.get("match_confidence") or ""
         entry = {
-            "t": t,
-            "ttl": (r.get("title") or "").strip(),
-            "yr": r.get("year"),
-            "disp": (r.get("disposition") or "").strip(),
-            "url": url,
+            "t": type_code,
+            "ttl": case_title(row) if row.get("type") == "Judicial case" else (row.get("title") or "").strip(),
+            "yr": row.get("year"),
+            "disp": (row.get("disposition") or "").strip(),
+            "url": ga_url(url_value),
+            "scope": scope,
+            "scopes": scopes,
+            "relationship_kind": relationship_kind,
+            "relationship_kinds": list(row.get("relationship_kinds") or ([relationship_kind] if relationship_kind else [])),
+            "evidence_basis": evidence_basis,
+            "evidence_bases": list(row.get("evidence_bases") or ([evidence_basis] if evidence_basis else [])),
+            "match_method": match_method,
+            "match_methods": list(row.get("match_methods") or ([match_method] if match_method else [])),
+            "match_confidence": match_confidence,
+            "match_confidences": [match_confidence] if match_confidence else [],
         }
-        for prov in provs:
-            nr = norm(prov)
-            if nr is None:
-                skipped[prov] += 1
+        for comp, ref in refs:
+            if comp == "bco" and MATCH_CONFIDENCE_RANK.get(match_confidence, -1) < MATCH_CONFIDENCE_RANK[BCO_MATCH_CONFIDENCE_THRESHOLD]:
                 continue
-            comp, ref = nr
-            if use_bco_manifests and comp == "bco" and not ref.startswith("PP-"):
-                continue
-            kept_provstrings.add(prov)
-            add(comp, ref, entry)
+            kept_provstrings.add(provision)
+            add(comp, ref, entry, record_id)
 
-    # Judicial cases come from the canonical GA reverse index.  It contains
-    # audited case pages, evidence, and normalized case metadata; the Markdown
-    # pass remains an audit only and cannot add citation rows.
-    case_keys = set()
-    for comp, ref, entry in load_case_provision_rows():
-        if use_bco_manifests and comp == "bco" and not ref.startswith("PP-"):
-            continue
-        add(comp, ref, entry)
-        if comp == "wlc":
-            case_keys.add((ref, entry["url"]))
-    audit_case_markdown(case_keys)
-
-    if use_bco_manifests:
-        manifest_rows = load_bco_manifest_rows()
-        for comp, ref, entry in manifest_rows:
-            add(comp, ref, entry)
-        print(f"loaded BCO manifests: {len(manifest_rows)} authority rows")
-    else:
-        print("BCO manifests unavailable; using legacy search-index BCO rows")
-
-    # The other types are indexed for BCO, but their Westminster references are
-    # largely untagged, so we continue harvesting those from their bodies.
-    for subdir, code in (("overtures","ov"), ("inquiries","inq"), ("rpr/exc","rpr"), ("studies","pp")):
-        f, r = scan_dir(add, subdir, code, westminster_only=True)
-        print(f"scanned {subdir}: {f} files, {r} Westminster links")
+    if not table:
+        raise ValueError(
+            "No supported authority-index records map to displayed provisions; "
+            "existing citation assets were left untouched."
+        )
+    if not any(key.startswith("bco|") for key in table):
+        raise ValueError(
+            "No high-confidence authority-index records map to displayed BCO provisions; "
+            "existing citation assets were left untouched."
+        )
 
     # sort each provision's actions newest-first, then by type
-    torder = {"case":0,"inq":1,"ov":2,"rpr":3,"pp":4}
+    torder = {"case":0,"ov":1,"inq":2,"ccb":3,"rpr":4}
     for key, rows in table.items():
         rows.sort(key=lambda e: (-(e["yr"] or 0), torder.get(e["t"],9)))
 
@@ -422,11 +311,12 @@ def main():
     # counts manifest (eager): powers reading-view badges + "has citations" checks
     cnt_payload = "{" + ",".join(
         f'{json.dumps(k)}:{counts[k]}' for k in sorted(counts)) + "}"
-    open(os.path.join(CONTENT, "citations-counts.js"), "w").write(
-        "/* citations-counts.js — per-provision GA-citation totals (eager; powers badges).\n"
-        "   Row data is split into content/cit/*.js, loaded on demand. Regenerate with build_citations.py. */\n"
-        f"window.GA_BASE = {json.dumps(GA_BASE)};\n"
-        f"window.CIT_COUNTS = {cnt_payload};\n")
+    with open(os.path.join(CONTENT, "citations-counts.js"), "w", encoding="utf-8") as output:
+        output.write(
+            "/* citations-counts.js — per-provision GA-citation totals (eager; powers badges).\n"
+            "   Row data is split into content/cit/*.js, loaded on demand. Regenerate with build_citations.py. */\n"
+            f"window.GA_BASE = {json.dumps(GA_BASE)};\n"
+            f"window.CIT_COUNTS = {cnt_payload};\n")
 
     # per-file row data (lazy): bco-<chapter>.js (including bco-PP.js),
     # wcf.js, wlc.js, wsc.js
@@ -438,8 +328,8 @@ def main():
         body = "{" + ",".join(
             f'{json.dumps(r)}:{json.dumps(refs[r], ensure_ascii=False, separators=(",",":"))}'
             for r in sorted(refs)) + "}"
-        open(os.path.join(CIT_DIR, f"{fid}.js"), "w").write(
-            f'window.CIT=window.CIT||{{}};window.CIT[{json.dumps(fid)}]={body};\n')
+        with open(os.path.join(CIT_DIR, f"{fid}.js"), "w", encoding="utf-8") as output:
+            output.write(f'window.CIT=window.CIT||{{}};window.CIT[{json.dumps(fid)}]={body};\n')
 
     # drop the obsolete monolithic file if present
     old = os.path.join(CONTENT, "citations.js")
