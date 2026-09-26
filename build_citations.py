@@ -285,6 +285,11 @@ def main():
             "No supported authority-index records map to displayed provisions; "
             "existing citation assets were left untouched."
         )
+    if not any(key.startswith("bco|") for key in table):
+        raise ValueError(
+            "No high-confidence authority-index records map to displayed BCO provisions; "
+            "existing citation assets were left untouched."
+        )
 
     # sort each provision's actions newest-first, then by type
     torder = {"case":0,"ov":1,"inq":2,"ccb":3,"rpr":4}

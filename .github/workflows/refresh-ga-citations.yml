@@ -27,30 +27,43 @@ jobs:
           repository: raymond-rishty/pca-ga
           path: pca-ga
 
-      - name: Check for compatible authority rows
+      - name: Check for high-confidence BCO authority rows
         id: authority-index
         env:
           PCA_GA_DIST: ${{ github.workspace }}/pca-ga
         run: |
           python - <<'PY'
-          import json
           import os
+          import sys
           from pathlib import Path
 
-          path = Path(os.environ["PCA_GA_DIST"]) / "index" / "authority_index.json"
+          sys.path.insert(0, str(Path.cwd()))
+          import build_citations as builder
+
           try:
-              rows = json.loads(path.read_text(encoding="utf-8"))
-          except (OSError, json.JSONDecodeError):
+              rows = builder.load_authority_rows()
+          except (OSError, ValueError):
               rows = []
-          supported = {"Judicial case", "Overture", "Constitutional inquiry", "CCB advice", "RPR exception"}
-          available = isinstance(rows, list) and any(
-              isinstance(row, dict) and row.get("type") in supported and row.get("provision")
-              for row in rows
-          )
+          valid_bco = builder.valid_refs()["bco"]
+          available = False
+          for row in rows if isinstance(rows, list) else []:
+              if not isinstance(row, dict) or row.get("type") not in builder.TYPE_CODE:
+                  continue
+              normalized = builder.norm(str(row.get("provision") or ""))
+              if not normalized or normalized[0] != "bco" or normalized[1] not in valid_bco:
+                  continue
+              occurrences = row.get("occurrences") or []
+              occurrence = builder.reader_occurrence(row)
+              if occurrences and occurrence is None:
+                  continue
+              confidence = (occurrence or {}).get("match_confidence") or row.get("match_confidence") or ""
+              if builder.MATCH_CONFIDENCE_RANK.get(confidence, -1) >= builder.MATCH_CONFIDENCE_RANK[builder.BCO_MATCH_CONFIDENCE_THRESHOLD]:
+                  available = True
+                  break
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               output.write(f"available={str(available).lower()}\n")
           if not available:
-              print("::notice::No compatible PCA GA authority rows are available; keeping the current citation assets.")
+              print("::notice::No valid high-confidence BCO rows are available in the PCA GA authority index; keeping the current citation assets.")
           PY
 
       - name: Rebuild citation assets
