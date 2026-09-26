@@ -2,10 +2,11 @@
 """Derive citations from the GA repository's curated authority projection.
 
 The generated ``index/authority_index.json`` is the only relationship source.
-Rows for record types supported by the Reader are included across all
-``reader_scope`` values; the scope and evidence labels are retained so
-contextual and candidate matches stay visible without appearing primary. This
-builder does not scan record bodies or reinterpret provision references.
+For BCO provisions, only matches at or above the high-confidence threshold
+pass the display cutoff; other constitutional books retain all scopes. Scope
+and evidence metadata remain in the derived rows for provenance, but BCO pages
+do not display scope labels.
+This builder does not scan record bodies or reinterpret provision references.
 
 Output (split for lazy loading; see the app's loader):
   content/citations-counts.js   window.CIT_COUNTS = { "comp|ref": <total>, ... }  (tiny, eager)
@@ -48,6 +49,9 @@ TYPE_CODE = {
     "CCB advice": "ccb",
     "RPR exception": "rpr",
 }
+
+MATCH_CONFIDENCE_RANK = {"low": 0, "medium": 1, "high": 2}
+BCO_MATCH_CONFIDENCE_THRESHOLD = "high"
 
 SCRIPTURE = {"acts","hebrews","romans","ephesians","exodus","daniel","luke",
              "philippians","revelation","matthew","john","psalm","psalms",
@@ -271,6 +275,8 @@ def main():
             "match_confidences": [match_confidence] if match_confidence else [],
         }
         for comp, ref in refs:
+            if comp == "bco" and MATCH_CONFIDENCE_RANK.get(match_confidence, -1) < MATCH_CONFIDENCE_RANK[BCO_MATCH_CONFIDENCE_THRESHOLD]:
+                continue
             kept_provstrings.add(provision)
             add(comp, ref, entry, record_id)
 
