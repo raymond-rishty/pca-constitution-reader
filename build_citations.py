@@ -23,9 +23,8 @@ from pathlib import Path
 # CI, while all derived citation assets still live in this repository.
 DIST = os.environ.get("PCA_GA_DIST", "/workspace/dist/pca-ga")
 AUTHORITY_INDEX = os.path.join(DIST, "index", "authority_index.json")
-# The source Markdown retains the old anchor's exact association with a PAGE
-# boundary. It is needed to migrate legacy gaNN-pN links without guessing from
-# the number alone. In the Pages build this is the mounted GA repository.
+# The source Markdown contains the dedicated Overture documents. In the Pages
+# build this is the mounted GA repository.
 GA_SOURCE = os.environ.get("PCA_GA_SOURCE", DIST)
 ROOT = os.path.dirname(os.path.abspath(__file__))   # repo root (works in a worktree too)
 CONTENT = os.path.join(ROOT, "content")
@@ -151,89 +150,9 @@ def index_wlc_refs(value):
     return [f"Q.{number}" for number in range(start, end + 1)]
 
 
-_MINUTES_PAGES = {}
-_PAGE_MARKER_RE = re.compile(
-    r"<!--\s*PAGE\s+ga=(?P<ga>\d+)\s+pdf_page=(?P<pdf>\d+)\s+"
-    r"printed_page=(?P<printed>[^\s>]+)(?:\s+printed_page_source=[^\s>]+)?\s*-->",
-    re.I,
-)
-_PAGE_ANCHOR_RE = re.compile(r'<a\s+id=["\'](?P<anchor>ga\d+-p[^"\']+)["\']', re.I)
-
-
-def minutes_pages(volume):
-    """Load page boundaries and legacy anchor ownership for one Minutes PDF."""
-    if volume not in _MINUTES_PAGES:
-        path = Path(GA_SOURCE, "markdown", f"{volume}.md")
-        if not path.is_file():
-            raise FileNotFoundError(
-                f"Cannot migrate Minutes page anchors: missing source Markdown {path}. "
-                "Set PCA_GA_SOURCE to the PCA GA repository root."
-            )
-        records = []
-        pending = []
-        for line in path.read_text(encoding="utf-8").splitlines():
-            pending.extend(m.group("anchor") for m in _PAGE_ANCHOR_RE.finditer(line))
-            marker = _PAGE_MARKER_RE.search(line)
-            if not marker:
-                continue
-            printed = marker.group("printed")
-            records.append({
-                "ga": int(marker.group("ga")),
-                "pdf": int(marker.group("pdf")),
-                "printed": None if printed.lower() == "null" else printed,
-                "legacy_anchors": tuple(pending),
-            })
-            pending = []
-        counts = collections.Counter(
-            record["printed"] for record in records if record["printed"] is not None
-        )
-        _MINUTES_PAGES[volume] = (records, counts)
-    return _MINUTES_PAGES[volume]
-
-
-def canonical_minutes_fragment(volume, fragment):
-    """Resolve a legacy page fragment through its source PAGE boundary."""
-    # These forms are already explicit under the Minutes anchor contract.
-    if re.fullmatch(r"ga\d+-pdf-p\d+", fragment) or re.fullmatch(
-        r"ga\d+-p.+-at-pdf\d+", fragment
-    ):
-        return fragment
-
-    records, printed_counts = minutes_pages(volume)
-    matches = [r for r in records if fragment in r["legacy_anchors"]]
-    if len(matches) != 1:
-        raise ValueError(
-            f"Cannot uniquely resolve legacy Minutes anchor #{fragment} in {volume}: "
-            f"found {len(matches)} source PAGE boundaries."
-        )
-    record = matches[0]
-    ga = record["ga"]
-    pdf = record["pdf"]
-    printed = record["printed"]
-    if printed is None:
-        return f"ga{ga}-pdf-p{pdf}"
-    if printed_counts[printed] > 1:
-        return f"ga{ga}-p{safe_folio(printed)}-at-pdf{pdf}"
-    return f"ga{ga}-p{safe_folio(printed)}"
-
-
-def safe_folio(printed):
-    """Match the GA site's page-ID normalization for nonnumeric folios."""
-    return re.sub(r"[^A-Za-z0-9.-]+", "-", str(printed)).strip("-")
-
-
 def ga_url(value):
-    """Convert a GA Markdown path and migrate legacy Minutes page anchors."""
+    """Convert a GA-relative Markdown path to its stable public HTML URL."""
     path = str(value or "").replace("\\", "/")
-    match = re.search(
-        r"(?:^|/)markdown/(?P<volume>ga\d+_[^/#]+)\.(?:md|html)(?P<fragment>#[^?]*)?$",
-        path,
-    )
-    if match and match.group("fragment"):
-        fragment = match.group("fragment")[1:]
-        if re.fullmatch(r"ga\d+-p[^#]+", fragment):
-            updated = canonical_minutes_fragment(match.group("volume"), fragment)
-            path = path[:match.start("fragment")] + "#" + updated
     if path.startswith("http://") or path.startswith("https://"):
         return re.sub(r"\.md(#|$)", r".html\1", path)
     return GA_BASE + re.sub(r"\.md(#|$)", r".html\1", path.lstrip("./"))
@@ -254,6 +173,21 @@ def case_title(row):
     if label and title and not title.startswith(label):
         return f"{label} — {title}"
     return title or label or "Judicial case"
+
+
+def overture_page(record_id):
+    """Return the dedicated Overture document for an authority record."""
+    match = re.fullmatch(r"overture:(?P<volume>ga\d+_\d+):(?P<number>\d+)", str(record_id or ""))
+    if not match:
+        raise ValueError(f"Cannot identify dedicated Overture page for {record_id!r}.")
+    volume = match.group("volume")
+    number = int(match.group("number"))
+    path = f"overtures/{volume}__o{number}.md"
+    if not Path(GA_SOURCE, path).is_file():
+        raise FileNotFoundError(
+            f"Missing dedicated Overture page {Path(GA_SOURCE, path)} for {record_id}."
+        )
+    return path
 
 
 def reader_occurrence(row):
@@ -330,8 +264,12 @@ def main():
         occurrence = reader_occurrence(row)
         if occurrences and occurrence is None:
             continue
-        url_value = (occurrence or {}).get("url") or row.get("url") or ""
-        record_id = str(row.get("record_id") or row.get("relationship_id") or url_value)
+        source_url = (occurrence or {}).get("url") or row.get("url") or ""
+        record_id = str(row.get("record_id") or row.get("relationship_id") or source_url)
+        if row.get("type") == "Overture":
+            url_value = overture_page(record_id)
+        else:
+            url_value = source_url
         scope = row.get("reader_scope") or (occurrence or {}).get("reader_scope") or "candidate"
         scope_order = {"primary": 0, "contextual": 1, "candidate": 2}
         scopes = set(row.get("scopes") or [scope])
