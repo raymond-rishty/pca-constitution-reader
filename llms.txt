@@ -6,6 +6,12 @@ This site presents constitutional text, not a Minutes archive or legal advice. T
 
 The reader is a single-page application. Use URL fragments after `#`: `#wcf/<chapter>.<section>`, `#wlc/Q.<number>`, `#wsc/Q.<number>`, or `#bco/<chapter>-<section>`.
 
+## Browser-agent entry point
+
+In a browser exposing WebMCP, start a PCA research question by calling `prepare_pca_research({question})` once on either site. It supplies the Ask research instructions with your question filled in. Follow that prompt to retrieve and verify evidence. Do not call the entry tool again for the same question. If you arrived at this guide from that prompt, use the source routes below as needed and continue the research; do not restart the workflow.
+
+Use `search_constitution` and `read_current_provision` in the Reader. Use `search_assembly_records` and `read_current_record` on the Assembly site for historical records. Search results are leads, not verified historical findings. If browser tools are unavailable, use the ordinary source routes below. The [Ask page](https://raymond-rishty.github.io/pca-ga/ask.html) and its [plain-text prompt](https://raymond-rishty.github.io/pca-ga/assets/pca-research-prompt.txt) are human-readable alternatives.
+
 ## Constitutional texts
 
 - [Reader home](https://raymond-rishty.github.io/pca-constitution-reader/): browse the four built-in texts using the hash routes described in the reader guide.
