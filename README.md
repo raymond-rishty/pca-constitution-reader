@@ -23,6 +23,8 @@ The reader uses URL fragments after `#`:
 
 ## Search
 
+Browser agents supporting [WebMCP](docs/webmcp.md) can start with `prepare_pca_research({question})`, then search public provisions and read the displayed text through native page tools.
+
 The search control (or <kbd>Ctrl/⌘ K</kbd>) searches the full text of every provision in the built-in library and installed book packs. Results rank exact references first, accept common document names and reference punctuation, and tolerate minor spelling mistakes in words of four or more letters. Put wording in quotation marks to require an exact phrase, and use the document chips to narrow the results.
 
 ## Agent retrieval workflow

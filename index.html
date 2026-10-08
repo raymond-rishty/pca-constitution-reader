@@ -1729,5 +1729,6 @@ async function shareApp(){
 /* ── PWA: register the service worker (installable + full offline) ── */
 if('serviceWorker' in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
 </script>
+<script src="webmcp-integration.js"></script>
 </body>
 </html>
