@@ -180,6 +180,34 @@
         },
         "meta": {
           "type": "string"
+        },
+        "editionYear": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "amendmentsThrough": {
+          "type": "string",
+          "minLength": 1
+        },
+        "language": {
+          "type": "string",
+          "minLength": 2
+        },
+        "translationOf": {
+          "type": "string",
+          "minLength": 1
+        },
+        "noticeLabel": {
+          "type": "string"
+        },
+        "vacatedText": {
+          "type": "string"
+        },
+        "parts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": false

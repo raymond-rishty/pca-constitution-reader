@@ -1,6 +1,6 @@
 /* PCA Constitution — service worker: offline-first app shell + runtime-cached fonts.
    Bump VERSION when shipping new content/markup to roll the cache. */
-const VERSION = 'pcacon-v45';
+const VERSION = 'pcacon-v47';
 const CORE = VERSION + '-core';
 const FONTS = VERSION + '-fonts';
 
@@ -11,6 +11,7 @@ const SHELL = [
   'content/wsc.js', 'content/wlc.js', 'content/wcf.js',
   'content/bco.js', 'content/proofs.js', 'content/verses.js', 'content/citations-counts.js',
   'content/ramsay.js', 'content/rao.js', 'content/appendix-h-diagrams.js',
+  'content/translations/bco-2025-es.js', 'content/translations/bco-2026-ko.js',
   'diagrams/appendix-h.svg', 'diagrams/appendix-h.es.svg', 'diagrams/appendix-h.ko.svg',
   'search-engine.js',
 ];

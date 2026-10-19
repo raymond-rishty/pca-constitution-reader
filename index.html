@@ -570,9 +570,36 @@
 <script src="content/ramsay.js"></script>
 <script src="content/rao.js"></script>
 <script src="content/appendix-h-diagrams.js"></script>
+<script src="content/translations/bco-2025-es.js"></script>
+<script src="content/translations/bco-2026-ko.js"></script>
 <script src="search-engine.js"></script>
 <script>
 /* ══════════ CONTENT: real where sourced (window.WSC), placeholder elsewhere ══════════ */
+/* Translation packs opt in with component.translationOf="bco" and component.language. */
+function chooseBcoEdition(){
+  const packs=(window.BUNDLED_PACKS||[]).filter(p=>p.kind==='book'&&p.component&&p.component.translationOf==='bco'&&p.component.language);
+  const languages=new Set(packs.map(p=>String(p.component.language).toLowerCase().split(/[-_]/)[0]));
+  const preferred=(navigator.languages||[navigator.language||'en']).map(tag=>String(tag).toLowerCase().split(/[-_]/)[0]);
+  const lang=preferred.find(x=>languages.has(x));
+  const pack=lang&&packs.find(p=>String(p.component.language).toLowerCase().split(/[-_]/)[0]===lang);
+  if(!pack) return {lang:'en',map:window.BCO,label:'English',component:{},notice:''};
+  const map=Object.assign({},window.BCO);
+  for(const id of pack.order||Object.keys(pack.chapters||{})){
+    const chapter=(pack.chapters||{})[id];
+    if(chapter&&map[id]){
+      const base=map[id];
+      const sourceSections=new Map((base.sections||[]).map(s=>[s.ref,s]));
+      map[id]=Object.assign({},base,chapter,{part:base.part,paras:chapter.paras||[],
+        sections:(chapter.sections||[]).map(s=>{
+          const source=sourceSections.get(s.ref);
+          return Object.assign(source&&source.binding!==undefined?{binding:source.binding}:{},s);
+        })});
+    }
+  }
+  return {lang,map,label:pack.component.name||pack.label||lang,component:pack.component,notice:pack.notice||''};
+}
+const BCO_EDITION=chooseBcoEdition();
+const BCO_DATA=BCO_EDITION.map;
 const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.";
 const SHORT_LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.";
 // curated opening questions (the rest are generated placeholders in the long scroll)
@@ -597,10 +624,10 @@ const COMPONENTS = {
     tag:"The concise catechism — for learning by heart.",
     lede:"One hundred seven questions and answers, composed to be committed to memory — the most widely learned summary of the faith in the Presbyterian tradition.",
     meta:"107 questions & answers · Scripture proof-texts"},
-  bco:{abbr:"BCO", mode:"paged", name:"Book of Church Order", division:"order",
-    tag:"How the church is governed, disciplined, and led in worship.",
-    lede:"The Constitution's governmental standard, in three parts: the Form of Government, the Rules of Discipline, and the Directory for the Worship of God.",
-    meta:"3 parts · Form of Government · Rules of Discipline · Directory for Worship"},
+  bco:{abbr:BCO_EDITION.component.abbr||"BCO", mode:"paged", name:BCO_EDITION.lang==='en'?"Book of Church Order":(BCO_EDITION.component.name||BCO_EDITION.label), division:"order",
+    tag:BCO_EDITION.component.tag||"How the church is governed, disciplined, and led in worship.",
+    lede:BCO_EDITION.component.lede||"The Constitution's governmental standard, in three parts: the Form of Government, the Rules of Discipline, and the Directory for the Worship of God.",
+    meta:BCO_EDITION.component.meta||"3 parts · Form of Government · Rules of Discipline · Directory for Worship"},
 };
 
 /* WCF chapter titles (standard 33) */
@@ -637,7 +664,7 @@ const SPINE = {
   wsc: WSC_SECTIONS.map(([a,b,t])=>({qStart:a, qEnd:b, title:t})),
   wlc: WLC_SECTIONS.map(([a,b,t])=>({qStart:a, qEnd:b, title:t})),
   bco: (window.BCO_ORDER
-    ? window.BCO_ORDER.map(id=>({part:window.BCO[id].part, ch:id, title:window.BCO[id].title, vacated:window.BCO[id].vacated}))
+    ? window.BCO_ORDER.map(id=>({part:BCO_DATA[id].part, ch:id, title:BCO_DATA[id].title, vacated:BCO_DATA[id].vacated}))
     : BCO_PARTS.flatMap(p=>p.chapters.map(ch=>({part:p.key, ch:String(ch[0]), title:ch[1], partName:p.name})))),
 };
 
@@ -646,7 +673,7 @@ const SPINE = {
    so nav / TOC / reader / search / drawer treat them uniformly. ── */
 window.BOOK_PACKS = window.BOOK_PACKS || [];
 function pagedData(book){               // unified accessor for paged corpora (BCO + custom books)
-  if(book==='bco') return window.BCO_ORDER ? {map:window.BCO, order:window.BCO_ORDER} : null;
+  if(book==='bco') return window.BCO_ORDER ? {map:BCO_DATA, order:window.BCO_ORDER} : null;
   const bp = window.BOOK_PACKS.find(b=>b.component.key===book);
   return bp ? {map:bp.chapters, order:bp.order} : null;
 }
@@ -852,18 +879,20 @@ function buildChapter(book, o){
       railSub:(bc.sections||[]).filter(s=>!s.prose).map(s=>s.ref).filter(Boolean),   // skip number-less prose (e.g. an essay appendix)
       provs:(bc.sections||[]).map(s=>({ref:s.ref, body:s.body, blocks:s.blocks, prose:s.prose}))};
   }
-  // bco — real text from window.BCO
-  if(window.BCO && window.BCO[o.ch]){
-    const bc = window.BCO[o.ch];
-    const PN = {fog:"Form of Government", rod:"Rules of Discipline", dow:"Directory for the Worship of God"}[bc.part];
+  // bco — active edition (English, Spanish, or Korean)
+  if(BCO_DATA && BCO_DATA[o.ch]){
+    const bc = BCO_DATA[o.ch];
+    const PN = BCO_EDITION.component.parts?.[bc.part] || {fog:"Form of Government", rod:"Rules of Discipline", dow:"Directory for the Worship of God"}[bc.part];
     const isChapter = !!PN;
     const kicker = isChapter ? "Book of Church Order · "+PN : (bc.part==='appx' ? "Book of Church Order · Appendices" : "Book of Church Order");
     const title = isChapter ? "Chapter "+o.ch : bc.title;
     const subtitle = isChapter ? bc.title : "";
-    if(bc.vacated) return {kicker, title, subtitle, railSub:[], provs:[{ref:null, body:"This chapter has been vacated."}]};
+    if(bc.vacated) return {kicker, title, subtitle, railSub:[], provs:[{ref:null, body:BCO_EDITION.component.vacatedText||"This chapter has been vacated."}]};
     const provs = (bc.paras||[]).map(p=>({ref:null, body:p}))
       .concat((bc.sections||[]).map(s=>Object.assign({ref:s.ref, body:s.body, blocks:s.blocks}, bc.part==='dow' ? {con:!!s.binding} : {})));
-    return {kicker, title, subtitle, advisoryNote: bc.part==='dow' ? DFW_NOTE : undefined,
+    const editionNotice = BCO_EDITION.lang==='en' ? '' : `<strong>${BCO_EDITION.component.noticeLabel||'Edition note'}:</strong> ${BCO_EDITION.notice}`;
+    const advisory = [bc.part==='dow' ? DFW_NOTE : '', editionNotice].filter(Boolean).join('<br><br>');
+    return {kicker, title, subtitle, advisoryNote: advisory||undefined,
       railSub: (bc.sections||[]).map(s=>s.ref), provs};
   }
   const key = "bco:"+o.part+":"+o.ch;
@@ -955,6 +984,7 @@ const EDITION_LINE = "Book of Church Order through the 52nd General Assembly (20
 
 function showAbout(){
   setView("about"); setRoute('about');
+  document.getElementById('doc').removeAttribute('lang');
   document.getElementById('doc').innerHTML = `<div class="landing about">
     <a class="back" data-home>‹ The PCA Constitution</a>
     <h1 class="about-title">About &amp; Sources</h1>
@@ -985,6 +1015,7 @@ function showAbout(){
 
 function showHome(){
   setView("home"); current="bco"; setRoute('');
+  document.getElementById('doc').removeAttribute('lang');
   document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', false));
   const entry = k => {
     const c = COMPONENTS[k];
@@ -1036,15 +1067,16 @@ function showComponent(book){
           return `<li><a data-book="${book}" data-ch="${id}"><span class="tn">${id}</span><span class="tt">${bc.title||('Chapter '+id)}</span></a></li>`;
         }).join('') : '')
       + `</ol>`;
-  } else if(window.BCO){ // bco — real TOC: front matter, the three parts, appendices
-    const GROUPS = [['front','Preface & Principles'],['fog','Form of Government'],['rod','Rules of Discipline'],['dow','Directory for the Worship of God'],['appx','Appendices']];
+  } else if(BCO_DATA){ // bco — real TOC: front matter, the three parts, appendices
+    const partLabels = BCO_EDITION.component.parts || {};
+    const GROUPS = [['front',partLabels.front||'Preface & Principles'],['fog',partLabels.fog||'Form of Government'],['rod',partLabels.rod||'Rules of Discipline'],['dow',partLabels.dow||'Directory for the Worship of God'],['appx',partLabels.appx||'Appendices']];
     toc = GROUPS.map(([key,label])=>{
-      const ids = window.BCO_ORDER.filter(id=>window.BCO[id].part===key);
+      const ids = window.BCO_ORDER.filter(id=>BCO_DATA[id].part===key);
       if(!ids.length) return '';
       const numbered = key==='fog'||key==='rod'||key==='dow';
       const range = numbered ? `<p class="prange">Chapters ${ids[0]}–${ids[ids.length-1]}${key==='dow'?' · mixed authority (binding sections marked)':''}</p>` : '';
       return `<div class="part-block"><h3>${label}</h3>${range}
-        <ol class="toc one">${ids.map(id=>{ const bc=window.BCO[id];
+        <ol class="toc one">${ids.map(id=>{ const bc=BCO_DATA[id];
           return `<li><a data-book="bco" data-ch="${id}"><span class="tn">${numbered?id:''}</span><span class="tt">${bc.title||'(Vacated)'}</span>${bc.vacated?'<span class="sample">vacated</span>':''}</a></li>`;
         }).join('')}</ol></div>`;
     }).join('');
@@ -1056,7 +1088,9 @@ function showComponent(book){
         return `<li><a data-book="bco" data-part="${p.key}" data-ch="${ch[0]}" data-title="${ch[1]}"><span class="tn">${ch[0]}</span><span class="tt">${ch[1]}</span>${sample?'<span class="sample">sample</span>':''}</a></li>`;
       }).join('')}</ol></div>`).join('');
   }
-  document.getElementById('doc').innerHTML = `<div class="landing component">
+  const docEl=document.getElementById('doc');
+  if(book==='bco') docEl.lang=BCO_EDITION.lang; else docEl.removeAttribute('lang');
+  docEl.innerHTML = `<div class="landing component">
     <a class="back" data-home>‹ The PCA Constitution</a>
     <p class="comp-eyebrow">${DIVISIONS[c.division]?DIVISIONS[c.division].one:'Church Order'}</p>
     <h1 class="comp-title">${c.name}</h1>
@@ -1064,8 +1098,8 @@ function showComponent(book){
     <p class="comp-meta">${c.meta}</p>
     ${toc}
     <p class="comp-note">${
-      (book==='bco'&&window.BCO)
-      ? 'Full Book of Church Order — for personal study only (© PCA; not for redistribution). The Directory for Worship marks its binding (constitutional) sections.'
+      (book==='bco'&&BCO_DATA)
+      ? `Full Book of Church Order${BCO_EDITION.lang==='en'?'':' · '+BCO_EDITION.label} — for personal study only (© PCA; not for redistribution). The Directory for Worship marks its binding (constitutional) sections.`
       : ((book==='wsc'&&window.WSC)||(book==='wlc'&&window.WLC)||(book==='wcf'&&window.WCF))
       ? 'Full text — public-domain OPC edition (the standard the PCA has adopted). Scripture proof texts are pending a proof-text source (WCF 21 shows a sample).'
       : c.custom
@@ -1073,6 +1107,7 @@ function showComponent(book){
       : c.mode==='scroll'
       ? 'Design prototype — placeholder text. The catechism opens as one long-scrolling page; every question is individually anchored and deep-linkable.'
       : 'Design prototype — text is placeholder and the chapter list is illustrative. The chapter marked “sample” opens a live reading view.'}</p>
+    ${book==='bco'&&BCO_EDITION.notice?`<div class="advisory-note"><strong>${BCO_EDITION.component.noticeLabel||'Edition note'}:</strong> ${BCO_EDITION.notice}</div>`:''}
   </div>`;
   window.scrollTo(0,0);
 }
@@ -1229,6 +1264,7 @@ function showChapter(book, o){
 
   const docEl = document.getElementById('doc');
   docEl.className = 'doc';   // clear any catechism density class
+  if(book==='bco') docEl.lang=BCO_EDITION.lang; else docEl.removeAttribute('lang');
   docEl.innerHTML = doc;
   document.getElementById('gutter').innerHTML = gut;
   if(o.anchor){
@@ -1485,7 +1521,7 @@ function buildSearch(){
   const out=[];
   if(window.WCF) for(const ch in window.WCF){ const c=window.WCF[ch]; (c.sections||[]).forEach(s=>out.push(_searchRecord('wcf',s.ref,{ch},c.title||`Chapter ${ch}`,_plain(s.body)))); }
   [['wsc',window.WSC],['wlc',window.WLC]].forEach(([bk,arr])=>{ if(Array.isArray(arr)) arr.forEach((qa,i)=>{ const ref='Q.'+(i+1), question=_plain(qa.q); out.push(_searchRecord(bk,ref,{qStart:String(i+1),anchor:ref},question,_plain(qa.a))); }); });
-  if(window.BCO && window.BCO_ORDER) window.BCO_ORDER.forEach(id=>{ const e=window.BCO[id]; (e.sections||[]).forEach(s=>{ let t=_plain(s.body); if(!t&&s.blocks) t=s.blocks.map(b=>_plain(b[b.length-1])).join(' '); out.push(_searchRecord('bco',s.ref,{ch:id},e.title||'',t)); }); if(e.paras&&e.paras.length){ const ref=id.startsWith('app')?`Appendix ${id.slice(3)}`:(e.title||id); out.push(_searchRecord('bco',ref,{ch:id},e.title||'Book of Church Order',e.paras.map(_plain).join(' '),true)); } });
+  if(BCO_DATA && window.BCO_ORDER) window.BCO_ORDER.forEach(id=>{ const e=BCO_DATA[id]; (e.sections||[]).forEach(s=>{ let t=_plain(s.body); if(!t&&s.blocks) t=s.blocks.map(b=>_plain(b[b.length-1])).join(' '); out.push(_searchRecord('bco',s.ref,{ch:id},e.title||'',t)); }); if(e.paras&&e.paras.length){ const ref=id.startsWith('app')?`Appendix ${id.slice(3)}`:(e.title||id); out.push(_searchRecord('bco',ref,{ch:id},e.title||'Book of Church Order',e.paras.map(_plain).join(' '),true)); } });
   window.BOOK_PACKS.forEach(bp=>{ const k=bp.component.key; (bp.order||[]).forEach(id=>{ const ch=bp.chapters[id]||{}; (ch.sections||[]).forEach(s=>out.push(_searchRecord(k,s.ref,{ch:id},ch.title||'',_plain(s.body)))); }); });
   return out;
 }
@@ -1609,7 +1645,7 @@ function renderPacks(){
   const nc = Object.values(NOTES).reduce((a,x)=>a+x.length,0);
   const haveComm = new Set(window.BCO_COMMENTARIES.map(c=>c.label));
   const haveBook = new Set(window.BOOK_PACKS.map(b=>b.component.key));
-  const available = (window.BUNDLED_PACKS||[]).filter(p=> p.kind==='book' ? !haveBook.has(p.component.key) : !haveComm.has(p.label));
+  const available = (window.BUNDLED_PACKS||[]).filter(p=>p.component?.translationOf!=='bco' && (p.kind==='book' ? !haveBook.has(p.component.key) : !haveComm.has(p.label)));
   const bookSecs = p => Object.values(p.chapters||{}).reduce((a,c)=>a+((c.sections||[]).length),0);
   document.getElementById('packsBody').innerHTML =
       `<div class="pack-row"><div><b>My notes</b><span class="pack-sub">${nc} note${nc!==1?'s':''} · stored on this device</span></div><button class="pack-btn" data-act="export-notes"${nc?'':' disabled'}>Export…</button></div>`
