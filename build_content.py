@@ -139,12 +139,13 @@ def build_bco():
     # section = a <p> that BEGINS with "NN-S." (number may be wrapped in any mix of <b>/<strong>/<span>).
     # A section opener may live in a <p> OR an <h4> (chapter-opening sections like
     # 27-1 are styled as headings), and the number itself may have stray spaces or
-    # tags inside it ("35- 5 ."). Try the section pattern before the generic <h4>
+    # tags inside it ("35- 5 ."). Some headings also omit the final period (56-6).
+    # Try the section pattern before the generic <h4>
     # title so heading-styled sections aren't swallowed as titles.
     _gap = r'(?:\s|<[^>]+>|&nbsp;)*'
     tok = re.compile(
         r'<h2[^>]*>\s*CHAPTER\s+([A-Z–\-]+)\s*</h2>'                          # 1: chapter heading
-        rf'|<(?:p|h4)[^>]*>{_gap}(\d+){_gap}-{_gap}(\d+[A-Za-z]?){_gap}\.'    # 2,3: section NN-S
+        rf'|<(?:p|h4)[^>]*>{_gap}(\d+){_gap}-{_gap}(\d+[A-Za-z]?){_gap}\.?'   # 2,3: section NN-S (period optional)
         r'|<h4[^>]*>(.*?)</h4>',                                              # 4: chapter title
         re.S | re.I)
     chapters = {}
@@ -174,6 +175,11 @@ def build_bco():
             ref = f"{ch}-{m.group(3)}"
             end = marks[i + 1].start() if i + 1 < len(marks) else len(src)
             body = clean(src[m.end():end]).strip()
+            # The last provision on each PCA part page can otherwise absorb
+            # the site's footer because there is no following section token.
+            body = re.split(r"\s*Copyright\s+©\s+\d{4}\b", body, maxsplit=1)[0].rstrip()
+            # The HTML page joins these words, but the 2026 BCO PDF has a space.
+            body = body.replace("Theruling elder or deacon elect", "The ruling elder or deacon elect")
             sec = {"ref": ref, "body": body}
             if part == "dow":
                 sec["binding"] = bco_binding(part, str(ch), ref)
