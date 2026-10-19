@@ -1,6 +1,7 @@
 [
   {
     "provision": "BCO 43-1",
+    "match_confidence": "high",
     "type": "Judicial case",
     "title": "RE J. Lance Acree v. Tennessee Valley Presbytery",
     "year": 2023,
@@ -20,6 +21,7 @@
   },
   {
     "provision": "BCO 11-3",
+    "match_confidence": "high",
     "type": "Judicial case",
     "title": "Candidate citation retained in Reader",
     "record_id": "case:contextual",
@@ -28,6 +30,7 @@
   },
   {
     "provision": "BCO 11-4",
+    "match_confidence": "high",
     "type": "CCB advice",
     "title": "CCB advice retained as contextual evidence",
     "record_id": "ccb_advice:example",
@@ -36,9 +39,10 @@
   },
   {
     "provision": "BCO Preliminary Principle 1",
+    "match_confidence": "high",
     "type": "Overture",
     "title": "Adopted preliminary-principle proposal",
-    "record_id": "overture:ga51_2024:10",
+    "record_id": "overture:ga51_2024:10:p1277",
     "reader_scope": "primary",
     "url": "markdown/ga51_2024.md#ga51-p1277",
     "occurrences": [

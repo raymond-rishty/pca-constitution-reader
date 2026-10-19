@@ -176,12 +176,22 @@ def case_title(row):
 
 
 def overture_page(record_id):
-    """Return the dedicated Overture document for an authority record."""
-    match = re.fullmatch(r"overture:(?P<volume>ga\d+_\d+):(?P<number>\d+)", str(record_id or ""))
+    """Return the dedicated document for legacy or page-qualified Overture IDs."""
+    # The authority index appends a Minutes page locator to newer record IDs.
+    # Reused overture numbers also have page-qualified document filenames.
+    match = re.fullmatch(
+        r"overture:(?P<volume>ga\d+_\d+):(?P<number>\d+)(?::p(?P<page>\d+))?",
+        str(record_id or ""),
+    )
     if not match:
         raise ValueError(f"Cannot identify dedicated Overture page for {record_id!r}.")
     volume = match.group("volume")
     number = int(match.group("number"))
+    page = match.group("page")
+    if page:
+        qualified_path = f"overtures/{volume}__o{number}__p{page}.md"
+        if Path(GA_SOURCE, qualified_path).is_file():
+            return qualified_path
     path = f"overtures/{volume}__o{number}.md"
     if not Path(GA_SOURCE, path).is_file():
         raise FileNotFoundError(

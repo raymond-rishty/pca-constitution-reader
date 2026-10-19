@@ -5,6 +5,7 @@ import re
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +18,33 @@ spec.loader.exec_module(citations)
 
 
 class BuildCitationsTests(unittest.TestCase):
+    def test_overture_ids_resolve_to_dedicated_pages(self):
+        with tempfile.TemporaryDirectory() as folder:
+            page = Path(folder, "overtures", "ga50_2023__o11.md")
+            page.parent.mkdir()
+            page.write_text("Overture 11", encoding="utf-8")
+            with patch.object(citations, "GA_SOURCE", folder):
+                for record_id in ("overture:ga50_2023:11", "overture:ga50_2023:11:p994"):
+                    with self.subTest(record_id=record_id):
+                        self.assertEqual(citations.overture_page(record_id),
+                                         "overtures/ga50_2023__o11.md")
+                with self.assertRaises(FileNotFoundError):
+                    citations.overture_page("overture:ga50_2023:12:p994")
+                qualified = page.with_name("ga50_2023__o11__p994.md")
+                qualified.write_text("Page-specific Overture 11", encoding="utf-8")
+                self.assertEqual(citations.overture_page("overture:ga50_2023:11:p994"),
+                                 "overtures/ga50_2023__o11__p994.md")
+                page.unlink()
+                self.assertEqual(citations.overture_page("overture:ga50_2023:11:p994"),
+                                 "overtures/ga50_2023__o11__p994.md")
+                with self.assertRaises(FileNotFoundError):
+                    citations.overture_page("overture:ga50_2023:11:p999")
+                for record_id in ("overture:ga50_2023:11:p994:extra",
+                                  "overture:ga50_2023:11:unknown", "case:ga50_2023:11"):
+                    with self.subTest(record_id=record_id):
+                        with self.assertRaises(ValueError):
+                            citations.overture_page(record_id)
+
     def test_empty_authority_index_cannot_erase_existing_citation_assets(self):
         with tempfile.TemporaryDirectory() as folder:
             temp = Path(folder)
@@ -58,13 +86,17 @@ class BuildCitationsTests(unittest.TestCase):
             (content / "wsc.js").write_text('{"n":95}', encoding="utf-8")
             source = temp / "authority_index.json"
             source.write_text(FIXTURE.read_text(encoding="utf-8"), encoding="utf-8")
+            overture = temp / "overtures" / "ga51_2024__o10.md"
+            overture.parent.mkdir()
+            overture.write_text("Overture 10", encoding="utf-8")
             previous = citations.DIST, citations.AUTHORITY_INDEX, citations.CONTENT, citations.CIT_DIR
             try:
                 citations.DIST = str(temp)
                 citations.AUTHORITY_INDEX = str(source)
                 citations.CONTENT = str(content)
                 citations.CIT_DIR = str(content / "cit")
-                citations.main()
+                with patch.object(citations, "GA_SOURCE", str(temp)):
+                    citations.main()
                 manifest = (content / "citations-counts.js").read_text(encoding="utf-8")
                 payload = json.loads(re.search(r"window\.CIT_COUNTS = (\{.*\});", manifest).group(1))
                 bco_rows = (content / "cit" / "bco-43.js").read_text(encoding="utf-8")
@@ -90,7 +122,8 @@ class BuildCitationsTests(unittest.TestCase):
         self.assertIn('"scope":"contextual"', scope_rows)
         self.assertIn('"t":"ccb"', scope_rows)
         self.assertIn('"scopes":["primary","candidate"]', pp_rows)
-        self.assertIn("ga51-p1277", all_citation_data)
+        self.assertIn("overtures/ga51_2024__o10.html", all_citation_data)
+        self.assertNotIn("ga51-p1277", all_citation_data)
         self.assertNotIn("ga51-p1278", all_citation_data)
         self.assertIn('"Q.65"', wlc_rows)
         self.assertIn('"Q.66"', wlc_rows)
