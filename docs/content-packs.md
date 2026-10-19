@@ -151,6 +151,19 @@ A book pack adds a complete paged corpus to the reader.
 | `tag` | optional | Short description shown on the home page. |
 | `lede` | optional | Longer component introduction. |
 | `meta` | optional | Compact edition/status line. |
+| `language` | optional | BCP 47 language tag for a translated BCO edition, such as `es` or `ko`. |
+| `translationOf` | optional | Set to `bco` to mark a book pack as a BCO translation used by the main reader. |
+| `parts` | optional | Localized BCO part labels keyed by `front`, `fog`, `rod`, `dow`, and `appx`. |
+| `noticeLabel` | optional | Localized label for the pack's edition notice. |
+| `vacatedText` | optional | Localized message for vacated chapters. |
+
+### BCO translation packs
+
+A bundled book pack can provide a translated BCO edition inside the existing `bco` routes. Set `component.translationOf` to `bco` and `component.language` to a language tag such as `es` or `ko`. The reader checks `navigator.languages` in order and uses the first language with a bundled translation; when none matches, it displays English. Language matching ignores the region (for example, `es-MX` matches `es`).
+
+Translation packs must use the same chapter order and IDs as the English BCO so bookmarks and shared `#bco/...` routes remain stable. The reader preserves English binding markers for the Directory for Worship while replacing the chapter text and clears English preface paragraphs to avoid mixing languages. Include the complete translated text for the intended edition; an older edition can legitimately omit later amendments. Standard book-pack `title`, `sections`, `body`, and `blocks` fields supply translated content. Optional `component.name`, `abbr`, `tag`, `lede`, `meta`, and `parts` fields localize the BCO landing page and part labels. Translation packs are consumed automatically and hidden from the optional pack importer.
+
+The Spanish 2025 and Korean 2026 source packs are maintained in the companion `pca-reader-content-packs` repository. They are personal-use assets and are not committed here. From a checkout with that repository alongside the reader, run `python build_bco_language_packs.py` to generate the local scripts under the ignored `content/packs/` directory. The generated scripts are loaded before the reader app and included in its offline cache. Do not publish those generated files without confirming distribution permission.
 
 The reader supplies `mode: "paged"` and `custom: true` internally; pack authors do not need to set them.
 
