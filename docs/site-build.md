@@ -10,7 +10,11 @@ The authoritative Appendix H sources are the SVG files in `diagrams/source/`. Th
 
 The built-in BCO Appendix H page embeds the active edition's SVG directly after the opening paragraph. The reader loads the local SVG as an in-page image.
 
-The English SVG preserves the vector artwork and outlined lettering from the original PDF page, including its shadows, line breaks, and arrowheads. The Spanish and Korean PDF charts are raster images. Their SVG reconstructions use box boundaries and connector positions measured from those images, with editable text and the printed line breaks. Spanish uses Carlito Bold and Korean uses Noto Serif KR, embedded as WOFF2 subsets so the lettering renders consistently without installed fonts or network requests. These are substitute typefaces for the scanned lettering. Their SIL Open Font License notices are in `diagrams/source/fonts/`.
+The English SVG preserves the original PDF's boxes, connectors, shadows, and arrowheads. All three SVGs use editable whole-line `<text>` or `<tspan>` elements. The English line positions and widths retain the printed layout; a single `textLength` per line preserves its width while the browser lays out the characters. The sources contain no individually placed PDF glyphs or glyph-outline definitions.
+
+English uses Arimo (compatible with Arial's metrics) and Tinos (compatible with Times New Roman's metrics). Spanish uses Carlito Bold with Tinos headings, and Korean uses Noto Serif KR. WOFF2 subsets are embedded so the lettering renders consistently without installed fonts or network requests. These substitute typefaces keep the text editable. Their SIL Open Font License notices are in `diagrams/source/fonts/`.
+
+The Spanish and Korean PDF charts are raster images. Their SVG reconstructions use box boundaries and connector positions measured from those images, with the printed line breaks.
 
 The PNGs in `diagrams/reference/` are visual references rendered from the cited PCA publications at 300 dpi: English, 2022 BCO, p. 221; Spanish, 2025 LDO, p. 372; Korean, 2026 BCO, p. 367. They are not build inputs.
 
