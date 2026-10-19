@@ -600,6 +600,11 @@ function chooseBcoEdition(){
 }
 const BCO_EDITION=chooseBcoEdition();
 const BCO_DATA=BCO_EDITION.map;
+const BCO_APPENDIX_H_FIGURES = {
+  en:{src:'diagrams/appendix-h.svg',alt:'Appendix H flowchart: Presbytery appellate court procedures'},
+  es:{src:'diagrams/appendix-h.es.svg',alt:'Diagrama del Apéndice H: procedimientos de los tribunales de apelación del presbiterio'},
+  ko:{src:'diagrams/appendix-h.ko.svg',alt:'부록 H: 노회 상소 치리회 절차 흐름도'},
+};
 const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.";
 const SHORT_LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.";
 // curated opening questions (the rest are generated placeholders in the long scroll)
@@ -890,6 +895,16 @@ function buildChapter(book, o){
     if(bc.vacated) return {kicker, title, subtitle, railSub:[], provs:[{ref:null, body:BCO_EDITION.component.vacatedText||"This chapter has been vacated."}]};
     const provs = (bc.paras||[]).map(p=>({ref:null, body:p}))
       .concat((bc.sections||[]).map(s=>Object.assign({ref:s.ref, body:s.body, blocks:s.blocks}, bc.part==='dow' ? {con:!!s.binding} : {})));
+    if(o.ch==='appH'){
+      const figure=BCO_APPENDIX_H_FIGURES[BCO_EDITION.lang]||BCO_APPENDIX_H_FIGURES.en;
+      const image=`<img class="pack-figure" src="${figure.src}" alt="${figure.alt}">`;
+      if(provs[0]?.blocks?.length){
+        const [opening,...rest]=provs[0].blocks;
+        provs[0]=Object.assign({},provs[0],{blocks:[opening,['p',0,image],...rest]});
+      } else {
+        provs.splice(Math.min(1,provs.length),0,{ref:null,body:image});
+      }
+    }
     const editionNotice = BCO_EDITION.lang==='en' ? '' : `<strong>${BCO_EDITION.component.noticeLabel||'Edition note'}:</strong> ${BCO_EDITION.notice}`;
     const advisory = [bc.part==='dow' ? DFW_NOTE : '', editionNotice].filter(Boolean).join('<br><br>');
     return {kicker, title, subtitle, advisoryNote: advisory||undefined,

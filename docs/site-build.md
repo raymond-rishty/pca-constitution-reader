@@ -8,6 +8,8 @@ npm run build
 
 The authoritative Appendix H sources are the SVG files in `diagrams/source/`. The harness checks their XML and copies them verbatim to `diagrams/`, where the reader and content packs load them. They have fixed shapes, connector paths, and lettering; a graph layout engine does not rearrange them. The build can also run directly with `python build_site.py`.
 
+The built-in BCO Appendix H page embeds the active edition's SVG directly after the opening paragraph. The reader loads the local SVG as an in-page image.
+
 The English SVG preserves the vector artwork and outlined lettering from the original PDF page, including its shadows, line breaks, and arrowheads. The Spanish and Korean PDF charts are raster images. Their SVG reconstructions use box boundaries and connector positions measured from those images, with editable text and the printed line breaks. Spanish uses Carlito Bold and Korean uses Noto Serif KR, embedded as WOFF2 subsets so the lettering renders consistently without installed fonts or network requests. These are substitute typefaces for the scanned lettering. Their SIL Open Font License notices are in `diagrams/source/fonts/`.
 
 The PNGs in `diagrams/reference/` are visual references rendered from the cited PCA publications at 300 dpi: English, 2022 BCO, p. 221; Spanish, 2025 LDO, p. 372; Korean, 2026 BCO, p. 367. They are not build inputs.
