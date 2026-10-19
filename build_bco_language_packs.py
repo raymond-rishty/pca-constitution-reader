@@ -37,6 +37,7 @@ def prepare_pack(source_path: Path, language: str, order: list[str]) -> dict:
     component = pack["component"]
     component["language"] = language
     component["translationOf"] = "bco"
+    component["editionYear"] = 2025 if language == "es" else 2026
     if language == "es":
         component.update(
             noticeLabel="Nota de edición",
@@ -50,6 +51,7 @@ def prepare_pack(source_path: Path, language: str, order: list[str]) -> dict:
             },
         )
     else:
+        component["amendmentsThrough"] = "53rd General Assembly"
         component.update(noticeLabel="판본 안내", vacatedText="이 장은 폐지되었습니다.")
         qualifier = "The Korean text is a study transcription; independent line-by-line proofreading remains outstanding."
         if qualifier not in pack.get("notice", ""):

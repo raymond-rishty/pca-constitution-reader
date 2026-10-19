@@ -151,6 +151,8 @@ A book pack adds a complete paged corpus to the reader.
 | `tag` | optional | Short description shown on the home page. |
 | `lede` | optional | Longer component introduction. |
 | `meta` | optional | Compact edition/status line. |
+| `editionYear` | optional | Numeric year of the edition, useful for filtering and display. |
+| `amendmentsThrough` | optional | General Assembly amendment cutoff for the edition, such as `53rd General Assembly`. |
 | `language` | optional | BCP 47 language tag for a translated BCO edition, such as `es` or `ko`. |
 | `translationOf` | optional | Set to `bco` to mark a book pack as a BCO translation used by the main reader. |
 | `parts` | optional | Localized BCO part labels keyed by `front`, `fog`, `rod`, `dow`, and `appx`. |
@@ -163,7 +165,7 @@ A bundled book pack can provide a translated BCO edition inside the existing `bc
 
 Translation packs must use the same chapter order and IDs as the English BCO so bookmarks and shared `#bco/...` routes remain stable. The reader preserves English binding markers for the Directory for Worship while replacing the chapter text and clears English preface paragraphs to avoid mixing languages. Include the complete translated text for the intended edition; an older edition can legitimately omit later amendments. Standard book-pack `title`, `sections`, `body`, and `blocks` fields supply translated content. Optional `component.name`, `abbr`, `tag`, `lede`, `meta`, and `parts` fields localize the BCO landing page and part labels. Translation packs are consumed automatically and hidden from the optional pack importer.
 
-The Spanish 2025 and Korean 2026 source packs are maintained in the companion `pca-reader-content-packs` repository and are prepared for distribution by the administrative committee. From a checkout with that repository alongside the reader, run `python build_bco_language_packs.py` to generate the reader bundles under `content/translations/`. Commit the generated scripts when updating distributed editions so they are loaded before the reader app and included in its offline cache. The source notices are carried into the bundles; preserve them because they identify the edition and its review status.
+The Spanish 2025 and Korean 2026 source packs are maintained in the companion `pca-reader-content-packs` repository and are prepared for distribution by the administrative committee. The bundles include the edition year; the Korean 2026 edition also records that it incorporates amendments through the 53rd General Assembly. From a checkout with that repository alongside the reader, run `python build_bco_language_packs.py` to generate the reader bundles under `content/translations/`. Commit the generated scripts when updating distributed editions so they are loaded before the reader app and included in its offline cache. The source notices are carried into the bundles; preserve them because they identify the edition and its review status.
 
 The reader supplies `mode: "paged"` and `custom: true` internally; pack authors do not need to set them.
 
