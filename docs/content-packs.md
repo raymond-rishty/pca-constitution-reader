@@ -258,7 +258,7 @@ window.BUNDLED_PACKS = window.BUNDLED_PACKS || [];
 window.BUNDLED_PACKS.push({ /* v1 pack object */ });
 ```
 
-The bundled Rules of Assembly Operations pack in `content/rao.js` is the canonical in-repository example of a book pack. `content/appendix-h-diagrams.js` is a bundled book pack that references the three static SVG diagrams in `diagrams/`. `content/ramsay.js` is the canonical bundled commentary example.
+The bundled Rules of Assembly Operations pack in `content/rao.js` is the canonical in-repository example of a book pack. `content/ramsay.js` is the canonical bundled commentary example. Appendix H diagrams are built-in BCO appendix figures rather than a separate book pack.
 
 ## Minimal validation performed today
 
