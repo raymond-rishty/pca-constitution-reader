@@ -29,12 +29,6 @@ BCO_PARTS = [
     ("rod", "Rules of Discipline",             "https://www.pcaac.org/book-of-church-order/part-2-the-rules-of-discipline/"),
     ("dow", "Directory for the Worship of God","https://www.pcaac.org/book-of-church-order/part-3-the-directory-for-the-worship-of-god/"),
 ]
-OFFICIAL_2026_35_16 = (
-    "If, in the prosecution of an appeal, new evidence be offered which, in the "
-    "judgment of the appellate court, has an important bearing on the case, it shall be "
-    "competent for that court to refer the case to the lower court for a new trial; or, "
-    "with the consent of parties, to admit the evidence and proceed with the case."
-)
 # Directory authority (BCO Preface / 3rd-GA statement): binding = chapters 56-58 + section 59-3; rest advisory.
 def bco_binding(part, ch, ref):
     return part == "dow" and (ch in ("56", "57", "58") or ref == "59-3")
@@ -184,22 +178,6 @@ def build_bco():
             if part == "dow":
                 sec["binding"] = bco_binding(part, str(ch), ref)
             chapters[str(cur)]["sections"].append(sec)
-    # The published HTML page displays BCO 35-16, but some fetched HTML
-    # responses omit it. Preserve the provision when it is not in parser output.
-    chapter35 = chapters.get("35")
-    if chapter35 and not any(s.get("ref") == "35-16" for s in chapter35["sections"]):
-        anchor = next((i for i, s in enumerate(chapter35["sections"]) if s.get("ref") == "35-15"), None)
-        assert anchor is not None, "cannot restore BCO 35-16 without the 35-15 insertion anchor"
-        chapter35["sections"].insert(anchor + 1, {"ref": "35-16", "body": OFFICIAL_2026_35_16})
-    # The PDF extraction joins the separately numbered 56-6 to the end of 56-5.
-    chapter56 = chapters.get("56")
-    section56_5 = next((s for s in chapter56["sections"] if s.get("ref") == "56-5"), None) if chapter56 else None
-    if section56_5 and "56-6" in section56_5["body"]:
-        before, after = section56_5["body"].split("56-6", 1)
-        section56_5["body"] = before.rstrip()
-        if not any(s.get("ref") == "56-6" for s in chapter56["sections"]):
-            anchor = chapter56["sections"].index(section56_5)
-            chapter56["sections"].insert(anchor + 1, {"ref": "56-6", "body": after.strip(), "binding": True})
     for k, c in chapters.items():
         if not c["sections"] and not c["title"]:
             c["title"] = "(Vacated)"
