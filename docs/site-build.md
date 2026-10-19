@@ -1,26 +1,29 @@
 # Manual site build
 
-The reader is currently served as static files. Install the locked npm build dependency once, then run the repository build harness manually when diagram sources change:
+The reader is currently served as static files. Run the manual build harness after editing diagram sources:
 
 ```sh
-npm ci
 npm run build
 ```
 
-The harness discovers every `diagrams/*.dot` source and renders its matching SVG with the headless WebAssembly Graphviz CLI. The DOT files use Neato's fixed-position mode: every node has a `pos` in points, and `neato -n2` preserves those positions while routing edges. Small invisible point nodes define the rails and edge bends. The harness adds a light offset shadow to boxes and ovals to match the printed diagrams. To change the composition, edit node coordinates and routing points in the DOT source, then run `npm run build`.
+The authoritative Appendix H sources are the SVG files in `diagrams/source/`. The harness checks their XML and copies them verbatim to `diagrams/`, where the reader and content packs load them. They have fixed shapes, connector paths, and lettering; a graph layout engine does not rearrange them. The build can also run directly with `python build_site.py`.
+
+The built-in BCO Appendix H page embeds the active edition's SVG directly after the opening paragraph. The reader loads the local SVG as an in-page image.
+
+The English SVG preserves the vector artwork and outlined lettering from the original PDF page, including its shadows, line breaks, and arrowheads. The Spanish and Korean PDF charts are raster images. Their SVG reconstructions use box boundaries and connector positions measured from those images, with editable text and the printed line breaks. Spanish uses Carlito Bold and Korean uses Noto Serif KR, embedded as WOFF2 subsets so the lettering renders consistently without installed fonts or network requests. These are substitute typefaces for the scanned lettering. Their SIL Open Font License notices are in `diagrams/source/fonts/`.
 
 The PNGs in `diagrams/reference/` are visual references rendered from the cited PCA publications at 300 dpi: English, 2022 BCO, p. 221; Spanish, 2025 LDO, p. 372; Korean, 2026 BCO, p. 367. They are not build inputs.
 
-The build dependency is pinned in `package-lock.json` to `@hpcc-js/wasm-graphviz-cli` 1.11.3. Its CLI and WASM package are Apache-2.0 licensed; the bundled Graphviz implementation is under the Eclipse Public License 2.0. Neither requires a paid license for this use. These packages are build dependencies and are not bundled with the reader. Keep the versions in the lockfile fixed when regenerating assets so layout and SVG output remain consistent.
+The earlier `diagrams/*.dot` approximations remain for reference. For a diagram that has no authored SVG, the harness renders its DOT source with the headless WebAssembly Graphviz CLI (`neato -n2`). Install this optional renderer with `npm ci`. It is pinned in `package-lock.json` to `@hpcc-js/wasm-graphviz-cli` 1.11.3. Its CLI and WASM package are Apache-2.0 licensed; the bundled Graphviz implementation is under the Eclipse Public License 2.0. Neither requires a paid license. These packages are build dependencies and are not bundled with the reader.
 
 ## Language variants
 
-Use the language tag before `.dot`:
+Use the language tag before `.svg`:
 
-- `diagrams/appendix-h.dot` — default English source
-- `diagrams/appendix-h.ko.dot` — Korean
-- `diagrams/appendix-h.es.dot` — Spanish
+- `diagrams/source/appendix-h.svg` — English
+- `diagrams/source/appendix-h.ko.svg` — Korean
+- `diagrams/source/appendix-h.es.svg` — Spanish
 
-Each source generates a correspondingly named `.svg`. The harness processes all present variants; it does not require every language file to exist. The DOT transcriptions retain the Spanish diagram's wording and repeated appellant-record step. Coordinates are tuned per language because label lengths and printed layouts differ.
+Each source publishes to the same filename in `diagrams/`. An authored SVG takes precedence over a DOT file with the same name. Spanish retains the printed wording and repeated appellant-record step. The embedded font subsets cover the chart's current characters; adding new text may require updating those subsets.
 
 This script is the manual build entry point and can host future static asset generation steps. It is intentionally not connected to GitHub Actions yet.
