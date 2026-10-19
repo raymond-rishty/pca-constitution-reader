@@ -569,7 +569,6 @@
 <script src="content/citations-counts.js"></script>
 <script src="content/ramsay.js"></script>
 <script src="content/rao.js"></script>
-<script src="content/appendix-h-diagrams.js"></script>
 <script src="content/translations/bco-2025-es.js"></script>
 <script src="content/translations/bco-2026-ko.js"></script>
 <script src="search-engine.js"></script>
@@ -728,7 +727,16 @@ const PACK_FORMAT = "pca-constitution-pack";
     else { const c=localStorage.getItem("pcacon.commentary");    // migrate the old single-pack key
            if(c){ const o=JSON.parse(c); if(o&&o.entries) window.BCO_COMMENTARIES=[{label:o.label||"Commentary", entries:o.entries}]; } }
   }catch(e){}
-  try{ const bk=localStorage.getItem("pcacon.books"); if(bk){ (JSON.parse(bk)||[]).forEach(p=>{ if(p&&p.component&&p.component.key) registerBook(p); }); } }catch(e){}
+  try{
+    const bk=localStorage.getItem("pcacon.books");
+    if(bk){
+      const stored=JSON.parse(bk)||[];
+      // These built-in appendix figures were briefly offered as a separate book.
+      const books=stored.filter(p=>!(p?.component?.key==='appendix-h-charts' && p.label==='Appendix H Flowcharts'));
+      books.forEach(p=>{ if(p&&p.component&&p.component.key) registerBook(p); });
+      if(books.length!==stored.length) saveBooks();
+    }
+  }catch(e){}
 })();
 const saveNotes = ()=>{ try{ localStorage.setItem("pcacon.notes", JSON.stringify(NOTES)); }catch(e){} };
 const saveCommentaries = ()=>{ try{ localStorage.setItem("pcacon.commentaries", JSON.stringify(window.BCO_COMMENTARIES)); localStorage.removeItem("pcacon.commentary"); }catch(e){} };
