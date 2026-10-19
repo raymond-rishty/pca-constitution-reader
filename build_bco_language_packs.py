@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepare private Spanish and Korean BCO packs for the reader's bundled-pack loader."""
+"""Prepare Spanish and Korean BCO editions for the reader's bundled-pack loader."""
 
 from __future__ import annotations
 
@@ -61,8 +61,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-dir", type=Path, default=DEFAULT_SOURCE_DIR,
                         help="pca-reader-content-packs checkout (default: sibling checkout)")
-    parser.add_argument("--output-dir", type=Path, default=ROOT / "content" / "packs",
-                        help="private generated output directory (default: content/packs)")
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "content" / "translations",
+                        help="generated distribution directory (default: content/translations)")
     args = parser.parse_args()
 
     order = reader_order()
@@ -72,7 +72,7 @@ def main() -> int:
         pack = prepare_pack(source_path, language, order)
         payload = json.dumps(pack, ensure_ascii=False, separators=(",", ":"))
         script = (
-            f"/* Private personal-use translation pack. Source: {source_path.name} */\n"
+            f"/* BCO translation edition. Source: {source_path.name} */\n"
             "(function(){const pack=" + payload + ";"
             "window.BUNDLED_PACKS=window.BUNDLED_PACKS||[];"
             "window.BUNDLED_PACKS.push(pack);})();\n"
