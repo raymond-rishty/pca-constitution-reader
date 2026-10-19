@@ -1,0 +1,52 @@
+// Korean chart: https://www.pcaac.org/wp-content/uploads/2026/08/2026-KBCO-ALL.pdf (PDF p. 367).
+digraph AppendixH {
+  graph [layout=neato, overlap=true, splines=polyline, notranslate=true, pad=0, margin=0, bgcolor="white", outputorder=edgesfirst];
+  node [shape=box, style="filled", fillcolor=white, color="#111111", penwidth=1.3, fontname="Malgun Gothic", fontsize=10, fontcolor="#111111", margin="0.06,0.04", width=0, height=0, pin=true, bold=false];
+  edge [color="#111111", penwidth=1.3, arrowsize=0.65, fontname="Malgun Gothic", fontsize=8, fontcolor="#111111", bold=false];
+  appoint [label="노회가 전권위원회를\n임명한다", pos="189,519!"];
+  convene [label="전권위원회\n일차모임", pos="317,496!"];
+  original [label="노회서기로부터 쌍방 당사자들이\n고소장 원본을 수신한다", pos="189,488!"];
+  accept [label="상소인이 소송 기록을 받고, 원하면,\n노회와 당회에 소송 개요를\n접수시킨다", pos="133,442!"];
+  object [label="상소인이 원하면 소송 기록에 대한\n반론을 노회와 당회에 접수 시킨다", pos="260,445!"];
+  response [label="당회가 반론을\n접수 시킨다", pos="262,399!"];
+  rule [label="전권위원회가 논쟁거리가 된\n소송 기록에 대한 판결을 한다", pos="260,360!"];
+  abrief [label="원하면 항소인이 소송 개요를\n접수시킨다", pos="260,322!"];
+  sbrief1 [label="원하면 당회가 소송 개요를\n접수 시킨다", pos="133,279!"];
+  sbrief2 [label="원하면 당회가 소송 개요를\n접수 시킨다", pos="260,279!"];
+  hearing [label="청문회", shape=oval, pos="197,241!"];
+  judgment [label="전권위원회가 판결을\n채택한다", pos="197,204!"];
+  decision [label="전권위원가 결의서를\n채택한다", pos="197,167!"];
+  report [label="전권위원회가 서기에게 전체\n보고서를 접수 시킨다", pos="120,126!"];
+  opinions [label="동의/이의를 노회 서기에게\n접수 시킨다", pos="292,126!"];
+  forward [label="노회 서기가 결정 사항을 노회와\n쌍방 당사자들 앞으로 우송한다", pos="205,87!"];
+
+  page_title [label=<<U>부록 H: 상소 치리회</U>>, shape=plaintext, style="", fontname="Malgun Gothic", fontsize=11, pos="198,567!"];
+  app_mid [label="", shape=point, width=0.01, style=invis, pos="270,519!"];
+  join [label="", shape=point, width=0.01, style=invis, pos="197,279!"];
+  rail42top [label="", shape=point, width=0.01, style=invis, pos="76,459!"];
+  rail42bottom [label="", shape=point, width=0.01, style=invis, pos="76,241!"];
+  rail84top [label="", shape=point, width=0.01, style=invis, pos="342,459!"];
+  rail84bottom [label="", shape=point, width=0.01, style=invis, pos="342,241!"];
+  report_left_top [label="", shape=point, width=0.01, style=invis, pos="103,214!"];
+  report_left_bottom [label="", shape=point, width=0.01, style=invis, pos="103,127!"];
+  opinions_right_top [label="", shape=point, width=0.01, style=invis, pos="315,214!"];
+  opinions_right_bottom [label="", shape=point, width=0.01, style=invis, pos="315,127!"];
+  report_cross [label="", shape=point, width=0.01, style=invis, pos="103,167!"];
+  opinions_cross [label="", shape=point, width=0.01, style=invis, pos="315,167!"];
+  page_min [label="", shape=point, width=0.01, style=invis, pos="1,1!"];
+  page_max [label="", shape=point, width=0.01, style=invis, pos="395,611!"];
+
+  appoint:e -> app_mid:w [label="10일", arrowhead=none]; app_mid -> convene:n [arrowhead=normal]; appoint -> original [arrowhead=normal];
+  original -> accept [label="14일", arrowhead=normal]; original -> object [label="14일", arrowhead=normal];
+  original:w -> rail42top:e [style=dashed, arrowhead=none]; original:e -> rail84top:w [style=dashed, arrowhead=none];
+  rail42top -> rail42bottom [style=dashed, label="42일", arrowhead=none]; rail84top -> rail84bottom [style=dashed, label="84일", arrowhead=none];
+  rail42bottom -> hearing:w [style=dashed, arrowhead=normal]; rail84bottom -> hearing:e [style=dashed, arrowhead=normal];
+  accept:e -> object:w [label="아니면", arrowhead=none];
+  object -> response [label="14일", arrowhead=normal]; response -> rule [label="14일", arrowhead=normal]; rule -> abrief [label="14일", arrowhead=normal]; abrief -> sbrief2 [label="14일", arrowhead=normal]; accept -> sbrief1 [label="14일", arrowhead=normal];
+  sbrief1:e -> join:w [arrowhead=none]; sbrief2:w -> join:e [arrowhead=none]; join -> hearing [label="14일", arrowhead=normal];
+  hearing -> judgment [label="10일", arrowhead=normal]; judgment -> decision [label="21일", arrowhead=normal];
+  hearing:w -> report_left_top:e [arrowhead=none]; report_left_top -> report_cross [label="42일", arrowhead=none]; report_cross -> report_left_bottom [arrowhead=none]; report_left_bottom -> report:n [arrowhead=normal];
+  hearing:e -> opinions_right_top:w [arrowhead=none]; opinions_right_top -> opinions_cross [label="42일", arrowhead=none]; opinions_cross -> opinions_right_bottom [arrowhead=none]; opinions_right_bottom -> opinions:n [arrowhead=normal];
+  decision:w -> report_cross:e [style=dashed, dir=both, arrowhead=normal, arrowtail=normal]; decision:e -> opinions_cross:w [style=dashed, dir=both, arrowhead=normal, arrowtail=normal];
+  report -> forward:nw [style=dashed, arrowhead=normal]; opinions -> forward:ne [style=dashed, arrowhead=normal];
+}

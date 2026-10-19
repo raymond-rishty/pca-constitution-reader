@@ -10,7 +10,9 @@ const SHELL = [
   'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
   'content/wsc.js', 'content/wlc.js', 'content/wcf.js',
   'content/bco.js', 'content/proofs.js', 'content/verses.js', 'content/citations-counts.js',
-  'content/ramsay.js', 'content/rao.js', 'search-engine.js',
+  'content/ramsay.js', 'content/rao.js', 'content/appendix-h-diagrams.js',
+  'diagrams/appendix-h.svg', 'diagrams/appendix-h.es.svg', 'diagrams/appendix-h.ko.svg',
+  'search-engine.js',
 ];
 // content/cit/*.js (per-chapter GA citations) are loaded on demand and runtime-cached
 // by the same-origin handler below — no need to precache all of them up front.
