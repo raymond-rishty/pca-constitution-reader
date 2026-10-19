@@ -5,7 +5,7 @@ window.BCO = {
 "part": "front",
 "title": "Preface",
 "paras": [
-"<b>Includes all amendments approved up to and including amendments ratified by the General Assembly in 2026</b> <b>I. THE KING AND HEAD OF THE CHURCH</b>",
+"<b>Includes all amendments approved up to and including the 53rd General Assembly held in Louisville, Kentucky, June 22-26, 2026</b> <b>I. THE KING AND HEAD OF THE CHURCH</b>",
 "Jesus Christ, upon whose shoulders the government rests, whose name is called Wonderful, Counselor, the Mighty God, the Everlasting Father, the Prince of Peace; of the increase of whose government and peace there shall be no end; who sits upon the throne of David, and upon His kingdom to order it and to establish it with judgment and justice from henceforth, even forever (Isaiah 9:6-7); having all power given unto Him in heaven and in earth by the Father, who raised Him from the dead and set Him at His own right hand, far above all principality and power, and might, and dominion, and every name that is named, not only in this world, but also in that which is to come, and has put all things under His feet, and gave Him to be the Head over all things to the Church, which is His body, the fullness of Him that filleth all in all (Ephesians 1:20-23); He, being ascended up far above all heavens, that He might fill all things, received gifts for His Church, and gave all offices necessary for the edification of His Church and the perfecting of His saints (Ephesians 4:10-13).",
 "Jesus, the Mediator, the sole Priest, Prophet, King, Saviour, and Head of the Church, contains in Himself, by way of eminency, all the offices in His Church, and has many of their names attributed to Him in the Scriptures. He is Apostle, Teacher, Pastor, Minister, Bishop and the only Lawgiver in Zion.",
 "It belongs to His Majesty from His throne of glory to rule and teach the Church through His Word and Spirit by the ministry of men; thus mediately exercising His own authority and enforcing His own laws, unto the edification and establishment of His Kingdom.",
@@ -1604,7 +1604,7 @@ window.BCO = {
 },
 {
 "ref": "18-2",
-"body": "Every applicant for the ministry must put himself under the care of Presbytery, which should ordinarily be the Presbytery that has jurisdiction of the church of which he is a member. The endorsement of his Session must be given to the Presbytery, consisting of testimonials regarding his Christian character and promise of usefulness in the ministry. The endorsement should also describe the activities of ministry the applicant has participated in with brief evaluation. Every applicant for care shall be a member of the congregation whose session provides an endorsement for at least six months before filing his application, except in those cases deemed extraordinary by the Presbytery. Every applicant must file his application with the clerk of the Presbytery. An applicant for care may not be received under care and examined for ordination at the same meeting of the Presbytery, since he must serve a period of at least one year of internship prior to ordination (see <i>BCO</i> 19-7 and 21-4). An applicant for internship is obliged to be under care and may be licensed to preach the Gospel; further, one who is not already under care may be taken under care, be licensed to preach the Gospel, and become an intern at the same meeting of Presbytery.",
+"body": "Every applicant for the ministry must put himself under the care of Presbytery, which should ordinarily be the Presbytery that has jurisdiction of the church of which he is a member. The endorsement of his Session must be given to the Presbytery, consisting of testimonials regarding his Christian character and promise of usefulness in the ministry. The endorsement should also describe the activities of ministry the applicant has participated in with brief evaluation. Every applicant for care shall be a member of the congregation whose Session provides an endorsement for at least six months before filing his application, except in those cases deemed extraordinary by the Presbytery. Every applicant must file his application with the clerk of the Presbytery. An applicant for care may not be received under care and examined for ordination at the same meeting of the Presbytery, since he must serve a period of at least one year of internship prior to ordination (see <i>BCO</i> 19-7 and 21-4). An applicant for internship is obliged to be under care and may be licensed to preach the Gospel; further, one who is not already under care may be taken under care, be licensed to preach the Gospel, and become an intern at the same meeting of Presbytery.",
 "blocks": [
 [
 "p",
@@ -1614,7 +1614,7 @@ window.BCO = {
 [
 "p",
 0,
-"Every applicant for care shall be a member of the congregation whose session provides an endorsement for at least six months before filing his application, except in those cases deemed extraordinary by the Presbytery."
+"Every applicant for care shall be a member of the congregation whose Session provides an endorsement for at least six months before filing his application, except in those cases deemed extraordinary by the Presbytery."
 ],
 [
 "p",
@@ -3398,7 +3398,7 @@ window.BCO = {
 "sections": [
 {
 "ref": "29-1",
-"body": "An offense, the proper object of judicial process, is anything in the doctrines or practice of a Church member professing faith in Christ which is contrary to the Word of God. The <i>Confession of Faith</i> and the <i>Larger</i> and <i>Shorter Catechisms</i> of the Westminster Assembly, together with the formularies of government, discipline, and worship are accepted by the Presbyterian Church in America as standard expositions of the teachings of Scripture in relation to both faith and practice. Nothing, therefore, ought to be considered by any court as an offense, or admitted as a matter of accusation, which cannot be proved to be such from Scripture."
+"body": "An offense, the proper object of judicial process, is anything in the doctrines or practice of a Church member professing faith in Christ which is contrary to the Word of God. The <i>Confession of Faith</i> and the <i>Larger</i> and <i>Shorter Catechisms</i> of the Westminster Assembly, together with the formularies of government, discipline, and worship are accepted by the Presbyterian Church in America as standard expositions of the teachings of Scripture in relation to both faith and practice. Nothing, therefore, ought to be considered by any court as an offense, or admitted as a matter of accusation, which cannot be proved to be such from Scripture as interpreted in these Standards."
 },
 {
 "ref": "29-2",
@@ -3949,7 +3949,7 @@ window.BCO = {
 },
 {
 "ref": "35-9",
-"body": "All parts of a trial other than deliberations shall be recorded (by transcription, audiotape, videotape, or some other electronic means) and witnesses informed of such prior to testifying. Such recording becomes part of the Record of the Case. However, in order to be referenced in written or oral briefs, such recording must be transcribed and the transcription authenticated by the trial court. The court of final appeal may assess the cost of transcription equitably among the parties."
+"body": "All parts of a trial other than deliberations shall be recorded (transcription, audiotape, videotape, or some other electronic means) and witnesses informed of such prior to testifying. Such recording becomes part of the Record of the Case. However, in order to be referenced in written or oral briefs, such recording must be transcribed and the transcription authenticated by the trial court. The court of final appeal may assess the cost of transcription equitably among the parties."
 },
 {
 "ref": "35-10",
@@ -4033,7 +4033,7 @@ window.BCO = {
 },
 {
 "ref": "36-5",
-"body": "Indefinite suspension from office or the Sacraments should be administered after the manner prescribed for definite suspension, but with added solemnity, that the indefinite suspension may be the means of impressing the mind of the delinquent with a proper sense of his danger. Indefinite suspension should also be administered under the blessing of God of leading him to repentance. When the court has resolved to pass this sentence, the moderator shall address the offending brother to the following purpose: <b>Whereas, you, ___________________ (here describe the person as a teaching elder, ruling elder, deacon, or private member of the church) are convicted by sufficient proof (or are guilty by your own confession) of the sin of ___________________ (here insert the offense), we the ___________________ (Presbytery (or Church Session) in the name and by the authority of the Lord Jesus Christ, do now declare you suspended from the Sacraments of the Church (and/or from the exercise of your office), until you give satisfactory evidence of repentance.</b> To this shall be added such advice or admonition as may be judged necessary, and the whole shall be concluded with prayer to almighty God that He would follow this act of discipline with His blessing.",
+"body": "Indefinite suspension from office or the Sacraments should be administered after the manner prescribed for definite suspension, but with added solemnity, that the indefinite suspension may be the means of impressing the mind of the delinquent with a proper sense of his danger. Indefinite suspension should also be administered under the blessing of God of leading him to repentance. When the court has resolved to pass this sentence, the moderator shall address the offending brother to the following purpose: <b>Whereas, you, ___________________ (here describe the person as a teaching elder, ruling elder, deacon, or private member of the church) are convicted by sufficient proof (or are guilty by your own confession) of the sin of ______________ (here insert the offense), we the _______________________ (Presbytery or Church Session) in the name and by the authority of the Lord Jesus Christ, do now declare you suspended from the Sacraments of the Church (and/or from the exercise of your office), until you give satisfactory evidence of repentance.</b> To this shall be added such advice or admonition as may be judged necessary, and the whole shall be concluded with prayer to almighty God that He would follow this act of discipline with His blessing.",
 "blocks": [
 [
 "p",
@@ -4043,7 +4043,7 @@ window.BCO = {
 [
 "p",
 0,
-"<b>Whereas, you, ___________________ (here describe the person as a teaching elder, ruling elder, deacon, or private member of the church) are convicted by sufficient proof (or are guilty by your own confession) of the sin of ___________________ (here insert the offense), we the ___________________ (Presbytery (or Church Session) in the name and by the authority of the Lord Jesus Christ, do now declare you suspended from the Sacraments of the Church (and/or from the exercise of your office), until you give satisfactory evidence of repentance.</b>"
+"<b>Whereas, you, ___________________ (here describe the person as a teaching elder, ruling elder, deacon, or private member of the church) are convicted by sufficient proof (or are guilty by your own confession) of the sin of ______________ (here insert the offense), we the _______________________ (Presbytery or Church Session) in the name and by the authority of the Lord Jesus Christ, do now declare you suspended from the Sacraments of the Church (and/or from the exercise of your office), until you give satisfactory evidence of repentance.</b>"
 ],
 [
 "p",
@@ -4523,12 +4523,12 @@ window.BCO = {
 },
 {
 "ref": "41-3",
-"body": "In making a reference the lower court may ask for advice only, or for final disposition of the matter referred; and in particular it may refer a judicial case with a request: a. That the higher court take original jurisdiction of the case, its trial, judgment, and whatever censure it deems warranted; or b. That the higher court provide additional teaching and/or ruling elders to serve with the lower court in a judicial case, as may seem prudent to the lower court, which additional elders, during their term of service on the case, shall have all the rights and responsibilities of judges in the lower court, subject to the rights of the parties under <i>BCO</i> 32-16.",
+"body": "In making a reference the lower court may ask for advice only, or for final disposition of the matter referred; and in particular it may refer a judicial case with request: a. That the higher court take original jurisdiction of the case, its trial, judgment, and whatever censure it deems warranted; or b. That the higher court provide additional teaching and/or ruling elders to serve with the lower court in a judicial case, as may seem prudent to the lower court, which additional elders, during their term of service on the case, shall have all the rights and responsibilities of judges in the lower court, subject to the rights of the parties under <i>BCO</i> 32-16.",
 "blocks": [
 [
 "p",
 0,
-"In making a reference the lower court may ask for advice only, or for final disposition of the matter referred; and in particular it may refer a judicial case with a request:"
+"In making a reference the lower court may ask for advice only, or for final disposition of the matter referred; and in particular it may refer a judicial case with request:"
 ],
 [
 "i",
@@ -6275,7 +6275,7 @@ window.BCO = {
 "Housing Allowance (Partially Taxable Salary)",
 "Taxable for Self-Employment Tax purposes Taxable for Federal Income Tax purposes Taxable only for Self-Employment Tax purposes ** There is an annual limit on the amount of total contributions (i.e., employee and employer contributions) that can be made to a 403(b) plan. This limit is referred to as the 415(c) limit. However, it is important to note that a minister's housing allowance cannot be included as part of includible compensation because it is not a component of a minister's gross income (1.425-2(d) of income tax regulations). This limit may reduce the amount that can be contributed to a retirement account even though the call package guidelines formula includes it (i.e., retirement contributions are a percentage of salary and housing allowance).",
 "*** Health Savings Account requires a high deductible heath savings account eligible plan.",
-"Copyright © 2025 by the Office of the Stated Clerk of the General Assembly of the Presbyterian Church in America All rights reserved"
+"Copyright © 2026 by the Office of the Stated Clerk of the General Assembly of the Presbyterian Church in America All rights reserved"
 ]
 }
 };
