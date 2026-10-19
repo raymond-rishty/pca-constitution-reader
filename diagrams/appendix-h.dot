@@ -1,5 +1,6 @@
 // English chart source: https://www.pcaac.org/wp-content/uploads/2022/09/Website-BCO-2022-Full-Book-WITH-BOOKMARKS.pdf (PDF p. 221).
 digraph AppendixH {
+  // Earlier approximation. The build publishes diagrams/source/appendix-h.svg in preference to this DOT file.
   graph [layout=neato, overlap=true, splines=polyline, notranslate=true, pad=0, margin=0, bgcolor="white", outputorder=edgesfirst];
   node [shape=box, style="filled", fillcolor=white, color="#111111", penwidth=1.2, fontname="Arial", fontsize=10, fontcolor="#111111", margin="0.06,0.04", width=0, height=0, pin=true, bold=false];
   edge [color="#111111", penwidth=1.2, arrowsize=0.65, fontname="Arial", fontsize=8, fontcolor="#111111", bold=false];

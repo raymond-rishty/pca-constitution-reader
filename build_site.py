@@ -6,6 +6,7 @@ from __future__ import annotations
 import shutil
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
@@ -13,10 +14,22 @@ ROOT = Path(__file__).resolve().parent
 DIAGRAM_DIR = ROOT / "diagrams"
 
 
-def render_graphviz_sources() -> None:
-    sources = sorted(DIAGRAM_DIR.glob("*.dot"))
+def build_diagrams() -> None:
+    authored = sorted((DIAGRAM_DIR / "source").glob("*.svg"))
+    for source in authored:
+        # Validate the authored vector source before publishing it. Copying it
+        # verbatim preserves its type, geometry, and embedded font subsets.
+        ET.parse(source)
+        output = DIAGRAM_DIR / source.name
+        shutil.copyfile(source, output)
+        print(f"Publishing {source.relative_to(ROOT)} -> {output.relative_to(ROOT)}")
+
+    authored_names = {source.name for source in authored}
+    sources = sorted(
+        source for source in DIAGRAM_DIR.glob("*.dot")
+        if source.with_suffix(".svg").name not in authored_names
+    )
     if not sources:
-        print(f"No Graphviz sources found in {DIAGRAM_DIR.relative_to(ROOT)}")
         return
 
     node = shutil.which("node")
@@ -48,7 +61,7 @@ def render_graphviz_sources() -> None:
 
 def main() -> int:
     try:
-        render_graphviz_sources()
+        build_diagrams()
     except subprocess.CalledProcessError as exc:
         print(f"Graphviz failed while rendering a diagram (exit {exc.returncode}).", file=sys.stderr)
         if exc.stderr:
