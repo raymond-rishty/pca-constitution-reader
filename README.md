@@ -21,6 +21,12 @@ The reader uses URL fragments after `#`:
 - Westminster Shorter Catechism: `#wsc/Q.<number>`.
 - BCO: `#bco/<chapter>` or `#bco/<chapter>-<section>`. Form of Government is chapters 1–26; Rules of Discipline is chapters 27–46; Directory for Worship is chapters 47–63.
 
+## Language and app menu
+
+Use the BCO language selector in the hamburger menu to switch the Book of Church Order between English, Español, and 한국어 without leaving your current passage. Your choice is saved in this browser. Choose **Browser default** to follow your browser's preferred languages again. Other books and the app interface remain in English; each translation retains its edition notice.
+
+The hamburger menu is available on desktop and mobile. It includes the document index, BCO language, import and notes, About, Install as App, and Share App.
+
 ## Search
 
 The search control (or <kbd>Ctrl/⌘ K</kbd>) searches the full text of every provision in the built-in library and installed book packs. Results rank exact references first, accept common document names and reference punctuation, and tolerate minor spelling mistakes in words of four or more letters. Put wording in quotation marks to require an exact phrase, and use the document chips to narrow the results.
