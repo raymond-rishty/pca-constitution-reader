@@ -184,8 +184,8 @@ def build_bco():
             if part == "dow":
                 sec["binding"] = bco_binding(part, str(ch), ref)
             chapters[str(cur)]["sections"].append(sec)
-    # The PCA HTML extraction omits BCO 35-16, which appears in the official
-    # 2025 edition and 2026 bilingual PDF.
+    # The published HTML page displays BCO 35-16, but some fetched HTML
+    # responses omit it. Preserve the provision when it is not in parser output.
     chapter35 = chapters.get("35")
     if chapter35 and not any(s.get("ref") == "35-16" for s in chapter35["sections"]):
         anchor = next((i for i, s in enumerate(chapter35["sections"]) if s.get("ref") == "35-15"), None)
