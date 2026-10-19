@@ -42,13 +42,22 @@
   nav.books button:hover{background:var(--paper-2); color:var(--ink)}
   nav.books button[aria-current="true"]{background:var(--accent-soft); color:var(--accent-ink); font-weight:600}
   .spacer{flex:1}
+  .language-select{font:inherit; font-size:.85rem; color:var(--navy); background:var(--paper-2); border:1px solid var(--line); border-radius:2px; padding:8px; width:150px; min-width:0; cursor:pointer}
+  .language-select:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
   .search-btn{font:inherit; font-size:.82rem; color:var(--muted); background:var(--paper-2); border:1px solid var(--line); border-radius:2px; padding:7px 12px; cursor:pointer; display:flex; gap:9px; align-items:center}
   .search-btn:hover{border-color:var(--line-2); color:var(--ink-soft)}
   .kbd{font-size:.7rem; border:1px solid var(--line-2); border-radius:2px; padding:1px 5px; background:#fff; color:var(--muted)}
   /* mobile chrome (shown only ≤880px) */
-  .hamburger{display:none; font-size:1.3rem; background:none; border:none; color:var(--navy); cursor:pointer; padding:2px 6px; line-height:1}
+  .hamburger{display:block; flex-shrink:0; font-size:1.3rem; background:none; border:none; color:var(--navy); cursor:pointer; padding:6px; line-height:1}
   .search-btn .mag{display:none}
   .mobile-menu{display:none}
+  .mobile-menu.open{display:block; position:absolute; top:100%; left:max(14px,calc((100% - 1180px)/2 + 22px)); width:350px; max-width:calc(100% - 28px); max-height:calc(100dvh - 120px); overflow-y:auto; background:var(--paper); border:1px solid var(--line-2); box-shadow:0 14px 26px rgba(27,28,28,.13); font-family:var(--sans)}
+  .mm-item,.mm-index summary{display:block; width:100%; text-align:left; font:inherit; font-size:.95rem; color:var(--ink); background:none; border:none; border-top:1px solid var(--line); padding:12px 18px; cursor:pointer}
+  .mm-item:hover,.mm-index summary:hover{background:var(--paper-2)}
+  .mm-index summary{display:list-item; list-style-position:inside; border-top:none; color:var(--navy); font-weight:600}
+  .mm-documents{padding:0 0 8px}
+  .mm-documents .mm-item{border-top:none; padding:9px 18px 9px 34px; font-family:var(--serif)}
+  .mm-language{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 18px; border-top:1px solid var(--line); font-size:.9rem}
   .botnav{display:none}
 
   /* ───────────────────────── 3-column layout (reading) ───────────────────────── */
@@ -472,9 +481,7 @@
     .search-btn{border:none; background:none; padding:6px 4px; color:var(--navy)}
     .search-btn .sb-text, .search-btn .kbd{display:none}
     .search-btn .mag{display:inline; font-size:1.25rem}
-    .mobile-menu.open{display:block; position:fixed; top:50px; left:0; right:0; z-index:29; background:var(--paper); border-bottom:1px solid var(--line-2); box-shadow:0 14px 26px rgba(27,28,28,.13)}
-    .mm-item{display:block; width:100%; text-align:left; font-family:var(--serif); font-size:1.05rem; color:var(--ink); background:none; border:none; border-top:1px solid var(--line); padding:14px 22px; cursor:pointer}
-    .mm-item:first-child{border-top:none; color:var(--navy); font-weight:600}
+    .mobile-menu.open{left:0; right:0; width:100%; max-width:100%; border-left:none; border-right:none}
     .botnav{display:flex; position:fixed; bottom:0; left:0; right:0; z-index:38; background:var(--paper); border-top:1px solid var(--line-2); justify-content:space-around; padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
     .bn{display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; color:var(--muted); font-family:var(--sans); font-size:.66rem; cursor:pointer; padding:4px 14px}
     .bn svg{width:22px; height:22px}
@@ -486,7 +493,7 @@
 
 <header>
   <div class="bar">
-    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-controls="mobileMenu" aria-expanded="false">☰</button>
     <button class="brand" id="brand"><span class="pca">PCA</span> Constitution</button>
     <nav class="books" id="books">
       <button data-book="wcf">Confession</button>
@@ -496,21 +503,29 @@
     </nav>
     <span class="spacer"></span>
     <button class="search-btn" id="openPal"><span class="mag">⌕</span><span class="sb-text">Search the Constitution…</span><span class="kbd">Ctrl K</span></button>
-    <button class="search-btn" id="openPacks" title="Packs & notes" aria-label="Packs and notes"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l8 4-8 4-8-4 8-4z"/><path d="M4 12l8 4 8-4"/></svg></button>
   </div>
+<!-- shared desktop and mobile menu -->
+<nav class="mobile-menu" id="mobileMenu" aria-label="Reader menu">
+  <details class="mm-index">
+    <summary>Document index</summary>
+    <div class="mm-documents" id="mmDocuments">
+      <button class="mm-item" data-home>Home — The PCA Constitution</button>
+      <button class="mm-item" data-book="wcf">Westminster Confession of Faith</button>
+      <button class="mm-item" data-book="wlc">Westminster Larger Catechism</button>
+      <button class="mm-item" data-book="wsc">Westminster Shorter Catechism</button>
+      <button class="mm-item" data-book="bco">Book of Church Order</button>
+    </div>
+  </details>
+  <div class="mm-language">
+    <label for="bcoLanguage">BCO language</label>
+    <select class="language-select" id="bcoLanguage" aria-label="Book of Church Order language" title="Book of Church Order language (other books remain in English)"></select>
+  </div>
+  <button class="mm-item" data-import>Import &amp; notes…</button>
+  <button class="mm-item" data-about>About</button>
+  <button class="mm-item" id="mmInstall" data-install>Install as App</button>
+  <button class="mm-item" data-share>Share App</button>
+</nav>
 </header>
-
-<!-- mobile book menu (hamburger target) -->
-<div class="mobile-menu" id="mobileMenu">
-  <button class="mm-item" data-home>Home — The PCA Constitution</button>
-  <button class="mm-item" data-book="wcf">Westminster Confession of Faith</button>
-  <button class="mm-item" data-book="wlc">Westminster Larger Catechism</button>
-  <button class="mm-item" data-book="wsc">Westminster Shorter Catechism</button>
-  <button class="mm-item" data-book="bco">Book of Church Order</button>
-  <button class="mm-item" id="mmInstall" data-install>Install app</button>
-  <button class="mm-item" data-import>Packs &amp; notes…</button>
-  <button class="mm-item" data-share>Share app</button>
-</div>
 
 <div class="shell">
   <aside class="rail" id="rail"></aside>
@@ -575,11 +590,17 @@
 <script>
 /* ══════════ CONTENT: real where sourced (window.WSC), placeholder elsewhere ══════════ */
 /* Translation packs opt in with component.translationOf="bco" and component.language. */
-function chooseBcoEdition(){
-  const packs=(window.BUNDLED_PACKS||[]).filter(p=>p.kind==='book'&&p.component&&p.component.translationOf==='bco'&&p.component.language);
+function bcoTranslations(){
+  return (window.BUNDLED_PACKS||[]).filter(p=>p.kind==='book'&&p.component&&p.component.translationOf==='bco'&&p.component.language);
+}
+function readBcoLanguage(){
+  try{ return localStorage.getItem('pcacon.bcoLanguage')||'auto'; }catch(_){ return 'auto'; }
+}
+function chooseBcoEdition(preference=readBcoLanguage()){
+  const packs=bcoTranslations();
   const languages=new Set(packs.map(p=>String(p.component.language).toLowerCase().split(/[-_]/)[0]));
-  const preferred=(navigator.languages||[navigator.language||'en']).map(tag=>String(tag).toLowerCase().split(/[-_]/)[0]);
-  const lang=preferred.find(x=>languages.has(x));
+  const preferred=(preference==='auto' ? (navigator.languages?.length?navigator.languages:[navigator.language||'en']) : [preference]).map(tag=>String(tag).toLowerCase().split(/[-_]/)[0]);
+  const lang=preferred.find(x=>x==='en'||languages.has(x));
   const pack=lang&&packs.find(p=>String(p.component.language).toLowerCase().split(/[-_]/)[0]===lang);
   if(!pack) return {lang:'en',map:window.BCO,label:'English',component:{},notice:''};
   const map=Object.assign({},window.BCO);
@@ -597,8 +618,8 @@ function chooseBcoEdition(){
   }
   return {lang,map,label:pack.component.name||pack.label||lang,component:pack.component,notice:pack.notice||''};
 }
-const BCO_EDITION=chooseBcoEdition();
-const BCO_DATA=BCO_EDITION.map;
+let BCO_EDITION=chooseBcoEdition();
+let BCO_DATA=BCO_EDITION.map;
 const BCO_APPENDIX_H_FIGURES = {
   en:{src:'diagrams/appendix-h.svg',alt:'Appendix H flowchart: Presbytery appellate court procedures'},
   es:{src:'diagrams/appendix-h.es.svg',alt:'Diagrama del Apéndice H: procedimientos de los tribunales de apelación del presbiterio'},
@@ -628,11 +649,14 @@ const COMPONENTS = {
     tag:"The concise catechism — for learning by heart.",
     lede:"One hundred seven questions and answers, composed to be committed to memory — the most widely learned summary of the faith in the Presbyterian tradition.",
     meta:"107 questions & answers · Scripture proof-texts"},
-  bco:{abbr:BCO_EDITION.component.abbr||"BCO", mode:"paged", name:BCO_EDITION.lang==='en'?"Book of Church Order":(BCO_EDITION.component.name||BCO_EDITION.label), division:"order",
+  bco:bcoComponent(),
+};
+function bcoComponent(){
+  return {abbr:BCO_EDITION.component.abbr||"BCO", mode:"paged", name:BCO_EDITION.lang==='en'?"Book of Church Order":(BCO_EDITION.component.name||BCO_EDITION.label), division:"order",
     tag:BCO_EDITION.component.tag||"How the church is governed, disciplined, and led in worship.",
     lede:BCO_EDITION.component.lede||"The Constitution's governmental standard, in three parts: the Form of Government, the Rules of Discipline, and the Directory for the Worship of God.",
-    meta:BCO_EDITION.component.meta||"3 parts · Form of Government · Rules of Discipline · Directory for Worship"},
-};
+    meta:BCO_EDITION.component.meta||"3 parts · Form of Government · Rules of Discipline · Directory for Worship"};
+}
 
 /* WCF chapter titles (standard 33) */
 const WCF_CH = [
@@ -1616,10 +1640,10 @@ function toggleVref(vr){
 }
 
 /* ───────────── events ───────────── */
-function closeMenu(){ const m=document.getElementById('mobileMenu'); if(m){ m.classList.remove('open'); document.getElementById('hamburger').setAttribute('aria-expanded','false'); } }
+function closeMenu(){ const m=document.getElementById('mobileMenu'); if(m){ m.classList.remove('open'); const b=document.getElementById('hamburger'); b.setAttribute('aria-expanded','false'); b.setAttribute('aria-label','Open menu'); } }
 document.getElementById('brand').addEventListener('click', ()=>{ closeMenu(); showHome(); });
 document.getElementById('books').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) showComponent(b.dataset.book); });
-document.getElementById('hamburger').addEventListener('click', ()=>{ const m=document.getElementById('mobileMenu'); const open=m.classList.toggle('open'); document.getElementById('hamburger').setAttribute('aria-expanded', open); });
+document.getElementById('hamburger').addEventListener('click', ()=>{ const m=document.getElementById('mobileMenu'); const open=m.classList.toggle('open'); const b=document.getElementById('hamburger'); b.setAttribute('aria-expanded', open); b.setAttribute('aria-label',open?'Close menu':'Open menu'); });
 document.body.addEventListener('click', e=>{
   if(e.target.closest('a[href="#"]')) e.preventDefault();   // placeholder citation links: don't navigate to '#'
   const mEl=document.getElementById('mobileMenu');          // click-off to dismiss the hamburger menu
@@ -1635,7 +1659,7 @@ document.body.addEventListener('click', e=>{
   const vr = e.target.closest('.vref'); if(vr){ toggleVref(vr); return; }
   const va = e.target.closest('.vall'); if(va){ const view=va.closest('.proofs-view'); const open=va.getAttribute('aria-pressed')!=='true'; view.querySelectorAll('.vref').forEach(a=>a.classList.toggle('open',open)); rebuildVerses(view); return; }
   if(e.target.closest('.home-jump')){ openPal(); return; }
-  const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else if(mm.hasAttribute('data-install')) promptInstall(); else if(mm.hasAttribute('data-import')) openPacks(); else if(mm.hasAttribute('data-share')) shareApp(); else showComponent(mm.dataset.book); return; }
+  const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else if(mm.hasAttribute('data-install')) promptInstall(); else if(mm.hasAttribute('data-import')) openPacks(); else if(mm.hasAttribute('data-about')) showAbout(); else if(mm.hasAttribute('data-share')) shareApp(); else showComponent(mm.dataset.book); return; }
   const bn = e.target.closest('.bn'); if(bn){ const a=bn.dataset.bn; if(a==='library') showHome(); else if(a==='search') openPal(); else showComponent(current); return; }
   const about = e.target.closest('[data-about]'); if(about){ showAbout(); return; }
   const home = e.target.closest('[data-home]'); if(home){ showHome(); return; }
@@ -1654,6 +1678,34 @@ document.body.addEventListener('click', e=>{
 document.getElementById('closeDrawer').addEventListener('click', closeDrawer);
 document.getElementById('overlay').addEventListener('click', closeDrawer);
 document.getElementById('openPal').addEventListener('click', openPal);
+/* Switch the BCO in place, keeping the current route and rebuilding translated navigation/search. */
+function setBcoLanguage(preference){
+  BCO_EDITION=chooseBcoEdition(preference);
+  BCO_DATA=BCO_EDITION.map;
+  COMPONENTS.bco=bcoComponent();
+  if(window.BCO_ORDER) SPINE.bco=window.BCO_ORDER.map(id=>({part:BCO_DATA[id].part, ch:id, title:BCO_DATA[id].title, vacated:BCO_DATA[id].vacated}));
+  SEARCH=null;
+  try{
+    if(preference==='auto') localStorage.removeItem('pcacon.bcoLanguage');
+    else localStorage.setItem('pcacon.bcoLanguage',preference);
+  }catch(_){}
+  applyRoute();
+}
+const languageSelect=document.getElementById('bcoLanguage');
+languageSelect.add(new Option('Browser default','auto'));
+languageSelect.add(new Option('English','en'));
+const languageNames={es:'Español',ko:'한국어'};
+const offeredLanguages=new Set(['en']);
+bcoTranslations().forEach(pack=>{
+  const lang=String(pack.component.language).toLowerCase().split(/[-_]/)[0];
+  if(!offeredLanguages.has(lang)){
+    languageSelect.add(new Option(languageNames[lang]||lang,lang));
+    offeredLanguages.add(lang);
+  }
+});
+const savedLanguage=readBcoLanguage();
+languageSelect.value=offeredLanguages.has(savedLanguage)?savedLanguage:'auto';
+languageSelect.addEventListener('change',()=>setBcoLanguage(languageSelect.value));
 document.getElementById('palClose').addEventListener('click', closePal);
 document.getElementById('palWrap').addEventListener('click', e=>{ if(e.target.id==='palWrap') closePal(); });   // click backdrop to dismiss
 document.getElementById('palTools').addEventListener('click', e=>{
@@ -1679,7 +1731,6 @@ function renderPacks(){
 }
 function openPacks(){ renderPacks(); document.getElementById('packWrap').classList.add('show'); }
 function closePacks(){ document.getElementById('packWrap').classList.remove('show'); }
-document.getElementById('openPacks').addEventListener('click', openPacks);
 document.getElementById('packClose').addEventListener('click', closePacks);
 document.getElementById('packWrap').addEventListener('click', e=>{ if(e.target.id==='packWrap') closePacks(); });
 document.getElementById('packsBody').addEventListener('click', e=>{
@@ -1707,7 +1758,11 @@ document.getElementById('palInput').addEventListener('keydown', e=>{
 });
 document.addEventListener('keydown', e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==='k'){ e.preventDefault(); openPal(); }
-  if(e.key==='Escape'){ closePal(); closeDrawer(); closePacks(); }
+  if(e.key==='Escape'){
+    const menuOpen=document.getElementById('mobileMenu').classList.contains('open');
+    closeMenu(); closePal(); closeDrawer(); closePacks();
+    if(menuOpen) document.getElementById('hamburger').focus();
+  }
 });
 
 /* keyboard activation for the provision number + proof toggle (role="button") */
@@ -1723,7 +1778,7 @@ document.addEventListener('keydown', e=>{
 document.addEventListener('keydown', e=>{
   if(view!=='read') return;
   if(e.metaKey||e.ctrlKey||e.altKey) return;
-  if(/^(INPUT|TEXTAREA)$/.test((e.target.tagName||''))) return;
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName||''))) return;
   if(document.getElementById('palWrap').classList.contains('show')) return;
   if(e.key==='ArrowRight'){ goRelative(1); }
   else if(e.key==='ArrowLeft'){ goRelative(-1); }
@@ -1746,12 +1801,11 @@ document.addEventListener('touchend', e=>{
 
 function refreshNav(){   // inject header + hamburger entries for pack-added books (built-ins are static HTML)
   document.querySelectorAll('[data-customnav]').forEach(el=>el.remove());
-  const books=document.getElementById('books'), menu=document.getElementById('mobileMenu');
-  const anchor = menu && menu.querySelector('[data-install]');
+  const books=document.getElementById('books'), menu=document.getElementById('mmDocuments');
   window.BOOK_PACKS.forEach(bp=>{
     const c=bp.component;
     if(books){ const b=document.createElement('button'); b.dataset.book=c.key; b.setAttribute('data-customnav','1'); b.textContent=c.abbr||c.name; books.appendChild(b); }
-    if(menu){ const m=document.createElement('button'); m.className='mm-item'; m.dataset.book=c.key; m.setAttribute('data-customnav','1'); m.textContent=c.name; menu.insertBefore(m, anchor); }
+    if(menu){ const m=document.createElement('button'); m.className='mm-item'; m.dataset.book=c.key; m.setAttribute('data-customnav','1'); m.textContent=c.name; menu.appendChild(m); }
   });
 }
 window.addEventListener('hashchange', applyRoute);   // back/forward + manual edits
