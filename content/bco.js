@@ -3986,6 +3986,10 @@ window.BCO = {
 {
 "ref": "35-15",
 "body": "If after trial before any court new testimony be discovered, which the accused believes important, it shall be his right to ask a new trial and it shall be within the power of the court to grant his request."
+},
+{
+"ref": "35-16",
+"body": "If, in the prosecution of an appeal, new evidence be offered which, in the judgment of the appellate court, has an important bearing on the case, it shall be competent for that court to refer the case to the lower court for a new trial; or, with the consent of parties, to admit the evidence and proceed with the case."
 }
 ],
 "vacated": false
@@ -5323,7 +5327,7 @@ window.BCO = {
 },
 {
 "ref": "56-5",
-"body": "The minister shall then read the covenant promises: <b>For to you is the promise, and to your children, and to all that are afar off, even as many as the Lord our God shall call unto him. And I will establish my covenant between me and thee and thy seed after thee throughout their generations for an everlasting covenant, to be a God unto thee and to thy seed after thee. Believe on the Lord Jesus, and thou shalt be saved, thou and thy house. (Acts 2:39; Gen. 17:7; Acts 16:31)</b> The minister shall then propose the following questions: <b>1. Do you acknowledge your child's need of the cleansing blood of Jesus Christ, and the renewing grace of the Holy Spirit?</b> <b>2. Do you claim God's covenant promises in (his) behalf, and do you look in faith to the Lord Jesus Christ for (his) salvation, as you do for your own?</b> <b>3. Do you now unreservedly dedicate your child to God, and promise, in humble reliance upon divine grace, that you will endeavor to set before (him) a godly example, that you will pray with and for (him), that you will teach (him) the doctrines of our holy religion, and that you will strive, by all the means of God's appointment, to bring (him) up in the nurture and admonition of the Lord?</b> To the congregation (optional): <b>Do you as a congregation undertake the responsibility of assisting the parents in the Christian nurture of this child?</b> <b>56-6</b> Then the minister is to pray for a blessing to attend this ordinance, after which, calling the child by name, he shall say: <b>I baptize you in the name of the Father, and of the Son, and of the Holy Spirit.</b> As he pronounces these words, he is to baptize the child with water, by pouring or sprinkling it on the head of the child, without adding any other ceremony; and the whole shall be concluded with prayer.",
+"body": "The minister shall then read the covenant promises: <b>For to you is the promise, and to your children, and to all that are afar off, even as many as the Lord our God shall call unto him. And I will establish my covenant between me and thee and thy seed after thee throughout their generations for an everlasting covenant, to be a God unto thee and to thy seed after thee. Believe on the Lord Jesus, and thou shalt be saved, thou and thy house. (Acts 2:39; Gen. 17:7; Acts 16:31)</b> The minister shall then propose the following questions: <b>1. Do you acknowledge your child's need of the cleansing blood of Jesus Christ, and the renewing grace of the Holy Spirit?</b> <b>2. Do you claim God's covenant promises in (his) behalf, and do you look in faith to the Lord Jesus Christ for (his) salvation, as you do for your own?</b> <b>3. Do you now unreservedly dedicate your child to God, and promise, in humble reliance upon divine grace, that you will endeavor to set before (him) a godly example, that you will pray with and for (him), that you will teach (him) the doctrines of our holy religion, and that you will strive, by all the means of God's appointment, to bring (him) up in the nurture and admonition of the Lord?</b> To the congregation (optional): <b>Do you as a congregation undertake the responsibility of assisting the parents in the Christian nurture of this child?</b>",
 "binding": true,
 "blocks": [
 [
@@ -5365,11 +5369,18 @@ window.BCO = {
 "p",
 0,
 "<b>Do you as a congregation undertake the responsibility of assisting the parents in the Christian nurture of this child?</b>"
-],
+]
+]
+},
+{
+"ref": "56-6",
+"body": "Then the minister is to pray for a blessing to attend this ordinance, after which, calling the child by name, he shall say: <b>I baptize you in the name of the Father, and of the Son, and of the Holy Spirit.</b> As he pronounces these words, he is to baptize the child with water, by pouring or sprinkling it on the head of the child, without adding any other ceremony; and the whole shall be concluded with prayer.",
+"binding": true,
+"blocks": [
 [
 "p",
 0,
-"<b>56-6</b> Then the minister is to pray for a blessing to attend this ordinance, after which, calling the child by name, he shall say:"
+"Then the minister is to pray for a blessing to attend this ordinance, after which, calling the child by name, he shall say:"
 ],
 [
 "p",
