@@ -905,8 +905,7 @@ function buildChapter(book, o){
         provs.splice(Math.min(1,provs.length),0,{ref:null,body:image});
       }
     }
-    const editionNotice = BCO_EDITION.lang==='en' ? '' : `<strong>${BCO_EDITION.component.noticeLabel||'Edition note'}:</strong> ${BCO_EDITION.notice}`;
-    const advisory = [bc.part==='dow' ? DFW_NOTE : '', editionNotice].filter(Boolean).join('<br><br>');
+    const advisory = bc.part==='dow' ? DFW_NOTE : '';
     return {kicker, title, subtitle, advisoryNote: advisory||undefined,
       railSub: (bc.sections||[]).map(s=>s.ref), provs};
   }

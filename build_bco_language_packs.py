@@ -53,9 +53,10 @@ def prepare_pack(source_path: Path, language: str, order: list[str]) -> dict:
     else:
         component["amendmentsThrough"] = "53rd General Assembly"
         component.update(noticeLabel="판본 안내", vacatedText="이 장은 폐지되었습니다.")
-        qualifier = "The Korean text is a study transcription; independent line-by-line proofreading remains outstanding."
-        if qualifier not in pack.get("notice", ""):
-            pack["notice"] = (pack.get("notice", "").rstrip() + " " + qualifier).strip()
+        pack["notice"] = (
+            "Korean text transcribed from the official 2026 bilingual Book of Church Order PDF. "
+            "Independent line-by-line proofreading remains outstanding."
+        )
     return pack
 
 
