@@ -159,10 +159,9 @@
   .sig:hover{color:var(--accent)}
   .sig:hover .dot{opacity:1; box-shadow:0 0 0 4px var(--accent-soft)}
 
-  /* ───────────────────────── landing views (home + component) ───────────────────────── */
-  body[data-view="home"] aside.rail, body[data-view="home"] .gutter,
-  body[data-view="component"] aside.rail, body[data-view="component"] .gutter{display:none}
-  body[data-view="home"] .shell, body[data-view="component"] .shell{grid-template-columns:minmax(0,1fr)}
+  /* ───────────────────────── landing views (home + component + about) ───────────────────────── */
+  body:not([data-view="read"]) aside.rail, body:not([data-view="read"]) .gutter{display:none}
+  body:not([data-view="read"]) .shell{grid-template-columns:minmax(0,1fr)}
   body:not([data-view="read"]) .doc{max-width:none}
   body:not([data-view="read"]) main{padding-top:54px}
   .landing{max-width:48rem; margin:0 auto}
