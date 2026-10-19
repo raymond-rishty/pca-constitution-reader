@@ -23,13 +23,19 @@ PARTS = {
 def fetch(part):
     fn, url = PARTS[part]
     p = os.path.join(CACHE, fn)
-    if os.path.exists(p):
+    if os.path.exists(p) and os.path.getsize(p) > 0:
         return open(p, encoding='utf-8', errors='replace').read()
     r = subprocess.run(["curl","-sS","-m","40","-A","constitution-reader/0.1 (personal study)",url],
-                       capture_output=True, text=True)
+                       capture_output=True)
     if r.returncode: sys.exit(f"fetch failed: {part}")
-    os.makedirs(CACHE, exist_ok=True); open(p,"w").write(r.stdout)
-    return r.stdout
+    if not r.stdout: sys.exit(f"fetch returned an empty document: {part}")
+    try:
+        src = r.stdout.decode("utf-8")
+    except UnicodeDecodeError:
+        src = r.stdout.decode("cp1252", "replace")
+    os.makedirs(CACHE, exist_ok=True)
+    with open(p, "w", encoding="utf-8") as f: f.write(src)
+    return src
 
 def clean(s):
     s = re.sub(r"<br\s*/?>", " ", s)
@@ -59,6 +65,8 @@ def clean_fmt(s):
     s = re.sub(r"<(?!/?[bi]>)[^>]*>", "", s)                 # strip every tag except <b></b><i></i>
     s = html.unescape(s).replace("’","'").replace("“",'"').replace("”",'"')
     s = re.sub(r"\s+", " ", s)
+    # The HTML omits this space; the 2026 BCO PDF confirms the printed wording.
+    s = s.replace("Theruling elder or deacon elect", "The ruling elder or deacon elect")
     for _ in range(4):                                       # merge split emphasis (<b>35-</b><b>5</b>) and
         s2 = s.replace("</b><b>","").replace("</i><i>","")   # drop empties, KEEPING any inner whitespace
         s2 = re.sub(r"<([bi])>(\s*)</\1>", r"\2", s2)
@@ -69,7 +77,7 @@ def clean_fmt(s):
 _gap = r'(?:\s|<[^>]+>|&nbsp;)*'
 tok = re.compile(
     r'<h2[^>]*>\s*CHAPTER\s+([A-Z–\-]+)\s*</h2>'
-    rf'|<(?:p|h4)[^>]*>{_gap}(\d+){_gap}-{_gap}(\d+[A-Za-z]?){_gap}\.'
+    rf'|<(?:p|h4)[^>]*>{_gap}(\d+){_gap}-{_gap}(\d+[A-Za-z]?){_gap}\.?'
     r'|<h4[^>]*>(.*?)</h4>', re.S | re.I)
 
 MARK = [
@@ -93,7 +101,7 @@ def parse_section(frag):
         if not txt: continue
         if first:
             first=False
-            txt = re.sub(r'^\s*(?:<b>\s*)?\d+\s*[–-]\s*\d+[A-Za-z]?(?:\s*</b>)?\s*\.\s*(?:</b>)?\s*', '', txt)
+            txt = re.sub(r'^\s*(?:<b>\s*)?\d+\s*[–-]\s*\d+[A-Za-z]?(?:\s*</b>)?\s*\.?\s*(?:</b>)?\s*', '', txt)
             if txt: raw.append(('p', 0, None, txt, None, False))
             continue
         if quote:                                            # blockquote -> indented quote paragraph
