@@ -1,0 +1,53 @@
+// English chart source: https://www.pcaac.org/wp-content/uploads/2022/09/Website-BCO-2022-Full-Book-WITH-BOOKMARKS.pdf (PDF p. 221).
+digraph AppendixH {
+  graph [layout=neato, overlap=true, splines=polyline, notranslate=true, pad=0, margin=0, bgcolor="white", outputorder=edgesfirst];
+  node [shape=box, style="filled", fillcolor=white, color="#111111", penwidth=1.2, fontname="Arial", fontsize=10, fontcolor="#111111", margin="0.06,0.04", width=0, height=0, pin=true, bold=false];
+  edge [color="#111111", penwidth=1.2, arrowsize=0.65, fontname="Arial", fontsize=8, fontcolor="#111111", bold=false];
+  appoint [label="Presbytery Appoints Commission", pos="196,542!"];
+  convene [label="Commission Convening Meeting", pos="341,518!"];
+  original [label="Parties Receive Original Record from Presbytery Clerk", pos="196,509!"];
+  accept [label="Appellant Accepts Record\nand, if desired, Files Brief\nwith Presbytery and Session", pos="132,459!"];
+  object [label="If desired, Appellant Files Objection\nto Record with Presbytery and Session", pos="278,459!"];
+  response [label="Session Files Response", pos="278,409!"];
+  rule [label="Commission Rules on Disputed Record", pos="278,368!"];
+  abrief [label="If desired, Appellant Files Brief", pos="278,326!"];
+  sbrief1 [label="If desired, Session Files Brief", pos="132,275!"];
+  sbrief2 [label="If desired, Session Files Brief", pos="278,275!"];
+  hearing [label="Hearing", shape=oval, pos="205,234!"];
+  judgment [label="Commission Adopts Judgment", pos="205,193!"];
+  decision [label="Commission Adopts Written Decision", pos="205,150!"];
+  report [label="Commission Files Full Report\nwith Stated Clerk", pos="113,110!"];
+  opinions [label="Concurring/Dissenting Opinions\nFiled with Stated Clerk", pos="314,110!"];
+  forward [label="Presbytery Clerk Forwards Decision\nto Parties and Presbyters", pos="214,67!"];
+
+  page_left [label="APPELLATE COURTS", shape=plaintext, style="", fontname="serif", fontsize=9, pos="110,590!"];
+  page_right [label="APPENDIX H", shape=plaintext, style="", fontname="serif", fontsize=9, pos="370,590!"];
+  app_mid [label="", shape=point, width=0.01, style=invis, pos="292,542!"];
+  join [label="", shape=point, width=0.01, style=invis, pos="205,275!"];
+  rail42top [label="", shape=point, width=0.01, style=invis, pos="68,475!"];
+  rail42bottom [label="", shape=point, width=0.01, style=invis, pos="68,234!"];
+  rail84top [label="", shape=point, width=0.01, style=invis, pos="369,475!"];
+  rail84bottom [label="", shape=point, width=0.01, style=invis, pos="369,234!"];
+  report_left_top [label="", shape=point, width=0.01, style=invis, pos="95,207!"];
+  report_left_bottom [label="", shape=point, width=0.01, style=invis, pos="95,111!"];
+  opinions_right_top [label="", shape=point, width=0.01, style=invis, pos="344,207!"];
+  opinions_right_bottom [label="", shape=point, width=0.01, style=invis, pos="344,111!"];
+  report_cross [label="", shape=point, width=0.01, style=invis, pos="95,150!"];
+  opinions_cross [label="", shape=point, width=0.01, style=invis, pos="344,150!"];
+  page_min [label="", shape=point, width=0.01, style=invis, pos="1,1!"];
+  page_max [label="", shape=point, width=0.01, style=invis, pos="431,647!"];
+
+  appoint:e -> app_mid:w [label="10 days", arrowhead=none]; app_mid -> convene:n [arrowhead=empty]; appoint -> original [arrowhead=empty];
+  original -> accept [label="14 days", arrowhead=empty]; original -> object [label="14 days", arrowhead=empty];
+  original:w -> rail42top:e [style=dashed, arrowhead=none]; original:e -> rail84top:w [style=dashed, arrowhead=none];
+  rail42top -> rail42bottom [style=dashed, label="42 days", arrowhead=none]; rail84top -> rail84bottom [style=dashed, label="84 days", arrowhead=none];
+  rail42bottom -> hearing:w [style=dashed, arrowhead=empty]; rail84bottom -> hearing:e [style=dashed, arrowhead=empty];
+  accept:e -> object:w [label="Or", arrowhead=none];
+  object -> response [label="14 days", arrowhead=empty]; response -> rule [label="14 days", arrowhead=empty]; rule -> abrief [label="14 days", arrowhead=empty]; abrief -> sbrief2 [label="14 days", arrowhead=empty]; accept -> sbrief1 [label="14 days", arrowhead=empty];
+  sbrief1:e -> join:w [arrowhead=none]; sbrief2:w -> join:e [arrowhead=none]; join -> hearing [label="14 days", arrowhead=empty];
+  hearing -> judgment [label="10 days", arrowhead=empty]; judgment -> decision [label="21 days", arrowhead=empty];
+  hearing:w -> report_left_top:e [arrowhead=none]; report_left_top -> report_cross [label="42 days", arrowhead=none]; report_cross -> report_left_bottom [arrowhead=none]; report_left_bottom -> report:n [arrowhead=empty];
+  hearing:e -> opinions_right_top:w [arrowhead=none]; opinions_right_top -> opinions_cross [label="42 days", arrowhead=none]; opinions_cross -> opinions_right_bottom [arrowhead=none]; opinions_right_bottom -> opinions:n [arrowhead=empty];
+  decision:w -> report_cross:e [style=dashed, dir=both, arrowhead=empty, arrowtail=empty]; decision:e -> opinions_cross:w [style=dashed, dir=both, arrowhead=empty, arrowtail=empty];
+  report -> forward:nw [style=dashed, arrowhead=empty]; opinions -> forward:ne [style=dashed, arrowhead=empty];
+}

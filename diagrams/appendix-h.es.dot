@@ -1,0 +1,53 @@
+// Spanish chart: https://www.pcaac.org/wp-content/uploads/2025/09/LDO_2025.pdf (PDF p. 372). Wording is preserved as printed.
+digraph AppendixH {
+  graph [layout=neato, overlap=true, splines=polyline, notranslate=true, pad=0, margin=0, bgcolor="white", outputorder=edgesfirst];
+  node [shape=box, style="filled", fillcolor=white, color="#111111", penwidth=2.0, fontname="Arial", fontsize=8.5, fontcolor="#111111", margin="0.04,0.025", width=0, height=0, pin=true, bold=true];
+  edge [color="#111111", penwidth=2.0, arrowsize=0.65, fontname="Arial", fontsize=8, fontcolor="#111111", bold=true];
+  appoint [label="El presbiterio nombra la comisión", pos="189,619!"];
+  convene [label="Convocatoria de la Reunión\nde la Comisión", pos="334,611!"];
+  original [label="El Apelante Acepta el Expediente y, si lo desea, Presenta\nun Informe al Presbiterio y al Consistorio", pos="149,590!"];
+  accept [label="El Apelante Acepta el Expediente\ny si lo desea. Archiva el Expediente\ncon el Presbiterio y el Consistorio", pos="122,473!"];
+  object [label="Si lo desea, El Apelante Presenta\nuna Objeción al Expediente en el\nPresbiterio y el Consistorio", pos="277,479!"];
+  response [label="Respuesta del Consistorio", pos="280,429!"];
+  rule [label="Reglas de la Comisión sobre el\nregistro de la disputa", pos="279,385!"];
+  abrief [label="Si se desea El Apelante Archiva\nel Expediente", pos="278,344!"];
+  sbrief1 [label="Si se desea El Consistorio Archiva\nel Expediente", pos="128,295!"];
+  sbrief2 [label="Si se desea El Consistorio Archiva\nel Expediente", pos="279,295!"];
+  hearing [label="AUDIENCIA", shape=oval, pos="197,252!"];
+  judgment [label="La Comisión emite un juicio", pos="196,211!"];
+  decision [label="La Comisión emite una decisión\nescrita", pos="196,167!"];
+  report [label="La Comisión presenta un\ninforme completo al\nSecretario", pos="104,126!"];
+  opinions [label="Las opiniones coincidentes/\ndisidentes se presentan al\nsecretario", pos="306,126!"];
+  forward [label="El Secretario del Presbiterio transmite\nla decisión a las Partes y Presbíteros", pos="203,79!"];
+
+  page_left [label="TRIBUNALES DE APELACIÓN", shape=plaintext, style="", fontname="serif", fontsize=9, pos="114,638!"];
+  page_right [label="APÉNDICE H", shape=plaintext, style="", fontname="serif", fontsize=9, pos="303,638!"];
+  app_mid [label="", shape=point, width=0.01, style=invis, pos="278,619!"];
+  join [label="", shape=point, width=0.01, style=invis, pos="197,295!"];
+  rail42top [label="", shape=point, width=0.01, style=invis, pos="58,519!"];
+  rail42bottom [label="", shape=point, width=0.01, style=invis, pos="58,252!"];
+  rail84top [label="", shape=point, width=0.01, style=invis, pos="367,519!"];
+  rail84bottom [label="", shape=point, width=0.01, style=invis, pos="367,252!"];
+  report_left_top [label="", shape=point, width=0.01, style=invis, pos="82,224!"];
+  report_left_bottom [label="", shape=point, width=0.01, style=invis, pos="82,127!"];
+  opinions_right_top [label="", shape=point, width=0.01, style=invis, pos="348,224!"];
+  opinions_right_bottom [label="", shape=point, width=0.01, style=invis, pos="348,127!"];
+  report_cross [label="", shape=point, width=0.01, style=invis, pos="82,167!"];
+  opinions_cross [label="", shape=point, width=0.01, style=invis, pos="348,167!"];
+  page_min [label="", shape=point, width=0.01, style=invis, pos="1,1!"];
+  page_max [label="", shape=point, width=0.01, style=invis, pos="431,647!"];
+
+  appoint:e -> app_mid:w [label="10 días", arrowhead=none]; app_mid -> convene:n [arrowhead=normal]; appoint -> original [arrowhead=normal];
+  original -> accept [label="14 días", arrowhead=normal]; original -> object [label="14 días", arrowhead=normal];
+  original:w -> rail42top:e [style=dashed, arrowhead=none]; original:e -> rail84top:w [style=dashed, arrowhead=none];
+  rail42top -> rail42bottom [style=dashed, label="42 días", arrowhead=none]; rail84top -> rail84bottom [style=dashed, label="84 días", arrowhead=none];
+  rail42bottom -> hearing:w [style=dashed, arrowhead=normal]; rail84bottom -> hearing:e [style=dashed, arrowhead=normal];
+  accept:e -> object:w [label="O", arrowhead=none];
+  object -> response [label="14 días", arrowhead=normal]; response -> rule [label="14 días", arrowhead=normal]; rule -> abrief [label="14 días", arrowhead=normal]; abrief -> sbrief2 [label="14 días", arrowhead=normal]; accept -> sbrief1 [label="14 días", arrowhead=normal];
+  sbrief1:e -> join:w [arrowhead=none]; sbrief2:w -> join:e [arrowhead=none]; join -> hearing [label="14 días", arrowhead=normal];
+  hearing -> judgment [label="10 días", arrowhead=normal]; judgment -> decision [label="21 días", arrowhead=normal];
+  hearing:w -> report_left_top:e [arrowhead=none]; report_left_top -> report_cross [label="42 días", arrowhead=none]; report_cross -> report_left_bottom [arrowhead=none]; report_left_bottom -> report:n [arrowhead=normal];
+  hearing:e -> opinions_right_top:w [arrowhead=none]; opinions_right_top -> opinions_cross [label="42 días", arrowhead=none]; opinions_cross -> opinions_right_bottom [arrowhead=none]; opinions_right_bottom -> opinions:n [arrowhead=normal];
+  decision:w -> report_cross:e [style=dashed, dir=both, arrowhead=normal, arrowtail=normal]; decision:e -> opinions_cross:w [style=dashed, dir=both, arrowhead=normal, arrowtail=normal];
+  report -> forward:nw [style=dashed, arrowhead=normal]; opinions -> forward:ne [style=dashed, arrowhead=normal];
+}
