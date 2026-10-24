@@ -760,6 +760,7 @@ const NOTES = {
 /* ── notes + content packs: persistence (localStorage) + portable import/export ── */
 window.BCO_COMMENTARIES = window.BCO_COMMENTARIES || [];   // [{label, entries}] — multiple commentary packs (Smith, Ramsay, …)
 const PACK_FORMAT = "pca-constitution-pack";
+const BCO_EDITION_FORMAT = "pca-reader-bco-edition";
 (function restore(){                                   // durable when served; file:// may not persist (export files cover that)
   try{ const n=localStorage.getItem("pcacon.notes"); if(n){ const o=JSON.parse(n); Object.keys(NOTES).forEach(k=>delete NOTES[k]); Object.assign(NOTES, o); } }catch(e){}
   try{
@@ -799,7 +800,44 @@ const saveCommentaries = ()=>{ try{
 const noteDate = ()=>{ try{ return new Date().toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}); }catch(e){ return ""; } };
 function packDownload(name, obj){ const u=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:"application/json"})); const a=document.createElement("a"); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u); }
 function exportNotes(){ packDownload("pca-constitution-notes.json", {format:PACK_FORMAT, version:1, kind:"notes", label:"My notes", exported:noteDate(), entries:NOTES}); }
+function bcoEditionToBookPack(edition){
+  if(edition.version!==1 || !Number.isInteger(edition.edition) || !Array.isArray(edition.order) || !edition.entries || typeof edition.entries!=='object')
+    throw new Error("Invalid BCO edition snapshot (expected version 1, edition, order, and entries).");
+  if(!edition.order.length || new Set(edition.order).size!==edition.order.length)
+    throw new Error("BCO edition snapshot has an empty or duplicated chapter order.");
+  const chapters={};
+  for(const id of edition.order){
+    const entry=edition.entries[id];
+    if(!entry || typeof entry!=='object') throw new Error(`BCO edition snapshot is missing ordered entry ${id}.`);
+    const sections=[];
+    if(entry.paras!=null){
+      if(!Array.isArray(entry.paras)) throw new Error(`BCO edition entry ${id} has invalid paragraphs.`);
+      if(entry.paras.length) sections.push({prose:true,blocks:entry.paras.map(text=>["p",0,String(text)])});
+    }
+    if(entry.sections!=null){
+      if(!Array.isArray(entry.sections)) throw new Error(`BCO edition entry ${id} has invalid sections.`);
+      for(const section of entry.sections){
+        if(!section || typeof section.ref!=='string' || !section.ref)
+          throw new Error(`BCO edition entry ${id} has a section without a reference.`);
+        const converted={ref:section.ref};
+        for(const field of ['body','blocks','prose','binding']) if(section[field]!==undefined) converted[field]=section[field];
+        sections.push(converted);
+      }
+    }
+    chapters[id]={title:entry.title||id, part:entry.part, sections, vacated:!!entry.vacated};
+  }
+  const label=edition.label||`PCA Book of Church Order (${edition.edition})`;
+  const slug=String(label).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48).replace(/-$/,'')||'edition';
+  return {format:PACK_FORMAT,version:1,kind:'book',label,
+    notice:`Historical BCO edition snapshot (${edition.edition}); wording and structure are presented as supplied in the source snapshot.`,
+    component:{key:`bco-${edition.edition}-${slug}`,abbr:`BCO ${edition.edition}`,name:label,division:'order',icon:'book',
+      tag:`Historical Book of Church Order edition (${edition.edition}).`,
+      lede:`Imported from a version 1 BCO edition snapshot for historical reading.`,
+      meta:`Historical edition · ${edition.edition}`,historicalBcoEdition:edition.edition},
+    order:edition.order.slice(),chapters};
+}
 function importPack(obj){
+  if(obj && obj.format===BCO_EDITION_FORMAT) obj=bcoEditionToBookPack(obj);
   if(!obj || obj.format!==PACK_FORMAT) throw new Error("Not a PCA Constitution pack file.");
   const entries=obj.entries||{}, n=Object.keys(entries).length+(Array.isArray(obj.sections)?obj.sections.length:0);
   if(obj.kind==="notes"){                              // merge (non-destructive), dedup by text
@@ -944,9 +982,15 @@ function buildChapter(book, o){
   // custom book pack (presbytery rules, bylaws…) — same chapter/section shape as BCO
   if(COMPONENTS[book] && COMPONENTS[book].custom){
     const pd = pagedData(book), bc = pd && pd.map[o.ch];
-    if(bc) return {kicker:COMPONENTS[book].name, title:(bc.title||("Chapter "+o.ch)), subtitle:"",
+    const partNames={front:"Preface & Principles",fog:"Form of Government",rod:"Rules of Discipline",dow:"Directory for Worship",appx:"Appendices"};
+    const partName=bc&&partNames[bc.part], isNumbered=bc&&['fog','rod','dow'].includes(bc.part);
+    const kicker=COMPONENTS[book].name+(partName?" · "+partName:'');
+    const title=bc&&isNumbered?"Chapter "+o.ch:(bc&&(bc.title||("Chapter "+o.ch)));
+    const subtitle=bc&&isNumbered?bc.title:"";
+    if(bc && bc.vacated) return {kicker, title, subtitle, railSub:[], provs:[{ref:null,body:"This chapter has been vacated."}]};
+    if(bc) return {kicker, title, subtitle,
       railSub:(bc.sections||[]).filter(s=>!s.prose).map(s=>s.ref).filter(Boolean),   // skip number-less prose (e.g. an essay appendix)
-      provs:(bc.sections||[]).map(s=>({ref:s.ref, body:s.body, blocks:s.blocks, prose:s.prose}))};
+      provs:(bc.sections||[]).map(s=>({ref:s.ref, body:s.body, blocks:s.blocks, prose:s.prose, con:!!s.binding}))};
   }
   // bco — active edition (English, Spanish, or Korean)
   if(BCO_DATA && BCO_DATA[o.ch]){
@@ -1665,7 +1709,7 @@ function buildSearch(){
   if(window.WCF) for(const ch in window.WCF){ const c=window.WCF[ch]; (c.sections||[]).forEach(s=>out.push(_searchRecord('wcf',s.ref,{ch},c.title||`Chapter ${ch}`,_plain(s.body)))); }
   [['wsc',window.WSC],['wlc',window.WLC]].forEach(([bk,arr])=>{ if(Array.isArray(arr)) arr.forEach((qa,i)=>{ const ref='Q.'+(i+1), question=_plain(qa.q); out.push(_searchRecord(bk,ref,{qStart:String(i+1),anchor:ref},question,_plain(qa.a))); }); });
   if(BCO_DATA && window.BCO_ORDER) window.BCO_ORDER.forEach(id=>{ const e=BCO_DATA[id]; (e.sections||[]).forEach(s=>{ let t=_plain(s.body); if(!t&&s.blocks) t=s.blocks.map(b=>_plain(b[b.length-1])).join(' '); out.push(_searchRecord('bco',s.ref,{ch:id},e.title||'',t)); }); if(e.paras&&e.paras.length){ const ref=id.startsWith('app')?`Appendix ${id.slice(3)}`:(e.title||id); out.push(_searchRecord('bco',ref,{ch:id},e.title||'Book of Church Order',e.paras.map(_plain).join(' '),true)); } });
-  window.BOOK_PACKS.forEach(bp=>{ const k=bp.component.key; (bp.order||[]).forEach(id=>{ const ch=bp.chapters[id]||{}; (ch.sections||[]).forEach(s=>out.push(_searchRecord(k,s.ref,{ch:id},ch.title||'',_plain(s.body)))); }); });
+  window.BOOK_PACKS.forEach(bp=>{ const k=bp.component.key; (bp.order||[]).forEach(id=>{ const ch=bp.chapters[id]||{}; (ch.sections||[]).forEach(s=>{ const text=s.body||((s.blocks||[]).map(b=>b[0]==='i'?`${b[2]} ${b[3]}`:b[2]).join(' ')); out.push(_searchRecord(k,s.ref||id,{ch:id},ch.title||'',_plain(text))); }); }); });
   return out;
 }
 const BOOK_LABEL={wcf:'WCF',wlc:'WLC',wsc:'WSC',bco:'BCO'};
@@ -1823,8 +1867,8 @@ function renderPacks(){
     + window.BCO_COMMENTARIES.map((c,i)=>`<div class="pack-row"><div><b>${c.label}</b><span class="pack-sub">Commentary · ${Object.keys(c.entries||{}).length+(c.sections||[]).length} sections</span></div><button class="pack-btn" data-act="rm-comm" data-i="${i}">Remove</button></div>`).join('')
     + window.BOOK_PACKS.map(b=>`<div class="pack-row"><div><b>${b.component.name}</b><span class="pack-sub">Book · ${bookSecs(b)} sections</span></div><button class="pack-btn" data-act="rm-book" data-key="${b.component.key}">Remove</button></div>`).join('')
     + available.map(p=>`<div class="pack-row"><div><b>${p.kind==='book'?p.component.name:p.label}</b><span class="pack-sub">${p.notice||((p.kind==='book'?'Book · '+bookSecs(p):'Commentary · '+Object.keys(p.entries).length)+' sections · public domain, included')}</span></div><button class="pack-btn" data-act="add-bundled" data-label="${p.label}">Add</button></div>`).join('')
-    + `<button class="pack-btn import" data-act="import">Import a pack…</button>`
-    + `<p class="packs-note">Notes and imported packs are kept in this browser's local storage and survive reloads. Public-domain packs (Ramsay commentary; a sample book) are included — just tap <b>Add</b>. Copyrighted commentary (e.g. Smith) isn't bundled; import it as your own JSON file. Book packs add a whole new document (presbytery rules, session standing rules, bylaws) alongside the four standards. Everything exports/imports as portable JSON.</p>`;
+    + `<button class="pack-btn import" data-act="import">Import a file…</button>`
+    + `<p class="packs-note">Notes and imported books are kept in this browser's local storage and survive reloads. You can import a content pack or a historical BCO edition snapshot JSON. Public-domain packs (Ramsay commentary; a sample book) are included — just tap <b>Add</b>. Copyrighted commentary (e.g. Smith) isn't bundled; import it as your own JSON file. Imported books appear alongside the four standards. Everything exports/imports as portable JSON.</p>`;
 }
 function openPacks(){ renderPacks(); document.getElementById('packWrap').classList.add('show'); }
 function closePacks(){ document.getElementById('packWrap').classList.remove('show'); }
