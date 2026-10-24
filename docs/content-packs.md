@@ -86,6 +86,20 @@ Commentary packs attach one or more paragraphs to provisions in an existing corp
 | `corpus` | optional | Component key to which the references belong. Defaults to `"bco"`. |
 | `entries` | yes in practice | Object keyed by provision reference; each value is an array of commentary paragraphs. |
 
+A pack may also store a multi-question source section once and list the questions on which it should appear:
+
+```json
+{
+  "questionRange": { "from": 100, "through": 107 },
+  "questions": [100, 101, 102, 103, 104, 105, 106, 107],
+  "title": "The Lord's Prayer",
+  "pages": { "from": 158, "through": 168 },
+  "paragraphs": ["Full source section text."]
+}
+```
+
+`questionRange` records the range printed by the source; `questions` controls where the section appears. `pages` records printed-page provenance and does not determine relevance. The reader displays each matching section once, with its heading and page span.
+
 Re-importing a commentary pack with the same `label` replaces the prior pack of that name.
 
 ## Book packs
