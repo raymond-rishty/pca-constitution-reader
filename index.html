@@ -375,6 +375,12 @@
   .commentary-section h4{font-family:var(--sans); font-size:.86rem; line-height:1.4; color:var(--navy); margin:0 0 5px}
   .commentary-range{font-family:var(--sans); font-size:.7rem; line-height:1.45; color:var(--muted); margin:0 0 10px}
   .commentary-section-body p{margin:.65em 0}
+  .commentary-section-body .li{margin:.32em 0;padding-left:1.5em;text-indent:-1.5em}
+  .commentary-section-body .li .mk{font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums;margin-right:.15em}
+  .commentary-section-body .li.d1{margin-left:1.7em}
+  .commentary-section-body .li.d2{margin-left:3.4em}
+  .commentary-section-body .li.d3{margin-left:5.1em}
+  .commentary-section-body .li.d4{margin-left:6.8em}
   .commentary-context{border-top:1px solid var(--line); margin-top:16px; padding-top:11px}
   .commentary-context>summary,.commentary-context-node>summary{cursor:pointer; font-family:var(--sans); color:var(--ink-soft); list-style-position:outside}
   .commentary-context>summary{font-size:.78rem; font-weight:600}
@@ -1455,6 +1461,15 @@ function commentarySectionMeta(s){
   return [q,printed,p].filter(Boolean).join(' · ');
 }
 function commentarySectionParas(s){
+  if(Array.isArray(s.blocks)&&s.blocks.length){
+    return s.blocks.map(b=>{
+      if(!Array.isArray(b)) return '';
+      const depth=Math.max(0,Math.min(4,Number.isInteger(b[1])?b[1]:0));
+      if(b[0]==='p') return '<p class="bpara d'+depth+'">'+esc(b[2]||'')+'</p>';
+      if(b[0]==='i') return '<div class="li d'+depth+'"><span class="mk">'+esc(b[2]||'')+'</span> '+esc(b[3]||'')+'</div>';
+      return '';
+    }).join('');
+  }
   return (s.paragraphs||[]).map(p=>'<p>'+esc(p)+'</p>').join('');
 }
 function renderCommentarySections(sections,qNumber){
