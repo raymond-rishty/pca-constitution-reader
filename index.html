@@ -1518,7 +1518,7 @@ function renderDrawer(){
       body += `<div class="csubtabs">${comms.map((c,i)=>`<button class="csub${i===sel?' on':''}" data-csub="${i}">${c.label.split(' — ')[0]}</button>`).join('')}</div>`;
     const c = comms[sel];
     const sectionMarkup=(c.sections||[]).map(s=>{
-      const range=s.questionRange?(`Questions ${s.questionRange.from}${s.questionRange.through===s.questionRange.from?'':'–'+s.questionRange.through}`):'';
+      const range=s.questionRange?(`${s.questionRange.from===s.questionRange.through?'Question':'Questions'} ${s.questionRange.from}${s.questionRange.through===s.questionRange.from?'':'–'+s.questionRange.through}`):'';
       const pages=s.pages?(`p. ${s.pages.from}${s.pages.through===s.pages.from?'':'–'+s.pages.through}`):'';
       return `<section class="commentary-section"><h4>${esc(s.title||range||'Commentary section')}</h4>${range||pages?`<p class="commentary-range">${[range,pages].filter(Boolean).join(' · ')}</p>`:''}${(s.paragraphs||[]).map(p=>`<p>${esc(p)}</p>`).join('')}</section>`;
     }).join('');
