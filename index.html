@@ -596,6 +596,7 @@
 <script src="content/wlc.js"></script>
 <script src="content/wcf.js"></script>
 <script src="content/bco.js"></script>
+<script src="content/bco-index.js"></script>
 <script src="content/proofs.js"></script>
 <script src="content/verses.js"></script>
 <script src="content/citations-counts.js"></script>
@@ -1650,7 +1651,7 @@ function closeDrawer(){
 /* Built lazily from the same provision data as the reader; installed books join this index. */
 let SEARCH=null;
 function _plain(html){ const d=document.createElement('div'); d.innerHTML=html||''; return (d.textContent||'').replace(/\s+/g,' ').trim(); }
-function _searchRecord(book,ref,open,title,text,noDrawer=false){
+function _searchRecord(book,ref,open,title,text,noDrawer=false,topics=[]){
   const label=(COMPONENTS[book]&&COMPONENTS[book].abbr)||book.toUpperCase();
   const bare=String(ref).replace(/^Q\.?\s*/i,'');
   const aliases=[`${label} ${ref}`,ref];
@@ -1658,13 +1659,14 @@ function _searchRecord(book,ref,open,title,text,noDrawer=false){
   if(book==='wlc') aliases.push(`Larger Catechism Q ${bare}`,`Larger Q ${bare}`);
   if(book==='wsc') aliases.push(`Shorter Catechism Q ${bare}`,`Shorter Q ${bare}`);
   if(book==='bco') aliases.push(`Book of Church Order ${ref}`);
-  return {book,ref,reference:`${label} ${ref}`,aliases,open,title:title||'',text:text||'',sub:title||'',txt:text||'',noDrawer};
+  return {book,ref,reference:`${label} ${ref}`,aliases,open,title:title||'',text:text||'',topics,sub:title||'',txt:text||'',noDrawer};
 }
 function buildSearch(){
   const out=[];
+  const bcoIndexTopics=window.BCO_INDEX_TOPICS||{};
   if(window.WCF) for(const ch in window.WCF){ const c=window.WCF[ch]; (c.sections||[]).forEach(s=>out.push(_searchRecord('wcf',s.ref,{ch},c.title||`Chapter ${ch}`,_plain(s.body)))); }
   [['wsc',window.WSC],['wlc',window.WLC]].forEach(([bk,arr])=>{ if(Array.isArray(arr)) arr.forEach((qa,i)=>{ const ref='Q.'+(i+1), question=_plain(qa.q); out.push(_searchRecord(bk,ref,{qStart:String(i+1),anchor:ref},question,_plain(qa.a))); }); });
-  if(BCO_DATA && window.BCO_ORDER) window.BCO_ORDER.forEach(id=>{ const e=BCO_DATA[id]; (e.sections||[]).forEach(s=>{ let t=_plain(s.body); if(!t&&s.blocks) t=s.blocks.map(b=>_plain(b[b.length-1])).join(' '); out.push(_searchRecord('bco',s.ref,{ch:id},e.title||'',t)); }); if(e.paras&&e.paras.length){ const ref=id.startsWith('app')?`Appendix ${id.slice(3)}`:(e.title||id); out.push(_searchRecord('bco',ref,{ch:id},e.title||'Book of Church Order',e.paras.map(_plain).join(' '),true)); } });
+  if(BCO_DATA && window.BCO_ORDER) window.BCO_ORDER.forEach(id=>{ const e=BCO_DATA[id]; (e.sections||[]).forEach(s=>{ let t=_plain(s.body); if(!t&&s.blocks) t=s.blocks.map(b=>_plain(b[b.length-1])).join(' '); const indexRef=s.ref.startsWith('PP-')?`Preface II-${s.ref.slice(3)}`:s.ref; out.push(_searchRecord('bco',s.ref,{ch:id},e.title||'',t,false,bcoIndexTopics[indexRef]||bcoIndexTopics[s.ref]||[])); }); if(e.paras&&e.paras.length){ const ref=id.startsWith('app')?`Appendix ${id.slice(3)}`:(e.title||id); const frontRef=id==='pref-1'?'Preface I':id==='pref-2'?'Preface II':id==='pref-3'?'Preface III':ref; const topics=Object.entries(bcoIndexTopics).filter(([key])=>key===frontRef||key.startsWith(`${frontRef}-`)).flatMap(([,labels])=>labels); out.push(_searchRecord('bco',ref,{ch:id},e.title||'Book of Church Order',e.paras.map(_plain).join(' '),true,[...new Set([...(bcoIndexTopics[ref]||[]),...topics])])); } });
   window.BOOK_PACKS.forEach(bp=>{ const k=bp.component.key; (bp.order||[]).forEach(id=>{ const ch=bp.chapters[id]||{}; (ch.sections||[]).forEach(s=>out.push(_searchRecord(k,s.ref,{ch:id},ch.title||'',_plain(s.body)))); }); });
   return out;
 }
@@ -1691,7 +1693,7 @@ function palRender(q){
   palResults=result.results.slice(0,50).map(row=>({...row.record,_match:row}));
   palSel=0; renderPalTools(result.total);
   const hits=palResults.map((h,i)=>{
-    const row=h._match, source=row.bestField==='title'?(h.title||h.text):h.text;
+    const row=h._match, source=row.bestField==='title'?(h.title||h.text):row.bestField==='topics'?(h.topics||[]).join(' · '):h.text;
     const snippet=PcaConstitutionSearch.excerpt(source,row.bestToken,190);
     return `<div class="hit ${i===0?'sel':''}" data-i="${i}" role="option" aria-selected="${i===0}"><span class="ref">${esc(h.reference)}</span><span class="title">${_highlight(h.title||'Constitutional provision',query)}</span><span class="txt">${_highlight(snippet,query)}</span></div>`;
   }).join('');

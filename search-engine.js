@@ -5,7 +5,7 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  const FIELD_WEIGHTS = { reference: 900, title: 180, text: 40 };
+  const FIELD_WEIGHTS = { reference: 900, title: 180, topics: 110, text: 40 };
 
   function normalize(value) {
     return String(value || '')
@@ -90,6 +90,7 @@
     return {
       reference: [record.reference || record.ref, ...(record.aliases || [])],
       title: [record.title || record.sub],
+      topics: record.topics || [],
       text: [record.text || record.txt],
     };
   }
