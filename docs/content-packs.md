@@ -98,7 +98,7 @@ A pack may also store a multi-question source section once and list the question
 }
 ```
 
-`questionRange` records the range printed by the source; `questions` controls where the section appears. `pages` records printed-page provenance and does not determine relevance. The reader displays each matching section once, with its heading and page span.
+`id` is a stable section identifier. `parentId` points to the enclosing source section, or is `null` for a top-level section. `questionRange` records the range printed by the source; `questions` controls where the section appears. `pages` records printed-page provenance and does not determine relevance. In a question’s Commentary drawer, the closest matching sections appear first; parent sections are available under collapsed “Context in Hodge’s book.” This hierarchy does not alter the catechism text or its navigation groups.
 
 Re-importing a commentary pack with the same `label` replaces the prior pack of that name.
 
