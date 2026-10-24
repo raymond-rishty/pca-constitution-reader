@@ -191,9 +191,23 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Stable identifier for this source section."
+                  },
+                  "parentId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "minLength": 1,
+                    "description": "ID of the enclosing source section, or null when this section has no parent."
                   }
                 },
-                "additionalProperties": false
+                "additionalProperties": false,
+                "description": "Printed source sections shared by the listed catechism questions; optional IDs and parent links preserve the source hierarchy for commentary-drawer presentation."
               }
             }
           },
