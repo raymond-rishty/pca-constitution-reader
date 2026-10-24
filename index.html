@@ -1449,8 +1449,10 @@ function spChip(ref, ttl){
 function commentarySectionMeta(s){
   const qs=Array.isArray(s.questions)?s.questions.slice().sort((a,b)=>a-b):[];
   const q=qs.length>1?('Shared discussion · Q.'+qs[0]+'–'+qs[qs.length-1]):(qs.length?'Q.'+qs[0]:'');
+  const r=s.questionRange, sameRange=!!(r&&qs.length&&r.from===qs[0]&&r.through===qs[qs.length-1]);
+  const printed=r&&!sameRange?('Printed heading range · Q.'+r.from+(r.through===r.from?'':'–'+r.through)):'';
   const p=s.pages?('pp. '+s.pages.from+(s.pages.through===s.pages.from?'':'–'+s.pages.through)):'';
-  return [q,p].filter(Boolean).join(' · ');
+  return [q,printed,p].filter(Boolean).join(' · ');
 }
 function commentarySectionParas(s){
   return (s.paragraphs||[]).map(p=>'<p>'+esc(p)+'</p>').join('');
