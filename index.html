@@ -780,7 +780,22 @@ const PACK_FORMAT = "pca-constitution-pack";
   }catch(e){}
 })();
 const saveNotes = ()=>{ try{ localStorage.setItem("pcacon.notes", JSON.stringify(NOTES)); }catch(e){} };
-const saveCommentaries = ()=>{ try{ localStorage.setItem("pcacon.commentaries", JSON.stringify(window.BCO_COMMENTARIES)); localStorage.removeItem("pcacon.commentary"); }catch(e){} };
+const saveCommentaries = ()=>{ try{
+  // Structured commentary blocks already contain the full rendered text. Keep
+  // the paragraphs fallback in portable pack files, but omit it from browser
+  // storage to avoid storing every commentary entry twice.
+  const stored=window.BCO_COMMENTARIES.map(pack=>{
+    const entries={};
+    for(const [ref,value] of Object.entries(pack.entries||{})){
+      if(value&&Array.isArray(value.blocks)&&Array.isArray(value.paragraphs)){
+        const {paragraphs,...compact}=value; entries[ref]=compact;
+      } else entries[ref]=value;
+    }
+    return {...pack,entries};
+  });
+  localStorage.setItem("pcacon.commentaries", JSON.stringify(stored));
+  localStorage.removeItem("pcacon.commentary");
+}catch(e){ throw e; } };
 const noteDate = ()=>{ try{ return new Date().toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}); }catch(e){ return ""; } };
 function packDownload(name, obj){ const u=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:"application/json"})); const a=document.createElement("a"); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u); }
 function exportNotes(){ packDownload("pca-constitution-notes.json", {format:PACK_FORMAT, version:1, kind:"notes", label:"My notes", exported:noteDate(), entries:NOTES}); }

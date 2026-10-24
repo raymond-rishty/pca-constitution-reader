@@ -126,9 +126,6 @@
                   },
                   {
                     "type": "object",
-                    "required": [
-                      "paragraphs"
-                    ],
                     "properties": {
                       "paragraphs": {
                         "type": "array",
@@ -138,10 +135,22 @@
                       },
                       "blocks": {
                         "$ref": "#/$defs/commentaryBlocks",
-                        "description": "Optional structured paragraph and list blocks. The reader renders these when present and retains paragraphs as a text fallback."
+                        "description": "Optional structured paragraph and list blocks. When present, these blocks can stand alone; paragraphs is an optional plain-text fallback for older readers."
                       }
                     },
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "anyOf": [
+                      {
+                        "required": [
+                          "paragraphs"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "blocks"
+                        ]
+                      }
+                    ]
                   }
                 ]
               }
@@ -155,8 +164,7 @@
                   "questionRange",
                   "questions",
                   "title",
-                  "pages",
-                  "paragraphs"
+                  "pages"
                 ],
                 "properties": {
                   "questionRange": {
@@ -230,9 +238,21 @@
                   },
                   "blocks": {
                     "$ref": "#/$defs/commentaryBlocks",
-                    "description": "Optional structured paragraph and list blocks rendered in the commentary drawer; paragraphs remains as a compatibility fallback."
+                    "description": "Optional structured paragraph and list blocks rendered in the commentary drawer. When present, these blocks can stand alone; paragraphs is an optional plain-text fallback for older readers."
                   }
                 },
+                "anyOf": [
+                  {
+                    "required": [
+                      "paragraphs"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "blocks"
+                    ]
+                  }
+                ],
                 "additionalProperties": false,
                 "description": "Printed source sections shared by the listed catechism questions; optional IDs and parent links preserve the source hierarchy for commentary-drawer presentation."
               }
@@ -505,6 +525,7 @@
     },
     "commentaryBlocks": {
       "type": "array",
+      "minItems": 1,
       "description": "Structured paragraph and list blocks for commentary source sections.",
       "items": {
         "oneOf": [
