@@ -117,10 +117,33 @@
             "entries": {
               "type": "object",
               "additionalProperties": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "paragraphs"
+                    ],
+                    "properties": {
+                      "paragraphs": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "blocks": {
+                        "$ref": "#/$defs/commentaryBlocks",
+                        "description": "Optional structured paragraph and list blocks. The reader renders these when present and retains paragraphs as a text fallback."
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
               }
             },
             "sections": {
