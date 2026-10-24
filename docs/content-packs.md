@@ -84,13 +84,12 @@ Commentary packs attach one or more paragraphs to provisions in an existing corp
 | --- | --- | --- |
 | `label` | recommended | Commentary name. Defaults to `"Commentary"`. |
 | `corpus` | optional | Component key to which the references belong. Defaults to `"bco"`. |
-| `entries` | yes in practice | Object keyed by provision reference; each value is an array of commentary paragraphs or a structured object containing `paragraphs` and optional `blocks`. |
+| `entries` | yes in practice | Object keyed by provision reference; each value is an array of commentary paragraphs or a structured object containing `paragraphs`, `blocks`, or both. |
 
-Use `blocks` when the source's paragraph and list structure should be preserved. A paragraph block is `["p", depth, text]`; a list-item block is `["i", depth, marker, text]`. Depth controls indentation from 0 to 4. Keep `paragraphs` as a plain-text fallback for readers that do not render blocks. For example:
+Use `blocks` when the source's paragraph and list structure should be preserved. A paragraph block is `["p", depth, text]`; a list-item block is `["i", depth, marker, text]`. Depth controls indentation from 0 to 4. `blocks` can stand alone; include `paragraphs` only when a plain-text fallback for older readers is useful. For example:
 
 ```json
 "31-2": {
-  "paragraphs": ["The first proposition.", "The second proposition."],
   "blocks": [
     ["p", 0, "The first proposition."],
     ["i", 0, "1st.", "The second proposition."]
@@ -106,7 +105,6 @@ A pack may also store a multi-question source section once and list the question
   "questions": [100, 101, 102, 103, 104, 105, 106, 107],
   "title": "The Lord's Prayer",
   "pages": { "from": 158, "through": 168 },
-  "paragraphs": ["Full source section text."],
   "blocks": [
     ["p", 0, "A source paragraph."],
     ["i", 1, "(1)", "A numbered list item."]
@@ -116,7 +114,7 @@ A pack may also store a multi-question source section once and list the question
 
 `id` is a stable section identifier. `parentId` points to the enclosing source section, or is `null` for a top-level section. `questionRange` records the range printed by the source; `questions` controls where the section appears. `pages` records printed-page provenance and does not determine relevance. In a question’s Commentary drawer, the closest matching sections appear first; parent sections are available under collapsed “Context in Hodge’s book.” This hierarchy does not alter the catechism text or its navigation groups.
 
-`blocks` preserves paragraph and list structure inside a section. A paragraph tuple is `["p", depth, text]`; a list item tuple is `["i", depth, marker, text]`. Depth controls indentation. When supplied, the reader renders `blocks`; `paragraphs` remains available as a text fallback for readers that do not support structured blocks.
+`blocks` preserves paragraph and list structure inside a section. A paragraph tuple is `["p", depth, text]`; a list item tuple is `["i", depth, marker, text]`. Depth controls indentation. When supplied, the reader renders `blocks`; `paragraphs` is optional and can be retained as a text fallback for older readers.
 
 Re-importing a commentary pack with the same `label` replaces the prior pack of that name.
 
