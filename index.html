@@ -768,12 +768,12 @@ function packDownload(name, obj){ const u=URL.createObjectURL(new Blob([JSON.str
 function exportNotes(){ packDownload("pca-constitution-notes.json", {format:PACK_FORMAT, version:1, kind:"notes", label:"My notes", exported:noteDate(), entries:NOTES}); }
 function importPack(obj){
   if(!obj || obj.format!==PACK_FORMAT) throw new Error("Not a PCA Constitution pack file.");
-  const entries=obj.entries||{}, n=Object.keys(entries).length;
+  const entries=obj.entries||{}, n=Object.keys(entries).length+(Array.isArray(obj.sections)?obj.sections.length:0);
   if(obj.kind==="notes"){                              // merge (non-destructive), dedup by text
     for(const ref in entries){ const have=NOTES[ref]||(NOTES[ref]=[]); const seen=new Set(have.map(x=>x.text)); (entries[ref]||[]).forEach(x=>{ if(!seen.has(x.text)) have.push(x); }); }
     saveNotes();
   } else if(obj.kind==="commentary"){                  // add, or replace a same-named pack (so re-import updates)
-    const label=obj.label||"Commentary", pack={label, entries, corpus:obj.corpus||"bco"};
+    const label=obj.label||"Commentary", pack={label, entries, sections:Array.isArray(obj.sections)?obj.sections:[], corpus:obj.corpus||"bco"};
     const i=window.BCO_COMMENTARIES.findIndex(c=>c.label===label);
     if(i>=0) window.BCO_COMMENTARIES[i]=pack; else window.BCO_COMMENTARIES.push(pack);
     saveCommentaries();
@@ -1447,9 +1447,13 @@ function renderDrawer(){
     + `<button class="copy-cite" data-cite="${refLabel}">⧉ Copy citation</button>`
     + `<button class="copy-cite" data-copytext="1" data-cite="${refLabel}">⧉ Copy section text</button>`;
   const hasHist = d.amend && d.amend.length;
+  const qMatch=/^Q\.(\d+)$/.exec(ref), qNumber=qMatch?Number(qMatch[1]):null;
   const comms = window.BCO_COMMENTARIES                       // commentary packs targeting THIS corpus
-      .filter(c=>(c.corpus||'bco')===current && Array.isArray(c.entries[ref]) && c.entries[ref].length)
-      .map(c=>({label:c.label, paras:c.entries[ref]}));
+      .filter(c=>(c.corpus||'bco')===current)
+      .map(c=>({label:c.label,
+        paras:Array.isArray(c.entries&&c.entries[ref])?c.entries[ref]:[],
+        sections:qNumber===null?[]:(c.sections||[]).filter(s=>Array.isArray(s.questions)&&s.questions.includes(qNumber))}))
+      .filter(c=>c.paras.length||c.sections.length);
   const bp = isCustom ? window.BOOK_PACKS.find(b=>b.component.key===current) : null;
   const fnotes = (bp && bp.footnotes && bp.footnotes[ref]) || null;   // the book's own footnotes for this provision
   if(bp && bp.commentary && Array.isArray(bp.commentary[ref]) && bp.commentary[ref].length)   // commentary bundled in the book pack
@@ -1513,7 +1517,12 @@ function renderDrawer(){
     if(comms.length>1)
       body += `<div class="csubtabs">${comms.map((c,i)=>`<button class="csub${i===sel?' on':''}" data-csub="${i}">${c.label.split(' — ')[0]}</button>`).join('')}</div>`;
     const c = comms[sel];
-    body += `<div class="commentary">${c.paras.map(p=>`<p>${p}</p>`).join('')}<p class="cattrib">${c.attrib || (c.label + ' — imported pack, personal use.')}</p></div>`;
+    const sectionMarkup=(c.sections||[]).map(s=>{
+      const range=s.questionRange?(`Questions ${s.questionRange.from}${s.questionRange.through===s.questionRange.from?'':'–'+s.questionRange.through}`):'';
+      const pages=s.pages?(`p. ${s.pages.from}${s.pages.through===s.pages.from?'':'–'+s.pages.through}`):'';
+      return `<section class="commentary-section"><h4>${esc(s.title||range||'Commentary section')}</h4>${range||pages?`<p class="commentary-range">${[range,pages].filter(Boolean).join(' · ')}</p>`:''}${(s.paragraphs||[]).map(p=>`<p>${esc(p)}</p>`).join('')}</section>`;
+    }).join('');
+    body += `<div class="commentary">${c.paras.map(p=>`<p>${p}</p>`).join('')}${sectionMarkup}<p class="cattrib">${c.attrib || (c.label + ' — imported pack, personal use.')}</p></div>`;
   } else if(dTab==='fn'){
     body += `<div class="commentary">${fnotes.map((p,i)=>`<p class="fn-item${dFnSel===i+1?' on':''}" id="dfn-${i+1}"><sup class="fnref">${i+1}</sup> ${p}</p>`).join('')}<p class="cattrib">Footnotes from the source document.</p></div>`;
   } else if(dTab==='notes'){
@@ -1722,7 +1731,7 @@ function renderPacks(){
   const bookSecs = p => Object.values(p.chapters||{}).reduce((a,c)=>a+((c.sections||[]).length),0);
   document.getElementById('packsBody').innerHTML =
       `<div class="pack-row"><div><b>My notes</b><span class="pack-sub">${nc} note${nc!==1?'s':''} · stored on this device</span></div><button class="pack-btn" data-act="export-notes"${nc?'':' disabled'}>Export…</button></div>`
-    + window.BCO_COMMENTARIES.map((c,i)=>`<div class="pack-row"><div><b>${c.label}</b><span class="pack-sub">Commentary · ${Object.keys(c.entries).length} sections</span></div><button class="pack-btn" data-act="rm-comm" data-i="${i}">Remove</button></div>`).join('')
+    + window.BCO_COMMENTARIES.map((c,i)=>`<div class="pack-row"><div><b>${c.label}</b><span class="pack-sub">Commentary · ${Object.keys(c.entries||{}).length+(c.sections||[]).length} sections</span></div><button class="pack-btn" data-act="rm-comm" data-i="${i}">Remove</button></div>`).join('')
     + window.BOOK_PACKS.map(b=>`<div class="pack-row"><div><b>${b.component.name}</b><span class="pack-sub">Book · ${bookSecs(b)} sections</span></div><button class="pack-btn" data-act="rm-book" data-key="${b.component.key}">Remove</button></div>`).join('')
     + available.map(p=>`<div class="pack-row"><div><b>${p.kind==='book'?p.component.name:p.label}</b><span class="pack-sub">${p.notice||((p.kind==='book'?'Book · '+bookSecs(p):'Commentary · '+Object.keys(p.entries).length)+' sections · public domain, included')}</span></div><button class="pack-btn" data-act="add-bundled" data-label="${p.label}">Add</button></div>`).join('')
     + `<button class="pack-btn import" data-act="import">Import a pack…</button>`
