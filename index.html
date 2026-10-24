@@ -371,6 +371,18 @@
   .commentary p{font-family:var(--sans); font-size:.88rem; line-height:1.6; color:var(--ink-soft); margin:0 0 11px}
   .commentary .fn-item{scroll-margin-top:14px; padding:4px 8px; margin-left:-8px; margin-right:-8px; border-radius:3px; transition:background .25s}
   .commentary .fn-item.on{background:var(--accent-soft)}   /* highlight the footnote you clicked */
+  .commentary-focus-section{margin:0 0 18px}
+  .commentary-section h4{font-family:var(--sans); font-size:.86rem; line-height:1.4; color:var(--navy); margin:0 0 5px}
+  .commentary-range{font-family:var(--sans); font-size:.7rem; line-height:1.45; color:var(--muted); margin:0 0 10px}
+  .commentary-section-body p{margin:.65em 0}
+  .commentary-context{border-top:1px solid var(--line); margin-top:16px; padding-top:11px}
+  .commentary-context>summary,.commentary-context-node>summary{cursor:pointer; font-family:var(--sans); color:var(--ink-soft); list-style-position:outside}
+  .commentary-context>summary{font-size:.78rem; font-weight:600}
+  .commentary-context-list{padding:8px 0 0 12px}
+  .commentary-context-node{margin:7px 0}
+  .commentary-context-node>summary{font-size:.76rem}
+  .commentary-context-node>summary small{display:block; color:var(--muted); font-size:.67rem; margin-top:2px}
+  .commentary-context-body{padding:5px 0 0 12px}
   .cattrib{font-family:var(--sans); font-size:.72rem; color:var(--muted); margin-top:14px; border-top:1px solid var(--line); padding-top:10px}
   .csubtabs{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 12px}
   .csub{font-family:var(--sans); font-size:.74rem; color:var(--ink-soft); background:var(--paper-2); border:1px solid var(--line); border-radius:2px; padding:4px 9px; cursor:pointer}
@@ -1434,6 +1446,48 @@ function spChip(ref, ttl){
   const sp=citeSubpoints(ref, ttl);
   return sp.length ? `<span class="sp-chip" title="Cites ${ref}.${sp.join(', '+ref+'.')}">${ref}.${sp.join('/')}</span>` : '';
 }
+function commentarySectionMeta(s){
+  const qs=Array.isArray(s.questions)?s.questions.slice().sort((a,b)=>a-b):[];
+  const q=qs.length>1?('Shared discussion · Q.'+qs[0]+'–'+qs[qs.length-1]):(qs.length?'Q.'+qs[0]:'');
+  const r=s.questionRange, sameRange=!!(r&&qs.length&&r.from===qs[0]&&r.through===qs[qs.length-1]);
+  const printed=r&&!sameRange?('Printed heading range · Q.'+r.from+(r.through===r.from?'':'–'+r.through)):'';
+  const p=s.pages?('pp. '+s.pages.from+(s.pages.through===s.pages.from?'':'–'+s.pages.through)):'';
+  return [q,printed,p].filter(Boolean).join(' · ');
+}
+function commentarySectionParas(s){
+  return (s.paragraphs||[]).map(p=>'<p>'+esc(p)+'</p>').join('');
+}
+function renderCommentarySections(sections,qNumber){
+  const source=Array.isArray(sections)?sections:[];
+  const selected=source.filter(s=>Array.isArray(s.questions)&&s.questions.includes(qNumber));
+  if(!selected.length) return '';
+  const byId=new Map(source.filter(s=>s&&s.id).map(s=>[s.id,s]));
+  const contextIds=new Set();
+  selected.forEach(s=>{
+    let id=s.parentId; const seen=new Set();
+    while(id&&byId.has(id)&&!seen.has(id)){
+      seen.add(id); contextIds.add(id); id=byId.get(id).parentId;
+    }
+  });
+  const primary=selected.filter(s=>!s.id||!contextIds.has(s.id));
+  const renderFocus=s=>{
+    const meta=commentarySectionMeta(s), sid=s.id?' id="commentary-'+esc(s.id)+'"':'';
+    return '<section class="commentary-section commentary-focus-section"'+sid+'><h4>'+esc(s.title||'Commentary section')+'</h4>'
+      +(meta?'<p class="commentary-range">'+esc(meta)+'</p>':'')
+      +'<div class="commentary-section-body">'+commentarySectionParas(s)+'</div></section>';
+  };
+  const renderContext=s=>{
+    const meta=commentarySectionMeta(s), children=source.filter(x=>x.parentId===s.id&&contextIds.has(x.id));
+    const sid=s.id?' id="commentary-'+esc(s.id)+'"':'';
+    return '<details class="commentary-context-node"'+sid+'><summary><span>'+esc(s.title||'Hodge section')+'</span>'
+      +(meta?'<small>'+esc(meta)+'</small>':'')+'</summary><div class="commentary-context-body">'
+      +commentarySectionParas(s)+children.map(renderContext).join('')+'</div></details>';
+  };
+  const roots=Array.from(contextIds).map(id=>byId.get(id)).filter(s=>s&&!contextIds.has(s.parentId));
+  const context=roots.length?'<details class="commentary-context"><summary>Context in Hodge’s book ('+roots.length+' section'+(roots.length===1?'':'s')+')</summary>'
+      +'<div class="commentary-context-list">'+roots.map(renderContext).join('')+'</div></details>':'';
+  return primary.map(renderFocus).join('')+context;
+}
 function renderDrawer(){
   const ref=drawerRef, d=dossierFor(ref), n=total(d);
   const isCustom = !!(COMPONENTS[current] && COMPONENTS[current].custom);
@@ -1517,11 +1571,7 @@ function renderDrawer(){
     if(comms.length>1)
       body += `<div class="csubtabs">${comms.map((c,i)=>`<button class="csub${i===sel?' on':''}" data-csub="${i}">${c.label.split(' — ')[0]}</button>`).join('')}</div>`;
     const c = comms[sel];
-    const sectionMarkup=(c.sections||[]).map(s=>{
-      const range=s.questionRange?(`${s.questionRange.from===s.questionRange.through?'Question':'Questions'} ${s.questionRange.from}${s.questionRange.through===s.questionRange.from?'':'–'+s.questionRange.through}`):'';
-      const pages=s.pages?(`p. ${s.pages.from}${s.pages.through===s.pages.from?'':'–'+s.pages.through}`):'';
-      return `<section class="commentary-section"><h4>${esc(s.title||range||'Commentary section')}</h4>${range||pages?`<p class="commentary-range">${[range,pages].filter(Boolean).join(' · ')}</p>`:''}${(s.paragraphs||[]).map(p=>`<p>${esc(p)}</p>`).join('')}</section>`;
-    }).join('');
+    const sectionMarkup=renderCommentarySections(c.sections||[],qNumber);
     body += `<div class="commentary">${c.paras.map(p=>`<p>${p}</p>`).join('')}${sectionMarkup}<p class="cattrib">${c.attrib || (c.label + ' — imported pack, personal use.')}</p></div>`;
   } else if(dTab==='fn'){
     body += `<div class="commentary">${fnotes.map((p,i)=>`<p class="fn-item${dFnSel===i+1?' on':''}" id="dfn-${i+1}"><sup class="fnref">${i+1}</sup> ${p}</p>`).join('')}<p class="cattrib">Footnotes from the source document.</p></div>`;
