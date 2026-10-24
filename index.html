@@ -785,13 +785,13 @@ const saveCommentaries = ()=>{ try{
   // the paragraphs fallback in portable pack files, but omit it from browser
   // storage to avoid storing every commentary entry twice.
   const stored=window.BCO_COMMENTARIES.map(pack=>{
-    const entries={};
-    for(const [ref,value] of Object.entries(pack.entries||{})){
-      if(value&&Array.isArray(value.blocks)&&Array.isArray(value.paragraphs)){
-        const {paragraphs,...compact}=value; entries[ref]=compact;
-      } else entries[ref]=value;
-    }
-    return {...pack,entries};
+    const compact=value=>{
+      if(!value||!Array.isArray(value.blocks)||!Array.isArray(value.paragraphs)) return value;
+      const {paragraphs,...structured}=value; return structured;
+    };
+    const entries=Object.fromEntries(Object.entries(pack.entries||{}).map(([ref,value])=>[ref,compact(value)]));
+    const sections=Array.isArray(pack.sections)?pack.sections.map(compact):[];
+    return {...pack,entries,sections};
   });
   localStorage.setItem("pcacon.commentaries", JSON.stringify(stored));
   localStorage.removeItem("pcacon.commentary");
@@ -1475,10 +1475,14 @@ function commentarySectionMeta(s){
   const p=s.pages?('pp. '+s.pages.from+(s.pages.through===s.pages.from?'':'–'+s.pages.through)):'';
   return [q,printed,p].filter(Boolean).join(' · ');
 }
-function commentarySectionParas(s){
-  return commentaryBlocksHtml(s.blocks,s.paragraphs||[]);
+function commentaryContentHasText(content){
+  return Array.isArray(content)?content.length>0:!!(content&&
+    ((Array.isArray(content.blocks)&&content.blocks.length)||(Array.isArray(content.paragraphs)&&content.paragraphs.length)));
 }
-function commentaryBlocksHtml(blocks,paragraphs){
+function commentaryContentHtml(content){
+  if(Array.isArray(content)) return content.map(p=>'<p>'+esc(p)+'</p>').join('');
+  if(!content||typeof content!=='object') return '';
+  const blocks=content.blocks;
   if(Array.isArray(blocks)&&blocks.length){
     return blocks.map(b=>{
       if(!Array.isArray(b)) return '';
@@ -1488,7 +1492,7 @@ function commentaryBlocksHtml(blocks,paragraphs){
       return '';
     }).join('');
   }
-  return (paragraphs||[]).map(p=>'<p>'+esc(p)+'</p>').join('');
+  return (Array.isArray(content.paragraphs)?content.paragraphs:[]).map(p=>'<p>'+esc(p)+'</p>').join('');
 }
 function renderCommentarySections(sections,qNumber){
   const source=Array.isArray(sections)?sections:[];
@@ -1507,14 +1511,14 @@ function renderCommentarySections(sections,qNumber){
     const meta=commentarySectionMeta(s), sid=s.id?' id="commentary-'+esc(s.id)+'"':'';
     return '<section class="commentary-section commentary-focus-section"'+sid+'><h4>'+esc(s.title||'Commentary section')+'</h4>'
       +(meta?'<p class="commentary-range">'+esc(meta)+'</p>':'')
-      +'<div class="commentary-section-body">'+commentarySectionParas(s)+'</div></section>';
+      +'<div class="commentary-section-body">'+commentaryContentHtml(s)+'</div></section>';
   };
   const renderContext=s=>{
     const meta=commentarySectionMeta(s), children=source.filter(x=>x.parentId===s.id&&contextIds.has(x.id));
     const sid=s.id?' id="commentary-'+esc(s.id)+'"':'';
     return '<details class="commentary-context-node"'+sid+'><summary><span>'+esc(s.title||'Hodge section')+'</span>'
       +(meta?'<small>'+esc(meta)+'</small>':'')+'</summary><div class="commentary-context-body">'
-      +commentarySectionParas(s)+children.map(renderContext).join('')+'</div></details>';
+      +commentaryContentHtml(s)+children.map(renderContext).join('')+'</div></details>';
   };
   const roots=Array.from(contextIds).map(id=>byId.get(id)).filter(s=>s&&!contextIds.has(s.parentId));
   const context=roots.length?'<details class="commentary-context"><summary>Context in Hodge’s book ('+roots.length+' section'+(roots.length===1?'':'s')+')</summary>'
@@ -1538,17 +1542,15 @@ function renderDrawer(){
   const comms = window.BCO_COMMENTARIES                       // commentary packs targeting THIS corpus
       .filter(c=>(c.corpus||'bco')===current)
       .map(c=>{
-        const entry=c.entries&&c.entries[ref];
-        const paragraphs=Array.isArray(entry)?entry:(entry&&Array.isArray(entry.paragraphs)?entry.paragraphs:[]);
-        const blocks=!Array.isArray(entry)&&entry&&Array.isArray(entry.blocks)?entry.blocks:[];
-        return {label:c.label,paragraphs,blocks,
+        const content=c.entries&&c.entries[ref];
+        return {label:c.label,content,
           sections:qNumber===null?[]:(c.sections||[]).filter(s=>Array.isArray(s.questions)&&s.questions.includes(qNumber))};
       })
-      .filter(c=>c.paragraphs.length||c.blocks.length||c.sections.length);
+      .filter(c=>commentaryContentHasText(c.content)||c.sections.length);
   const bp = isCustom ? window.BOOK_PACKS.find(b=>b.component.key===current) : null;
   const fnotes = (bp && bp.footnotes && bp.footnotes[ref]) || null;   // the book's own footnotes for this provision
   if(bp && bp.commentary && Array.isArray(bp.commentary[ref]) && bp.commentary[ref].length)   // commentary bundled in the book pack
-    comms.push({label: bp.commentaryLabel || 'Commentary', paragraphs: bp.commentary[ref], blocks: [], attrib: bp.commentaryAttribution || 'Commentary included with this document.'});
+    comms.push({label: bp.commentaryLabel || 'Commentary', content: bp.commentary[ref], attrib: bp.commentaryAttribution || 'Commentary included with this document.'});
   const PRF = {wcf:window.WCF_PROOFS, wlc:window.WLC_PROOFS, wsc:window.WSC_PROOFS}[current];
   const proofs = PRF ? PRF[ref] : null;
   // custom books carry no GA citations / Scripture proofs — show only what applies
@@ -1609,7 +1611,7 @@ function renderDrawer(){
       body += `<div class="csubtabs">${comms.map((c,i)=>`<button class="csub${i===sel?' on':''}" data-csub="${i}">${c.label.split(' — ')[0]}</button>`).join('')}</div>`;
     const c = comms[sel];
     const sectionMarkup=renderCommentarySections(c.sections||[],qNumber);
-    body += `<div class="commentary">${commentaryBlocksHtml(c.blocks,c.paragraphs)}${sectionMarkup}<p class="cattrib">${c.attrib || (c.label + ' — imported pack, personal use.')}</p></div>`;
+    body += `<div class="commentary">${commentaryContentHtml(c.content)}${sectionMarkup}<p class="cattrib">${c.attrib || (c.label + ' — imported pack, personal use.')}</p></div>`;
   } else if(dTab==='fn'){
     body += `<div class="commentary">${fnotes.map((p,i)=>`<p class="fn-item${dFnSel===i+1?' on':''}" id="dfn-${i+1}"><sup class="fnref">${i+1}</sup> ${p}</p>`).join('')}<p class="cattrib">Footnotes from the source document.</p></div>`;
   } else if(dTab==='notes'){
