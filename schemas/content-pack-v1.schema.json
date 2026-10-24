@@ -122,6 +122,79 @@
                   "type": "string"
                 }
               }
+            },
+            "sections": {
+              "type": "array",
+              "description": "Printed source sections shared by the listed catechism questions.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "questionRange",
+                  "questions",
+                  "title",
+                  "pages",
+                  "paragraphs"
+                ],
+                "properties": {
+                  "questionRange": {
+                    "type": "object",
+                    "required": [
+                      "from",
+                      "through"
+                    ],
+                    "properties": {
+                      "from": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "through": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "questions": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "pages": {
+                    "type": "object",
+                    "required": [
+                      "from",
+                      "through"
+                    ],
+                    "properties": {
+                      "from": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "through": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "paragraphs": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
             }
           },
           "unevaluatedProperties": false
