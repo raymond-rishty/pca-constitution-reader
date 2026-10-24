@@ -84,7 +84,19 @@ Commentary packs attach one or more paragraphs to provisions in an existing corp
 | --- | --- | --- |
 | `label` | recommended | Commentary name. Defaults to `"Commentary"`. |
 | `corpus` | optional | Component key to which the references belong. Defaults to `"bco"`. |
-| `entries` | yes in practice | Object keyed by provision reference; each value is an array of commentary paragraphs. |
+| `entries` | yes in practice | Object keyed by provision reference; each value is an array of commentary paragraphs or a structured object containing `paragraphs` and optional `blocks`. |
+
+Use `blocks` when the source's paragraph and list structure should be preserved. A paragraph block is `["p", depth, text]`; a list-item block is `["i", depth, marker, text]`. Depth controls indentation from 0 to 4. Keep `paragraphs` as a plain-text fallback for readers that do not render blocks. For example:
+
+```json
+"31-2": {
+  "paragraphs": ["The first proposition.", "The second proposition."],
+  "blocks": [
+    ["p", 0, "The first proposition."],
+    ["i", 0, "1st.", "The second proposition."]
+  ]
+}
+```
 
 A pack may also store a multi-question source section once and list the questions on which it should appear:
 

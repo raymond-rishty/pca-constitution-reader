@@ -375,12 +375,12 @@
   .commentary-section h4{font-family:var(--sans); font-size:.86rem; line-height:1.4; color:var(--navy); margin:0 0 5px}
   .commentary-range{font-family:var(--sans); font-size:.7rem; line-height:1.45; color:var(--muted); margin:0 0 10px}
   .commentary-section-body p{margin:.65em 0}
-  .commentary-section-body .li{margin:.32em 0;padding-left:1.5em;text-indent:-1.5em}
-  .commentary-section-body .li .mk{font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums;margin-right:.15em}
-  .commentary-section-body .li.d1{margin-left:1.7em}
-  .commentary-section-body .li.d2{margin-left:3.4em}
-  .commentary-section-body .li.d3{margin-left:5.1em}
-  .commentary-section-body .li.d4{margin-left:6.8em}
+  .commentary .li{margin:.32em 0;padding-left:1.5em;text-indent:-1.5em;font-family:var(--sans);font-size:.88rem;line-height:1.6;color:var(--ink-soft)}
+  .commentary .li .mk{font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums;margin-right:.15em}
+  .commentary .li.d1{margin-left:1.7em}
+  .commentary .li.d2{margin-left:3.4em}
+  .commentary .li.d3{margin-left:5.1em}
+  .commentary .li.d4{margin-left:6.8em}
   .commentary-context{border-top:1px solid var(--line); margin-top:16px; padding-top:11px}
   .commentary-context>summary,.commentary-context-node>summary{cursor:pointer; font-family:var(--sans); color:var(--ink-soft); list-style-position:outside}
   .commentary-context>summary{font-size:.78rem; font-weight:600}
@@ -1461,8 +1461,11 @@ function commentarySectionMeta(s){
   return [q,printed,p].filter(Boolean).join(' · ');
 }
 function commentarySectionParas(s){
-  if(Array.isArray(s.blocks)&&s.blocks.length){
-    return s.blocks.map(b=>{
+  return commentaryBlocksHtml(s.blocks,s.paragraphs||[]);
+}
+function commentaryBlocksHtml(blocks,paragraphs){
+  if(Array.isArray(blocks)&&blocks.length){
+    return blocks.map(b=>{
       if(!Array.isArray(b)) return '';
       const depth=Math.max(0,Math.min(4,Number.isInteger(b[1])?b[1]:0));
       if(b[0]==='p') return '<p class="bpara d'+depth+'">'+esc(b[2]||'')+'</p>';
@@ -1470,7 +1473,7 @@ function commentarySectionParas(s){
       return '';
     }).join('');
   }
-  return (s.paragraphs||[]).map(p=>'<p>'+esc(p)+'</p>').join('');
+  return (paragraphs||[]).map(p=>'<p>'+esc(p)+'</p>').join('');
 }
 function renderCommentarySections(sections,qNumber){
   const source=Array.isArray(sections)?sections:[];
@@ -1519,10 +1522,14 @@ function renderDrawer(){
   const qMatch=/^Q\.(\d+)$/.exec(ref), qNumber=qMatch?Number(qMatch[1]):null;
   const comms = window.BCO_COMMENTARIES                       // commentary packs targeting THIS corpus
       .filter(c=>(c.corpus||'bco')===current)
-      .map(c=>({label:c.label,
-        paras:Array.isArray(c.entries&&c.entries[ref])?c.entries[ref]:[],
-        sections:qNumber===null?[]:(c.sections||[]).filter(s=>Array.isArray(s.questions)&&s.questions.includes(qNumber))}))
-      .filter(c=>c.paras.length||c.sections.length);
+      .map(c=>{
+        const entry=c.entries&&c.entries[ref];
+        const paragraphs=Array.isArray(entry)?entry:(entry&&Array.isArray(entry.paragraphs)?entry.paragraphs:[]);
+        const blocks=!Array.isArray(entry)&&entry&&Array.isArray(entry.blocks)?entry.blocks:[];
+        return {label:c.label,paragraphs,blocks,
+          sections:qNumber===null?[]:(c.sections||[]).filter(s=>Array.isArray(s.questions)&&s.questions.includes(qNumber))};
+      })
+      .filter(c=>c.paragraphs.length||c.blocks.length||c.sections.length);
   const bp = isCustom ? window.BOOK_PACKS.find(b=>b.component.key===current) : null;
   const fnotes = (bp && bp.footnotes && bp.footnotes[ref]) || null;   // the book's own footnotes for this provision
   if(bp && bp.commentary && Array.isArray(bp.commentary[ref]) && bp.commentary[ref].length)   // commentary bundled in the book pack
@@ -1587,7 +1594,7 @@ function renderDrawer(){
       body += `<div class="csubtabs">${comms.map((c,i)=>`<button class="csub${i===sel?' on':''}" data-csub="${i}">${c.label.split(' — ')[0]}</button>`).join('')}</div>`;
     const c = comms[sel];
     const sectionMarkup=renderCommentarySections(c.sections||[],qNumber);
-    body += `<div class="commentary">${c.paras.map(p=>`<p>${p}</p>`).join('')}${sectionMarkup}<p class="cattrib">${c.attrib || (c.label + ' — imported pack, personal use.')}</p></div>`;
+    body += `<div class="commentary">${commentaryBlocksHtml(c.blocks,c.paragraphs)}${sectionMarkup}<p class="cattrib">${c.attrib || (c.label + ' — imported pack, personal use.')}</p></div>`;
   } else if(dTab==='fn'){
     body += `<div class="commentary">${fnotes.map((p,i)=>`<p class="fn-item${dFnSel===i+1?' on':''}" id="dfn-${i+1}"><sup class="fnref">${i+1}</sup> ${p}</p>`).join('')}<p class="cattrib">Footnotes from the source document.</p></div>`;
   } else if(dTab==='notes'){
