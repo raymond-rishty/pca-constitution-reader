@@ -32,6 +32,19 @@
     return tokenize(value);
   }
 
+  function contentText(content) {
+    if (typeof content === 'string' || typeof content === 'number') return String(content);
+    if (Array.isArray(content)) return content.map(contentText).filter(Boolean).join(' ');
+    if (!content || typeof content !== 'object') return '';
+    if (Array.isArray(content.blocks) && content.blocks.length) {
+      return content.blocks.map((block) => {
+        if (!Array.isArray(block)) return '';
+        return block[0] === 'i' ? `${block[2] || ''} ${block[3] || ''}` : String(block[2] || '');
+      }).filter(Boolean).join(' ');
+    }
+    return Array.isArray(content.paragraphs) ? content.paragraphs.map(contentText).filter(Boolean).join(' ') : '';
+  }
+
   function distance(a, b, limit) {
     if (a === b) return 0;
     if (!a || !b || Math.abs(a.length - b.length) > limit) return limit + 1;
@@ -232,5 +245,5 @@
     return `${left ? '…' : ''}${source.slice(left, right).trim()}${right < source.length ? '…' : ''}`;
   }
 
-  return { normalize, tokenize, parseQuery, distance, createIndex, search, excerpt };
+  return { normalize, tokenize, parseQuery, distance, contentText, createIndex, search, excerpt };
 }));

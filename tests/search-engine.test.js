@@ -28,6 +28,14 @@ test('normalizes punctuation, apostrophes, case, and accents', () => {
   assert.equal(engine.normalize('Café'), 'cafe');
 });
 
+test('extracts searchable text from structured pack content', () => {
+  assert.equal(engine.contentText({
+    blocks: [['p', 0, 'First paragraph.'], ['i', 1, 'a.', 'A list item.']],
+    paragraphs: ['Fallback text is not duplicated.'],
+  }), 'First paragraph. a. A list item.');
+  assert.equal(engine.contentText(['One paragraph.', { paragraphs: ['Another paragraph.'] }]), 'One paragraph. Another paragraph.');
+});
+
 test('ranks an exact reference ahead of incidental matches', () => {
   const result = engine.search(records, 'BCO 24.1');
   assert.equal(result.total, 1);
@@ -88,6 +96,15 @@ test('indexes sections in installed content packs and honors their filters', () 
   }];
   assert.equal(engine.search(installedPack, 'monthly').results[0].record.book, 'local-rules');
   assert.equal(engine.search(installedPack, 'monthly', { books: new Set(['wcf']) }).total, 0);
+});
+
+test('searches installed commentary and personal-note records', () => {
+  const installed = [
+    { book: 'wsc', ref: 'Q.1', reference: 'WSC Q.1', aliases: ['Q.1'], title: 'Commentary', text: 'communion with God', packKind: 'commentary', packLabel: 'Ramsay' },
+    { book: 'wsc', ref: 'Q.1', reference: 'WSC Q.1', aliases: ['Q.1'], title: 'Personal note', text: 'Discuss in membership class', packKind: 'notes', packLabel: 'My notes' },
+  ];
+  assert.equal(engine.search(installed, 'communion').results[0].record.packLabel, 'Ramsay');
+  assert.equal(engine.search(installed, 'membership').results[0].record.packKind, 'notes');
 });
 
 test('tolerates minor misspellings without matching very short words fuzzily', () => {
