@@ -28,6 +28,14 @@ test('normalizes punctuation, apostrophes, case, and accents', () => {
   assert.equal(engine.normalize('Café'), 'cafe');
 });
 
+test('extracts searchable text from structured pack content', () => {
+  assert.equal(engine.contentText({
+    blocks: [['p', 0, 'First paragraph.'], ['i', 1, 'a.', 'A list item.']],
+    paragraphs: ['Fallback text is not duplicated.'],
+  }), 'First paragraph. a. A list item.');
+  assert.equal(engine.contentText(['One paragraph.', { paragraphs: ['Another paragraph.'] }]), 'One paragraph. Another paragraph.');
+});
+
 test('ranks an exact reference ahead of incidental matches', () => {
   const result = engine.search(records, 'BCO 24.1');
   assert.equal(result.total, 1);
@@ -59,6 +67,44 @@ test('searches question, answer, title, and provision text', () => {
   assert.equal(engine.search(records, 'chief end').results[0].record.ref, 'Q.1');
   assert.equal(engine.search(records, 'conscionable').results[0].record.ref, '21.5');
   assert.equal(engine.search(records, 'Ordination').results[0].record.ref, '24-1');
+});
+
+test('searches BCO index topics and returns the topic as the matching excerpt', () => {
+  const indexed = records.concat({
+    book: 'bco', ref: '1-1', reference: 'BCO 1-1', aliases: ['1-1'], title: 'The Church',
+    topics: ['Church Government — Representative'], text: 'The visible church is governed by elders.',
+  });
+  const result = engine.search(indexed, 'representative government');
+  assert.equal(result.results[0].record.ref, '1-1');
+  assert.equal(result.results[0].bestField, 'topics');
+});
+
+test('searches Spanish and Korean content with Unicode-aware tokenization', () => {
+  const multilingual = [
+    { book: 'bco-es', ref: '1-1', reference: 'BCO 1-1', aliases: [], title: 'La iglesia visible', text: 'La iglesia se gobierna por ancianos.' },
+    { book: 'bco-ko', ref: '1-1', reference: 'BCO 1-1', aliases: [], title: '교회 정치', text: '교회는 장로들에 의해 다스려진다.' },
+  ];
+  assert.equal(engine.search(multilingual, 'iglesia', { books: new Set(['bco-es']) }).results[0].record.book, 'bco-es');
+  assert.equal(engine.search(multilingual, '교회', { books: new Set(['bco-ko']) }).results[0].record.book, 'bco-ko');
+  assert.equal(engine.search(multilingual, 'iglesia visible').results[0].record.book, 'bco-es');
+});
+
+test('indexes sections in installed content packs and honors their filters', () => {
+  const installedPack = [{
+    book: 'local-rules', ref: '4.2', reference: 'LR 4.2', aliases: ['4.2'],
+    title: 'Meetings', text: 'The session shall meet monthly.', topics: ['Session — Meetings'],
+  }];
+  assert.equal(engine.search(installedPack, 'monthly').results[0].record.book, 'local-rules');
+  assert.equal(engine.search(installedPack, 'monthly', { books: new Set(['wcf']) }).total, 0);
+});
+
+test('searches installed commentary and personal-note records', () => {
+  const installed = [
+    { book: 'wsc', ref: 'Q.1', reference: 'WSC Q.1', aliases: ['Q.1'], title: 'Commentary', text: 'communion with God', packKind: 'commentary', packLabel: 'Ramsay' },
+    { book: 'wsc', ref: 'Q.1', reference: 'WSC Q.1', aliases: ['Q.1'], title: 'Personal note', text: 'Discuss in membership class', packKind: 'notes', packLabel: 'My notes' },
+  ];
+  assert.equal(engine.search(installed, 'communion').results[0].record.packLabel, 'Ramsay');
+  assert.equal(engine.search(installed, 'membership').results[0].record.packKind, 'notes');
 });
 
 test('tolerates minor misspellings without matching very short words fuzzily', () => {

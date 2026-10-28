@@ -29,7 +29,9 @@ The hamburger menu is available on desktop and mobile. It includes the document 
 
 ## Search
 
-The search control (or <kbd>Ctrl/⌘ K</kbd>) searches the full text of every provision in the built-in library and installed book packs. Results rank exact references first, accept common document names and reference punctuation, and tolerate minor spelling mistakes in words of four or more letters. Put wording in quotation marks to require an exact phrase, and use the document chips to narrow the results.
+The search control (or <kbd>Ctrl/⌘ K</kbd>) searches references, aliases, titles, and provision text, including installed book packs, their bundled commentary and footnotes, installed commentary packs, and personal notes. Results identify their source pack and open at the matching provision or note. Results rank exact references first, accept common document names and reference punctuation, and tolerate minor spelling mistakes in words of four or more letters. Put wording in quotation marks to require an exact phrase, and use the document chips to narrow the results. Search is Unicode-aware, including the Spanish and Korean BCO editions.
+
+Search runs locally with MiniSearch 7.2.0. Its browser build is bundled for offline use and cached with the app shell.
 
 ## Agent retrieval workflow
 

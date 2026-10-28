@@ -1,26 +1,48 @@
 (function (root, factory) {
-  const api = factory();
+  const MiniSearch = typeof module === 'object' && module.exports
+    ? require('minisearch')
+    : root.MiniSearch;
+  const api = factory(MiniSearch);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.PcaConstitutionSearch = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function (MiniSearch) {
   'use strict';
 
-  const FIELD_WEIGHTS = { reference: 900, title: 180, text: 40 };
+  const SEARCH_FIELDS = ['reference', 'aliases', 'title', 'topics', 'text'];
+  const FIELD_WEIGHTS = { reference: 16, aliases: 16, title: 5, topics: 4, text: 1 };
+  const INDEX_CACHE = new WeakMap();
 
   function normalize(value) {
     return String(value || '')
-      .normalize('NFKD')
+      .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .replace(/&/g, ' and ')
       .replace(/[’']/g, '')
-      .replace(/[^a-z0-9]+/g, ' ')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
       .trim()
       .replace(/\s+/g, ' ');
   }
 
+  function tokenize(value) {
+    return normalize(value).match(/[\p{L}\p{N}]+/gu) || [];
+  }
+
   function words(value) {
-    return normalize(value).split(' ').filter(Boolean);
+    return tokenize(value);
+  }
+
+  function contentText(content) {
+    if (typeof content === 'string' || typeof content === 'number') return String(content);
+    if (Array.isArray(content)) return content.map(contentText).filter(Boolean).join(' ');
+    if (!content || typeof content !== 'object') return '';
+    if (Array.isArray(content.blocks) && content.blocks.length) {
+      return content.blocks.map((block) => {
+        if (!Array.isArray(block)) return '';
+        return block[0] === 'i' ? `${block[2] || ''} ${block[3] || ''}` : String(block[2] || '');
+      }).filter(Boolean).join(' ');
+    }
+    return Array.isArray(content.paragraphs) ? content.paragraphs.map(contentText).filter(Boolean).join(' ') : '';
   }
 
   function distance(a, b, limit) {
@@ -59,41 +81,6 @@
     return { source, phrases, terms };
   }
 
-  function fuzzyLimit(term) {
-    if (term.length >= 8) return 2;
-    if (term.length >= 4) return 1;
-    return 0;
-  }
-
-  function bestTermMatch(term, fieldValue) {
-    const value = normalize(fieldValue);
-    if (!value) return null;
-    const tokens = value.split(' ');
-    if (tokens.includes(term)) return { kind: 'exact', token: term, score: 80 };
-    if (value.includes(term)) return { kind: 'substring', token: term, score: 60 };
-    if (term.length >= 3) {
-      const prefix = tokens.find((token) => token.startsWith(term));
-      if (prefix) return { kind: 'prefix', token: prefix, score: 48 };
-    }
-    const limit = fuzzyLimit(term);
-    if (!limit) return null;
-    let best = null;
-    for (const token of tokens) {
-      if (token.length < 3 || Math.abs(token.length - term.length) > limit) continue;
-      const edits = distance(term, token, limit);
-      if (edits <= limit && (!best || edits < best.edits)) best = { edits, token };
-    }
-    return best ? { kind: 'fuzzy', token: best.token, score: 30 - (best.edits * 6) } : null;
-  }
-
-  function fieldValues(record) {
-    return {
-      reference: [record.reference || record.ref, ...(record.aliases || [])],
-      title: [record.title || record.sub],
-      text: [record.text || record.txt],
-    };
-  }
-
   function queryLooksLikeReference(parsed) {
     if (parsed.phrases.length || !parsed.terms.length) return false;
     const compact = normalize(parsed.source);
@@ -102,77 +89,136 @@
     return /^(wcf|confession|wlc|larger|wsc|shorter|bco|book of church order|rao)?\s*q?\s*\d+(?:\s+[a-z0-9]+)*$/.test(compact);
   }
 
+  function referenceValues(record) {
+    return [record.reference || record.ref, ...(record.aliases || [])].filter(Boolean).map(normalize);
+  }
+
+  function searchableValues(record) {
+    return {
+      reference: [record.reference || record.ref].filter(Boolean),
+      aliases: (record.aliases || []).filter(Boolean),
+      title: [record.title || record.sub].filter(Boolean),
+      topics: (record.topics || []).filter(Boolean),
+      text: [record.text || record.txt].filter(Boolean),
+    };
+  }
+
+  function createIndex(records) {
+    const existing = INDEX_CACHE.get(records);
+    if (existing) return existing;
+    if (!MiniSearch) throw new Error('MiniSearch is required to build the reader search index.');
+    const docs = records.map((record, id) => {
+      const fields = searchableValues(record);
+      return {
+        id,
+        book: record.book,
+        ref: record.ref,
+        reference: fields.reference.join(' '),
+        aliases: fields.aliases.join(' '),
+        title: fields.title.join(' '),
+        topics: fields.topics.join(' '),
+        text: fields.text.join(' '),
+      };
+    });
+    const index = new MiniSearch({
+      fields: SEARCH_FIELDS,
+      storeFields: ['id'],
+      tokenize,
+      processTerm: (term) => normalize(term),
+      searchOptions: { boost: FIELD_WEIGHTS, combineWith: 'OR' },
+    });
+    index.addAll(docs);
+    const built = { index };
+    INDEX_CACHE.set(records, built);
+    return built;
+  }
+
+  function indexFor(records) {
+    return createIndex(records);
+  }
+
+  function hasPhrase(record, phrase) {
+    return Object.values(searchableValues(record)).some((values) =>
+      values.some((value) => normalize(value).includes(phrase)));
+  }
+
+  function matchFields(hit) {
+    const fields = new Set();
+    for (const matched of Object.values(hit.match || {})) matched.forEach((field) => fields.add(field));
+    return fields;
+  }
+
+  function fuzzyLimit(term) {
+    if (term.length >= 8) return 2;
+    if (term.length >= 4) return 1;
+    return 0;
+  }
+
+  function bestField(fields) {
+    return [...fields].sort((a, b) => (FIELD_WEIGHTS[b] || 0) - (FIELD_WEIGHTS[a] || 0))[0] || 'text';
+  }
+
   function search(records, query, options = {}) {
     const parsed = parseQuery(query);
     const selectedBooks = options.books && options.books.size ? options.books : null;
-    const pool = selectedBooks ? records.filter((record) => selectedBooks.has(record.book)) : records;
     if (!parsed.source) return { query: parsed, total: 0, results: [], fuzzy: false };
+
     const referenceQuery = queryLooksLikeReference(parsed);
+    const normalizedQuery = normalize(parsed.source);
     const rows = [];
+    const terms = [...parsed.terms, ...parsed.phrases.flatMap(words)];
+    const queryText = [...new Set(terms)].join(' ');
+    const { index } = indexFor(records);
+    const settings = {
+      combineWith: 'OR',
+      prefix: (term) => term.length >= 3,
+      fuzzy: (term) => term.length >= 8 ? 0.2 : (term.length >= 4 ? 0.15 : false),
+    };
+    const hits = queryText ? index.search(queryText, settings) : [];
+    const hitById = new Map(hits.map((hit) => [hit.id, hit]));
+    const allowed = (record) => !selectedBooks || selectedBooks.has(record.book);
 
-    for (const record of pool) {
-      const fields = fieldValues(record);
-      const normalizedFields = Object.fromEntries(Object.entries(fields).map(([field, values]) => [
-        field, values.filter(Boolean).map((raw) => ({ raw: String(raw), normalized: normalize(raw) })),
-      ]));
-      const normalizedQuery = normalize(parsed.source);
-      const referenceMatch = normalizedFields.reference.some((value) =>
-        value.normalized === normalizedQuery || value.normalized.startsWith(`${normalizedQuery} `));
-      if (referenceQuery && !referenceMatch) continue;
-      let score = 0;
-      let matchedTerms = 0;
-      let fuzzy = false;
-      let bestField = 'text';
-      let bestToken = '';
-      let bestContribution = -1;
-      let rejected = false;
+    records.forEach((record, id) => {
+      if (!allowed(record)) return;
+      const refs = referenceValues(record);
+      const exactReference = refs.includes(normalizedQuery);
+      const referenceMatch = refs.some((value) => value === normalizedQuery || value.startsWith(`${normalizedQuery} `));
+      if (referenceQuery && !referenceMatch) return;
 
-      for (const phrase of parsed.phrases) {
-        let phraseField = null;
-        for (const field of Object.keys(normalizedFields)) {
-          if (normalizedFields[field].some((value) => value.normalized.includes(phrase))) {
-            phraseField = field;
-            break;
-          }
-        }
-        if (!phraseField) { rejected = true; break; }
-        const contribution = 500 + FIELD_WEIGHTS[phraseField];
-        score += contribution;
-        if (contribution > bestContribution) {
-          bestContribution = contribution;
-          bestField = phraseField;
-          bestToken = phrase;
-        }
-      }
-      if (rejected) continue;
+      const hit = hitById.get(id);
+      const recordFields = searchableValues(record);
+      const phraseFields = parsed.phrases.length
+        ? Object.keys(recordFields).filter((field) =>
+          recordFields[field].some((value) => parsed.phrases.every((phrase) => normalize(value).includes(phrase))))
+        : [];
+      if (parsed.phrases.some((phrase) => !hasPhrase(record, phrase))) return;
+      if (!hit && !exactReference) return;
 
-      for (const term of parsed.terms) {
-        let termBest = null;
-        for (const [field, values] of Object.entries(normalizedFields)) {
-          for (const value of values) {
-            const hit = bestTermMatch(term, value.normalized);
-            if (!hit) continue;
-            const contribution = hit.score + FIELD_WEIGHTS[field];
-            if (!termBest || contribution > termBest.contribution) termBest = { ...hit, field, contribution };
-          }
-        }
-        if (!termBest) continue;
-        matchedTerms += 1;
-        score += termBest.contribution;
-        fuzzy = fuzzy || termBest.kind === 'fuzzy';
-        if (termBest.contribution > bestContribution) {
-          bestContribution = termBest.contribution;
-          bestField = termBest.field;
-          bestToken = termBest.token;
-        }
-      }
-
-      if (!parsed.phrases.length && !matchedTerms) continue;
-      const exactReference = normalizedFields.reference.some((value) => value.normalized === normalizedQuery);
-      if (exactReference) score += 5000;
-      score += matchedTerms * matchedTerms * 35;
-      rows.push({ record, score, matchedTerms, fuzzy, bestField, bestToken, exactReference });
-    }
+      const fields = matchFields(hit || {});
+      phraseFields.forEach((field) => fields.add(field));
+      const matchedTerms = terms.filter((term) => hit && (hit.terms || []).some((matched) => {
+        const normalized = normalize(matched);
+        const limit = fuzzyLimit(term);
+        return normalized === term || normalized.startsWith(term) || (limit && distance(term, normalized, limit) <= limit);
+      })).length;
+      const fuzzy = Boolean(hit && terms.some((term) => {
+        const limit = fuzzyLimit(term);
+        return limit > 0 && (hit.terms || []).some((matched) => {
+          const normalized = normalize(matched);
+          return !normalized.startsWith(term) && distance(term, normalized, limit) <= limit;
+        });
+      }));
+      const tokens = [...parsed.terms, ...parsed.phrases];
+      rows.push({
+        record,
+        score: (exactReference ? 1e9 : 0) + (hit ? hit.score : 0) + matchedTerms * matchedTerms * 0.01,
+        matchedTerms,
+        fuzzy,
+        bestField: bestField(fields),
+        bestToken: tokens[0] || normalizedQuery,
+        exactReference,
+      });
+    });
 
     rows.sort((a, b) => b.score - a.score
       || b.matchedTerms - a.matchedTerms
@@ -199,5 +245,5 @@
     return `${left ? '…' : ''}${source.slice(left, right).trim()}${right < source.length ? '…' : ''}`;
   }
 
-  return { normalize, parseQuery, distance, search, excerpt };
+  return { normalize, tokenize, parseQuery, distance, contentText, createIndex, search, excerpt };
 }));

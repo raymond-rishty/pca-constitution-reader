@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import sys
@@ -12,6 +13,28 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 DIAGRAM_DIR = ROOT / "diagrams"
+MINISEARCH_PACKAGE = ROOT / "node_modules" / "minisearch"
+VENDOR_DIR = ROOT / "vendor"
+
+
+def publish_minisearch() -> None:
+    package_json = MINISEARCH_PACKAGE / "package.json"
+    if not package_json.is_file():
+        raise SystemExit("MiniSearch is not installed. Run 'npm ci' before building the site.")
+    package = json.loads(package_json.read_text(encoding="utf-8"))
+    if package.get("version") != "7.2.0":
+        raise SystemExit("The vendored reader build requires MiniSearch 7.2.0.")
+    VENDOR_DIR.mkdir(exist_ok=True)
+    for source, destination in (
+        (MINISEARCH_PACKAGE / "dist" / "umd" / "index.js", VENDOR_DIR / "minisearch.js"),
+        (MINISEARCH_PACKAGE / "LICENSE.txt", VENDOR_DIR / "MiniSearch-LICENSE.txt"),
+    ):
+        contents = source.read_bytes()
+        if destination.is_file():
+            existing = destination.read_bytes()
+            if existing.replace(b"\r\n", b"\n") == contents.replace(b"\r\n", b"\n"):
+                continue
+        destination.write_bytes(contents)
 
 
 def build_diagrams() -> None:
@@ -61,6 +84,7 @@ def build_diagrams() -> None:
 
 def main() -> int:
     try:
+        publish_minisearch()
         build_diagrams()
     except subprocess.CalledProcessError as exc:
         print(f"Graphviz failed while rendering a diagram (exit {exc.returncode}).", file=sys.stderr)
