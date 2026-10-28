@@ -4,5 +4,8 @@
   },
   "devDependencies": {
     "@hpcc-js/wasm-graphviz-cli": "1.11.3"
+  },
+  "dependencies": {
+    "minisearch": "7.2.0"
   }
 }
