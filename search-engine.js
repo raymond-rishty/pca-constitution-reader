@@ -220,7 +220,8 @@
       });
     });
 
-    rows.sort((a, b) => b.score - a.score
+    rows.sort((a, b) => Number(a.record.packKind === 'commentary') - Number(b.record.packKind === 'commentary')
+      || b.score - a.score
       || b.matchedTerms - a.matchedTerms
       || String(a.record.reference || a.record.ref).localeCompare(String(b.record.reference || b.record.ref), undefined, { numeric: true }));
     return {
