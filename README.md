@@ -33,6 +33,10 @@ The search control (or <kbd>Ctrl/⌘ K</kbd>) searches references, aliases, titl
 
 Search runs locally with MiniSearch 7.2.0. Its browser build is bundled for offline use and cached with the app shell.
 
+Open a match and use **Previous match** or **Next match** to compare passages. **Back to results** restores your query and document filters and selects the match you just read. Closing a match’s details lets you read the whole passage with the same search controls.
+
+The reader’s **Back** button and browser Back retrace the pages and panels you visited. For example, after jumping from Chapter 12 to Chapter 20, Back returns to your place in Chapter 12. Browser Forward reopens Chapter 20. The chapter arrows continue in book order.
+
 ## Agent retrieval workflow
 
 1. Use the hash routes to open the exact book, chapter, question, or BCO provision.
