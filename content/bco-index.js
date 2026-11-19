@@ -193,12 +193,12 @@ window.BCO_INDEX_TOPICS = {
     "Labor in bounds, out of — Records",
     "Labor in bounds, out of — Reports to General Assembly",
     "Minutes — Presbytery",
-    "Presbytery",
-    "Records of lower — Subject of reviews"
+    "Presbytery"
   ],
   "13-11": [
     "Congregational — Duties of",
-    "Presbytery"
+    "Presbytery",
+    "Records of lower — Subject of reviews"
   ],
   "13-12": [
     "Called Meetings — Presbytery",
@@ -340,9 +340,7 @@ window.BCO_INDEX_TOPICS = {
     "Commission appointed by",
     "Commissions (Ecclesiastical) — Consists of",
     "Commissions (Ecclesiastical) — Judicial cases",
-    "Commissions (Ecclesiastical) — Quorum of",
-    "Judicial cases to commission",
-    "Quorum of Judicial Commission"
+    "Judicial cases to commission"
   ],
   "15-4": [
     "Commissions (Ecclesiastical) — Consists of",
@@ -559,8 +557,7 @@ window.BCO_INDEX_TOPICS = {
     "Congregational Meetings — Session calls",
     "M oderator, congregational — Procedure of local church",
     "M oderator, congregational — Pulpit committee",
-    "Pastor ............... (see also Minister, and",
-    "Personal Offenses Defined"
+    "Pastor ............... (see also Minister, and"
   ],
   "20-3": [
     "Cases of process — Election of",
@@ -973,14 +970,13 @@ window.BCO_INDEX_TOPICS = {
     "Constitution of PCA — Amending"
   ],
   "26-4": [
-    "Constitution of PCA — Amending",
-    "Organic Union with Other Bodies",
-    "Union With Other Bodies"
+    "Constitution of PCA — Amending"
   ],
   "26-5": [
     "Confession of Faith — Amending",
     "Constitution of PCA — Amending",
-    "Union With Other Bodies"
+    "Union With Other Bodies",
+    "Organic Union with Other Bodies"
   ],
   "26-6": [
     "Amending Constitution — Presbytery action",
@@ -1043,7 +1039,8 @@ window.BCO_INDEX_TOPICS = {
     "General offenses",
     "Offenses Defined",
     "Private Offenses",
-    "Public Offenses"
+    "Public Offenses",
+    "Personal Offenses Defined"
   ],
   "29-3": [
     "General offenses",
@@ -1308,7 +1305,8 @@ window.BCO_INDEX_TOPICS = {
     "Indictment — Drawn and served",
     "Plea — Written",
     "Prosecutor — Appointed",
-    "Cases of process"
+    "Cases of process",
+    "Charge Against Offender — Written"
   ],
   "32-4": [
     "Issued and signed",
@@ -1373,7 +1371,6 @@ window.BCO_INDEX_TOPICS = {
     "Suspension — Sacraments"
   ],
   "33-3": [
-    "Made by some person or — Written",
     "Members of Church — Process against",
     "Process Before Session — Censure for crime or heresy",
     "Removals — Sessions vs. members",
@@ -1504,99 +1501,100 @@ window.BCO_INDEX_TOPICS = {
     "Suspended Minister (continued) — Pastoral relation dissolved"
   ],
   "35-1": [
-    "Accused — Not compelled to testify",
-    "Accused — Testimony not required",
     "Accuser — Challenge to witness",
-    "Accuser — Testimony required",
     "Censure — Challenges",
     "Challenge (in Case of Process) — Witness",
-    "Evidence — Accused not compelled to testify",
-    "Evidence — Accuser required to testify",
     "Evidence — Challenge of witnesses",
     "Evidence — Competency of witnesses",
-    "Evidence — Court judges evidence",
     "Witnesses — Challenge of",
     "Witnesses — Challenge to",
     "Witnesses — Examined",
     "Witnesses — Who is competent"
   ],
   "35-10": [
-    "Commissions (Ecclesiastical) — Appointed authority",
-    "Evidence — Commission appointment",
-    "More than one witness — Taking testimony",
     "Suspension — Testimony",
-    "Testimony — Coordinate court"
+    "Annual review by higher court — Evidence in all courts",
+    "Moderator — Authenticates records of court",
+    "Testimony — Records for all courts",
+    "Record — Other court’s use",
+    "Evidence — Records authenticated"
   ],
   "35-11": [
     "Citations",
+    "Suspension — Testimony",
+    "Evidence — Certified testimony valid",
+    "Testimony — Valid in every court if certified"
+  ],
+  "35-12": [
+    "Suspension — Testimony",
+    "Commissions (Ecclesiastical) — Appointed authority",
+    "Evidence — Commission appointment",
+    "Testimony — Coordinate court",
+    "Evidence — Taking testimony"
+  ],
+  "35-13": [
     "Suspension — Testimony",
     "Testimony — Of member of court",
     "Witness disqualified as judge, if — challenged",
     "Witnesses — Member of court"
   ],
-  "35-12": [
-    "More than one witness — Refusing to testify",
-    "Refusal of Witness to Testify",
-    "Suspension — Testimony",
-    "Testimony — Refusal",
-    "Witnesses — Refusing to testify"
-  ],
-  "35-13": [
-    "Accused — New testimony, new trial",
-    "More than one witness — New testimony, new trial",
-    "New Trial/New Evidence",
-    "Suspension — Testimony",
-    "Testimony — New testimony, new trial"
-  ],
   "35-14": [
-    "Appeals (continued) — New testimony, new trial",
-    "More than one witness",
+    "Suspension — Testimony",
+    "Refusal of Witness to Testify",
+    "Testimony — Refusal",
+    "Witnesses — Refusing to testify",
+    "Evidence — Refusing to testify"
+  ],
+  "35-15": [
+    "Accused — New testimony, new trial",
+    "Testimony — New testimony, new trial",
     "New Trial/New Evidence",
-    "Suspension — Testimony"
+    "Evidence — New testimony, new trial"
+  ],
+  "35-16": [
+    "New Trial/New Evidence",
+    "Appeals (continued) — New testimony, new trial",
+    "Evidence — New testimony, new trial"
   ],
   "35-2": [
-    "More than one witness — Spouse testimony",
     "Removals — Spouse, testimony",
-    "Witnesses — Spouses"
-  ],
-  "35-3": [
-    "More than one witness — necessary",
-    "Testimony — More than one witness",
-    "Witnesses — Number of"
+    "Witnesses — Spouses",
+    "Accused — Not compelled to testify",
+    "Accused — Testimony not required",
+    "Accuser — Testimony required",
+    "Evidence — Accused not compelled to testify",
+    "Evidence — Accuser required to testify",
+    "Evidence — Spouse testimony"
   ],
   "35-4": [
-    "Evidence — Examination of witnesses",
     "Witnesses",
-    "Witnesses — Examination"
+    "Testimony — More than one witness",
+    "Witnesses — Number of",
+    "Evidence — More than one witness necessary"
   ],
   "35-5": [
-    "Evidence — Examination of witnesses",
     "Witnesses",
-    "Witnesses — Examination"
+    "Evidence — Court judges evidence"
   ],
   "35-6": [
     "Congregation — Witnesses",
-    "Indictment — Oath of witness",
-    "More than one witness — Oath of witness",
-    "Witnesses — Oath",
-    "Witnesses — Oath of"
+    "Evidence — Examination of witnesses",
+    "Witnesses — Examination"
   ],
   "35-7": [
-    "More than one witness — Questions asked witness",
-    "Record — Testimony of witness",
-    "Witnesses — Questions, written"
+    "Evidence — Examination of witnesses",
+    "Witnesses — Examination",
+    "Evidence — Questions asked witness"
   ],
   "35-8": [
-    "Annual review by higher court — Evidence in all courts",
-    "Moderator — Authenticates records of court",
-    "More than one witness — Records authenticated",
-    "Record — Other court’suse",
-    "Testimony — Records for all courts"
+    "Witnesses — Oath",
+    "Witnesses — Oath of",
+    "Cases of Process — Oath of witness",
+    "Evidence — Oath of witness"
   ],
   "35-9": [
-    "Evidence — Certified testimony valid",
     "Suspension — Testimony",
-    "Testimony — Valid in every court if certified"
+    "Record — Testimony of witness"
   ],
   "36-1": [
     "Infliction of Church Censures — Spirit of meekness"
@@ -1712,12 +1710,14 @@ window.BCO_INDEX_TOPICS = {
     "Resignation or dissolving of",
     "Restoration after — censure",
     "Restoration of Censured",
-    "Suspended Minister (continued) — Restored"
+    "Suspended Minister (continued) — Restored",
+    "Removal of censures"
   ],
   "37-9": [
     "Resignation or dissolving of",
     "Restoration after — censure",
-    "Restoration of Censured"
+    "Restoration of Censured",
+    "Removal of censures"
   ],
   "38-1": [
     "Accused — Confession",
@@ -1755,7 +1755,8 @@ window.BCO_INDEX_TOPICS = {
   "38-4": [
     "Duty of Sessions when — Willful neglect",
     "Members of Church — Erasure/dismissal",
-    "Renouncing Jurisdiction"
+    "Renouncing Jurisdiction",
+    "Court of original — Delete names from roll"
   ],
   "39-1": [
     "Lower Court — Supervision of higher court",
@@ -1870,7 +1871,8 @@ window.BCO_INDEX_TOPICS = {
     "Definition of appellant — and appellee"
   ],
   "42-10": [
-    "Appellant — Counsel for"
+    "Appellant — Counsel for",
+    "Counsel — Right of appellant to"
   ],
   "42-11": [
     "Appeals — Abandoned",
@@ -1899,11 +1901,11 @@ window.BCO_INDEX_TOPICS = {
   "42-5": [
     "Appeals (continued) — Lodging with higher court",
     "Appeals (continued) — Records of case",
-    "More than one witness",
     "Notice of Appeal — Within 30 days",
     "Record of Case, of Process",
     "Record of Case, of Process — Appeal or complaint",
-    "Record of Case, of Process — Definition of"
+    "Record of Case, of Process — Definition of",
+    "Evidence — New testimony, new trial"
   ],
   "42-6": [
     "Appeals (continued) — Notice of",
@@ -1926,8 +1928,7 @@ window.BCO_INDEX_TOPICS = {
   ],
   "42-9": [
     "Appeals (continued) — Records of case",
-    "Appeals — Decisions of higher court",
-    "Counsel — Right of appellant to"
+    "Appeals — Decisions of higher court"
   ],
   "43-1": [
     "Complaints — Definition of",
@@ -2040,9 +2041,7 @@ window.BCO_INDEX_TOPICS = {
     "Power)"
   ],
   "46-5": [
-    "Court of original — Delete names from roll",
     "Lower Court — Jurisdiction",
-    "Members of Church — Erasure/dismissal",
     "Original: Session and — Presbytery",
     "Power)"
   ],
@@ -2150,9 +2149,6 @@ window.BCO_INDEX_TOPICS = {
     "Particular Church (continued) — New church organized",
     "Presbytery over minister, licentiate — or candidate"
   ],
-  "5-10": [
-    "Organization of Particular Church — Deacons elected"
-  ],
   "5-2": [
     "Mission Church — Establishment of",
     "Particular Church (continued) — New church organized"
@@ -2163,27 +2159,29 @@ window.BCO_INDEX_TOPICS = {
     "Particular Church (continued) — New church organized"
   ],
   "5-4": [
-    "Mission Church — Members received",
     "Non-communing Member of Church — Children"
   ],
   "5-5": [
-    "Mission Church — Judicial Process of"
+    "Mission Church — Members received"
   ],
-  "5-7": [
-    "Mission Church — Civil government, relationship"
+  "5-6": [
+    "Mission Church — Judicial Process of"
   ],
   "5-8": [
     "General Assembly adjournment — Organization of particular church",
     "Organization of Particular Church — By acommission",
-    "Organization of Particular Church — Presbytery authority only",
-    "Organization of Particular Church — Procedure"
+    "Organization of Particular Church — Procedure",
+    "Mission Church — Civil government, relationship"
   ],
   "5-9": [
     "Dissolving relationship upon — Examination of",
     "Minister from another — Officer nominees",
     "Nominating Procedures",
     "Organization of Particular Church — Pastor elected",
-    "Organization of Particular Church — Ruling Elders elected"
+    "Organization of Particular Church — Ruling Elders elected",
+    "Organization of Particular Church — Deacons elected",
+    "Organization of Particular Church — Presbytery authority only",
+    "Particular Church (continued) — New church organized"
   ],
   "50-1": [
     "Preaching of the Word — Scripture Reading",
@@ -2502,6 +2500,12 @@ window.BCO_INDEX_TOPICS = {
     "Dissolving relationship upon — Officer of church",
     "Elders — (see also Ruling Elders) Titles"
   ],
+  "8-10": [
+    "Elders — Ruling elders",
+    "Elders — Parity",
+    "Ruling Elders — Authority and eligibility",
+    "Ruling Elders — Teaching aptitude"
+  ],
   "8-2": [
     "Elders — Qualifications",
     "Presbytery, court of — Qualifications of",
@@ -2548,15 +2552,9 @@ window.BCO_INDEX_TOPICS = {
     "Other works",
     "Out of Bounds"
   ],
-  "8-8": [
-    "Elders — Defined",
-    "Elders — Parity",
-    "Elders — Ruling elders",
-    "Ruling Elders — Authority and eligibility"
-  ],
   "8-9": [
-    "Elders — Ruling elders",
-    "Resignation or dissolving of — Teaching aptitude"
+    "Elders — Defined",
+    "Elders — Ruling elders"
   ],
   "9-1": [
     "Assistance from godly men or — Definition of office"
