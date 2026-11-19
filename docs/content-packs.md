@@ -11,7 +11,7 @@ This document describes the format currently consumed by the reader. The format 
 }
 ```
 
-The current importer requires `format` to equal `"pca-constitution-pack"`. Version 1 is the documented contract; the importer currently does not reject another `version` value, so producers should still emit `version: 1` for compatibility.
+The importer accepts version 1 `pca-constitution-pack` files and PCA BCO edition snapshots in the `pca-reader-bco-edition` format. Content packs remain the interchange format for notes, commentary, and custom books; BCO snapshots are converted into a local custom book during import.
 
 
 A machine-checkable companion is available at [`schemas/content-pack-v1.schema.json`](../schemas/content-pack-v1.schema.json). For LLM or automated conversion workflows, use this document for semantic guidance and validate the resulting JSON against the schema. A compact canonical example is available at [`examples/book-pack.json`](../examples/book-pack.json).
@@ -84,13 +84,12 @@ Commentary packs attach one or more paragraphs to provisions in an existing corp
 | --- | --- | --- |
 | `label` | recommended | Commentary name. Defaults to `"Commentary"`. |
 | `corpus` | optional | Component key to which the references belong. Defaults to `"bco"`. |
-| `entries` | yes in practice | Object keyed by provision reference; each value is an array of commentary paragraphs or a structured object containing `paragraphs` and optional `blocks`. |
+| `entries` | yes in practice | Object keyed by provision reference; each value is an array of commentary paragraphs or a structured object containing `paragraphs`, `blocks`, or both. |
 
-Use `blocks` when the source's paragraph and list structure should be preserved. A paragraph block is `["p", depth, text]`; a list-item block is `["i", depth, marker, text]`. Depth controls indentation from 0 to 4. Keep `paragraphs` as a plain-text fallback for readers that do not render blocks. For example:
+Use `blocks` when the source's paragraph and list structure should be preserved. A paragraph block is `["p", depth, text]`; a list-item block is `["i", depth, marker, text]`. Depth controls indentation from 0 to 4. `blocks` can stand alone; include `paragraphs` only when a plain-text fallback for older readers is useful. For example:
 
 ```json
 "31-2": {
-  "paragraphs": ["The first proposition.", "The second proposition."],
   "blocks": [
     ["p", 0, "The first proposition."],
     ["i", 0, "1st.", "The second proposition."]
@@ -106,7 +105,6 @@ A pack may also store a multi-question source section once and list the question
   "questions": [100, 101, 102, 103, 104, 105, 106, 107],
   "title": "The Lord's Prayer",
   "pages": { "from": 158, "through": 168 },
-  "paragraphs": ["Full source section text."],
   "blocks": [
     ["p", 0, "A source paragraph."],
     ["i", 1, "(1)", "A numbered list item."]
@@ -116,7 +114,7 @@ A pack may also store a multi-question source section once and list the question
 
 `id` is a stable section identifier. `parentId` points to the enclosing source section, or is `null` for a top-level section. `questionRange` records the range printed by the source; `questions` controls where the section appears. `pages` records printed-page provenance and does not determine relevance. In a question’s Commentary drawer, the closest matching sections appear first; parent sections are available under collapsed “Context in Hodge’s book.” This hierarchy does not alter the catechism text or its navigation groups.
 
-`blocks` preserves paragraph and list structure inside a section. A paragraph tuple is `["p", depth, text]`; a list item tuple is `["i", depth, marker, text]`. Depth controls indentation. When supplied, the reader renders `blocks`; `paragraphs` remains available as a text fallback for readers that do not support structured blocks.
+`blocks` preserves paragraph and list structure inside a section. A paragraph tuple is `["p", depth, text]`; a list item tuple is `["i", depth, marker, text]`. Depth controls indentation. When supplied, the reader renders `blocks`; `paragraphs` is optional and can be retained as a text fallback for older readers.
 
 Re-importing a commentary pack with the same `label` replaces the prior pack of that name.
 
@@ -281,6 +279,12 @@ Imported notes, commentaries, and books are stored in browser `localStorage`.
 - A book with the same `component.key` replaces that book pack.
 - Removing a pack from the pack manager removes the locally stored copy; it does not alter a source JSON file.
 
+## Importing historical BCO edition snapshots
+
+The reader accepts version 1 `pca-reader-bco-edition` JSON snapshots directly. Choose a `bco-<year>.json` snapshot from the content-packs repository in **Import & notes**. The reader creates a local book for that edition, retaining its chapter order, provision references, wording, paragraph blocks, and Directory binding markers. Preface and other unnumbered paragraphs remain unnumbered prose. Vacated chapters display a notice. The generated book key is based on the edition year and snapshot label; importing the same snapshot again replaces that local book.
+
+This conversion happens in the browser and does not rewrite the source snapshot or create a preview content-pack file. The snapshot remains the authority for its text and structure. The separate `*-preview.content-pack.json` files remain importable as ordinary book packs.
+
 ## Bundled packs
 
 A pack distributed with the reader is ordinary v1 pack data pushed into `window.BUNDLED_PACKS`. For example:
@@ -296,11 +300,10 @@ The bundled Rules of Assembly Operations pack in `content/rao.js` is the canonic
 
 The current importer intentionally remains permissive:
 
-- all packs: `format === "pca-constitution-pack"`;
-- supported `kind`: `notes`, `commentary`, or `book`;
-- book packs: `component.key` must exist.
+- content packs: `format === "pca-constitution-pack"`; supported `kind` is `notes`, `commentary`, or `book`; book packs require `component.key`;
+- BCO edition snapshots: `format === "pca-reader-bco-edition"`, `version === 1`, an integer `edition`, a nonempty unique `order`, and an entry for each ordered chapter.
 
-It does not currently perform JSON Schema validation, enforce `version === 1`, validate reference syntax, or verify that every `order` entry has a corresponding chapter. Producers should follow this specification even where the current reader is more forgiving.
+Neither import path performs full JSON Schema validation or validates provision-reference syntax. Content-pack imports do not verify that every `order` entry has a corresponding chapter; the BCO snapshot path checks that its ordered entries exist. Producers should follow their documented structure even where the current reader is more forgiving.
 
 
 The schema is intentionally stricter than the importer: it requires the fields a well-formed producer should emit, constrains block tuple shapes and divisions, and disallows unknown fields within the documented v1 structures. Some cross-field invariants — especially that every `order` value names a key in `chapters` — are documented requirements that standard JSON Schema cannot conveniently enforce without additional validation logic.
