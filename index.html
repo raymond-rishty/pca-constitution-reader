@@ -49,6 +49,12 @@
   .kbd{font-size:.7rem; border:1px solid var(--line-2); border-radius:2px; padding:1px 5px; background:#fff; color:var(--muted)}
   /* mobile chrome (shown only ≤880px) */
   .hamburger{display:block; flex-shrink:0; font-size:1.3rem; background:none; border:none; color:var(--navy); cursor:pointer; padding:6px; line-height:1}
+  .history-back,.match-nav button{background:none; color:var(--navy); border:1px solid var(--line); border-radius:3px; padding:6px 9px; cursor:pointer; font:inherit}
+  .history-back{font: .83rem var(--sans); white-space:nowrap}
+  .match-nav{display:flex; flex-wrap:wrap; align-items:center; gap:6px; font:.8rem var(--sans); padding:6px 0}
+  .match-nav button:disabled{opacity:.45; cursor:default}
+  #pageMatches:not(:empty){max-width:1180px; margin:auto; padding:4px 14px}
+  .match-nav:empty{display:none}
   .search-btn .mag{display:none}
   .mobile-menu{display:none}
   .mobile-menu.open{display:block; position:absolute; top:100%; left:max(14px,calc((100% - 1180px)/2 + 22px)); width:350px; max-width:calc(100% - 28px); max-height:calc(100dvh - 120px); overflow-y:auto; background:var(--paper); border:1px solid var(--line-2); box-shadow:0 14px 26px rgba(27,28,28,.13); font-family:var(--sans)}
@@ -512,6 +518,7 @@
 <header>
   <div class="bar">
     <button class="hamburger" id="hamburger" aria-label="Open menu" aria-controls="mobileMenu" aria-expanded="false">☰</button>
+    <button class="history-back" id="readerBack" hidden>‹ Back</button>
     <button class="brand" id="brand"><span class="pca">PCA</span> Constitution</button>
     <nav class="books" id="books">
       <button data-book="wcf">Confession</button>
@@ -543,6 +550,7 @@
   <button class="mm-item" id="mmInstall" data-install>Install as App</button>
   <button class="mm-item" data-share>Share App</button>
 </nav>
+<nav class="match-nav" id="pageMatches" aria-label="Search matches"></nav>
 </header>
 
 <div class="shell">
@@ -558,6 +566,7 @@
     <button class="x" id="closeDrawer" aria-label="Close">✕</button>
     <div class="eyebrow" id="dEyebrow"></div>
     <div class="ref" id="dRef"></div>
+    <nav class="match-nav" id="drawerMatches" aria-label="Search matches"></nav>
     <div class="quote" id="dQuote"></div>
     <div class="dmeta" id="dMeta"></div>
   </div>
@@ -1067,7 +1076,136 @@ function resolveIcon(c){                          // pack-supplied icon -> SVG/g
   return HOME_ICONS.bco;
 }
 /* ── URL routing: hash reflects the current location so it's linkable + survives reload ── */
-function setRoute(r){ try{ history.replaceState(null, '', r ? '#'+r : location.pathname + location.search); }catch(_){ } }
+// Each visit is a page, a panel over a page, or one match in a search.
+// The public fragment identifies the passage. Private search state lives in the tab's history.
+let visit=null, backPending=false;
+const visited=new Map();
+const noteDrafts=new WeakMap();
+const byId=id=>document.getElementById(id);
+const visitKey=()=>crypto.randomUUID?.() || Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+function visitLabel(place){
+  if(place.panel==='search') return 'search results';
+  if(place.panel==='drawer') return (COMPONENTS[current]?.abbr||current)+' '+place.drawer.ref;
+  if(place.panel==='packs') return 'Packs & Notes';
+  if(!place.route) return 'Home';
+  if(place.route==='about') return 'About & Sources';
+  const [book,ref]=place.route.split('/');
+  return (COMPONENTS[book]?.abbr||book)+' '+(ref||'contents');
+}
+function fragment(){
+  try{ return decodeURIComponent(location.hash.replace(/^#\/?/,'')); }catch(_){ return ''; }
+}
+function searchPosition(){
+  return {query:byId('palInput').value, books:[...palBooks], index:palSel, top:byId('palHits').scrollTop};
+}
+function rememberVisit(persist){
+  if(!visit) return;
+  visit.y=window.scrollY;
+  if(visit.panel==='search') visit.search=searchPosition();
+  if(visit.panel==='drawer'){
+    visit.drawer={ref:drawerRef, tab:dTab, filter:dFilter, sort:dSort, commentary:dCommSel, footnote:dFnSel, top:byId('dBody').scrollTop};
+    if(dTab==='comm') visit.drawer.openSections=[...byId('dBody').querySelectorAll('details')].map(el=>el.open);
+    if(dTab==='proofs') visit.drawer.verses=Array.from(byId('dBody').querySelectorAll('.vref'),(el,i)=>el.classList.contains('open')?i:-1).filter(i=>i>=0);
+    const note=byId('dBody').querySelector('.note-input');
+    if(note?.value) noteDrafts.set(visit,note.value); else noteDrafts.delete(visit);
+  }
+  if(cur.mode==='scroll' && view==='read'){
+    visit.density=document.querySelector('.density [aria-pressed="true"]')?.dataset.density;
+    visit.expanded=[...document.querySelectorAll('.prov.q.expanded')].map(p=>p.id);
+  }
+  const active=document.activeElement;
+  visit.focus=active.id || null;
+  visit.focusRef=active.dataset.ref || null;
+  // Native Back has already changed history.state when popstate fires. Keep the
+  // departing view here so Forward can still recover its last scroll and selection.
+  visited.set(visit.key,visit);
+  if(visited.size>128) visited.delete(visited.keys().next().value);
+  if(persist) history.replaceState(visit,'');
+}
+function writeVisit(next, replace=false){
+  rememberVisit(true);
+  const previous=visit;
+  if(next.panel && !next.match && next.route===previous.route){
+    next.density=previous.density;
+    next.expanded=previous.expanded;
+  }
+  visit={...next,readerVisit:1,key:replace?previous.key:visitKey(),back:replace?previous.back:true,
+    backLabel:replace?previous.backLabel:visitLabel(previous)};
+  const url=visit.route?'#'+visit.route:location.pathname+location.search;
+  history[replace?'replaceState':'pushState'](visit,'',url);
+  displayVisit(previous);
+}
+function navigatePage(route, target){
+  if(visit.panel==='menu' && visit.route===route && !target){ readerBack(); return; }
+  if(visit.route===route && !visit.panel && !visit.match && !target) return;
+  writeVisit({route,target},visit.panel==='menu');
+}
+function openPanel(panel,drawer){
+  if(visit.panel===panel && (!drawer || drawer.ref===drawerRef)) return;
+  writeVisit({route:visit.route,target:visit.target,panel,drawer,y:window.scrollY},visit.panel==='menu');
+}
+function readerBack(){
+  if(visit.back && !backPending){ backPending=true; history.back(); }
+}
+function dismissPanel(){
+  if(visit.match && visit.panel==='drawer'){
+    // Close exposes the full passage. Back still goes directly to the results.
+    writeVisit({...visit,panel:null,drawer:null,y:window.scrollY},true);
+  }else if(visit.panel) readerBack();
+}
+function restoreVisit(state){
+  const previous=visit;
+  if(previous) rememberVisit(false);
+  backPending=false;
+  visit=state?.readerVisit===1 ? visited.get(state.key)||state
+    : {readerVisit:1,key:visitKey(),route:fragment(),back:!!previous,backLabel:previous && visitLabel(previous)};
+  if(visit.panel==='search' && previous?.match?.origin===visit.key){
+    visit.search={...previous.match.search};
+  }
+  displayVisit(previous);
+  history.replaceState(visit,'',visit.route?'#'+visit.route:location.pathname+location.search);
+}
+function displayVisit(previous){
+  closeMenu();
+  hideDrawer();
+  byId('palWrap').classList.remove('show');
+  byId('packWrap').classList.remove('show');
+  if(!previous || previous.route!==visit.route || previous.target?.anchor!==visit.target?.anchor){
+    applyRoute();
+  }
+  if(visit.density && view==='read' && cur.mode==='scroll'){
+    byId('doc').className='doc cat-'+visit.density;
+    document.querySelectorAll('.density button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.density===visit.density));
+    const expanded=new Set(visit.expanded);
+    document.querySelectorAll('.prov.q').forEach(p=>p.classList.toggle('expanded',expanded.has(p.id)));
+  }
+  const back=byId('readerBack');
+  back.hidden=!visit.back || !!visit.match;
+  back.title=visit.backLabel?'Back to '+visit.backLabel:'Back';
+  back.setAttribute('aria-label',back.title);
+  if(visit.panel==='menu'){
+    byId('mobileMenu').classList.add('open');
+    byId('hamburger').setAttribute('aria-expanded','true');
+    byId('hamburger').setAttribute('aria-label','Close menu');
+    byId('hamburger').focus({preventScroll:true});
+  }
+  if(visit.panel==='drawer') showDrawer(visit.drawer);
+  if(visit.panel==='packs'){
+    renderPacks(); byId('packWrap').classList.add('show'); byId('packClose').focus({preventScroll:true});
+  }
+  if(visit.panel==='search'){
+    byId('palWrap').classList.add('show');
+    restoreSearch(visit.search);
+    byId('palInput').focus({preventScroll:true});
+  }else if(visit.match) restoreSearch(visit.match.search);
+  renderMatchNav();
+  if(Number.isFinite(visit.y)) window.scrollTo(0,visit.y);
+  if(!visit.panel){
+    const trigger=byId(visit.focus) || (visit.focusRef && byId('p-'+visit.focusRef)?.querySelector('.n'));
+    if(trigger) trigger.focus({preventScroll:true});
+    else if(document.activeElement.closest('#drawer,#palWrap,#packWrap')) (back.hidden?byId('brand'):back).focus({preventScroll:true});
+  }
+}
 function pagedRoute(book, rest){
   if(book === 'wcf'){
     const match = /^(\d+)\s*(?:\.|[-\u2010\u2011\u2012\u2013\u2014\u2212])\s*(\d+)(?:\s*(?:\.\s*[A-Za-z]|\(\s*[A-Za-z]\s*\)))?$/i.exec(rest);
@@ -1088,8 +1226,7 @@ function pagedRoute(book, rest){
   return {ch:chapter, anchor:section};
 }
 function applyRoute(){
-  closeDrawer(); closePal(); closePacks();
-  const raw = decodeURIComponent((location.hash || '').replace(/^#\/?/, ''));
+  const raw = visit.route;
   if(!raw){ showHome(); return; }
   if(raw === 'about'){ showAbout(); return; }
   const i = raw.indexOf('/');
@@ -1099,16 +1236,17 @@ function applyRoute(){
     const bundled = (window.BUNDLED_PACKS||[]).find(p=>p.kind==='book' && p.component && p.component.key===book);
     if(bundled){ registerBook(bundled); saveBooks(); SEARCH=null; refreshNav(); }
   }
-  if(!COMPONENTS[book]){ showHome(); return; }
+  if(!COMPONENTS[book]){ Object.assign(visit,{route:'',target:null,panel:null,match:null}); showHome(); return; }
   if(!rest){ showComponent(book); return; }
-  if(COMPONENTS[book].mode === 'scroll') openTarget(book, {anchor: rest});
+  if(visit.target) openTarget(book, visit.target);
+  else if(COMPONENTS[book].mode === 'scroll') openTarget(book, {anchor: rest});
   else openTarget(book, pagedRoute(book, rest));
 }
 
 const EDITION_LINE = "Book of Church Order through the 52nd General Assembly (2025) · Westminster Standards in the American revision (received 1788)";
 
 function showAbout(){
-  setView("about"); setRoute('about');
+  setView("about");
   document.getElementById('doc').removeAttribute('lang');
   document.getElementById('doc').innerHTML = `<div class="landing about">
     <a class="back" data-home>‹ The PCA Constitution</a>
@@ -1139,7 +1277,7 @@ function showAbout(){
 }
 
 function showHome(){
-  setView("home"); current="bco"; setRoute('');
+  setView("home"); current="bco";
   document.getElementById('doc').removeAttribute('lang');
   document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', false));
   const entry = k => {
@@ -1169,7 +1307,7 @@ function showHome(){
 }
 
 function showComponent(book){
-  setView("component"); current=book; setRoute(book);
+  setView("component"); current=book;
   document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', b.dataset.book===book));
   const c = COMPONENTS[book];
   let toc = '';
@@ -1291,8 +1429,6 @@ function renderCatechism(book, anchor){
   docEl.innerHTML = doc;
   document.getElementById('gutter').innerHTML = gut;
   alignGutter();
-  // reflect the location in the URL (book, or book/Q.N when jumped to a question)
-  setRoute(anchor ? book+'/'+anchor : book);
   if(anchor && document.getElementById('p-'+anchor)){
     document.getElementById('p-'+anchor).scrollIntoView({block:'start'});
   } else { window.scrollTo(0,0); }
@@ -1319,11 +1455,10 @@ function pgLink(kind, book, sp){
 }
 /* move one step along the spine; bounce at component edges */
 function goRelative(dir){
-  if(view!=='read' || cur.mode==='scroll') return;   // catechisms scroll; they don't page
-  if(document.getElementById('drawer').classList.contains('show')) return;
+  if(view!=='read' || cur.mode==='scroll' || visit.panel) return;
   const s = SPINE[cur.book], i = spineIndex(cur.book, cur.o), j = i + dir;
   if(i<0 || j<0 || j>=s.length){ bounce(dir); return; }
-  showChapter(cur.book, s[j]);
+  navigatePage(cur.book+'/'+s[j].ch);
 }
 function bounce(){
   const d = document.getElementById('doc');
@@ -1342,7 +1477,7 @@ function renderBlocks(blocks, head){
   return out;
 }
 function showChapter(book, o){
-  setView("read"); current=book; cur={book,o}; setRoute(book+'/'+(o.anchor || o.ch));
+  setView("read"); current=book; cur={book,o};
   document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', b.dataset.book===book));
   const ch = buildChapter(book, o);
   const c = COMPONENTS[book];
@@ -1393,14 +1528,11 @@ function showChapter(book, o){
   docEl.innerHTML = doc;
   document.getElementById('gutter').innerHTML = gut;
   if(o.anchor){
-    requestAnimationFrame(()=>{
-      const target = document.getElementById('p-' + o.anchor);
-      if(!target){ window.scrollTo(0,0); return; }
-      target.scrollIntoView({block:'start'});
-      document.querySelectorAll('.rail .sub a').forEach(a=>a.classList.toggle('here', a.dataset.anchor===o.anchor));
-      target.classList.add('route-target');
-      window.setTimeout(()=>target.classList.remove('route-target'), 1800);
-    });
+    const target = document.getElementById('p-' + o.anchor);
+    if(target) target.scrollIntoView({block:'start'}); else window.scrollTo(0,0);
+    document.querySelectorAll('.rail .sub a').forEach(a=>a.classList.toggle('here', a.dataset.anchor===o.anchor));
+    target?.classList.add('route-target');
+    window.setTimeout(()=>target?.classList.remove('route-target'), 1800);
   } else window.scrollTo(0,0);
   alignGutter();
   // gentle page-turn fade
@@ -1442,8 +1574,7 @@ window.addEventListener('scroll', ()=>{
 /* open a chapter from a clicked element's dataset */
 function openFromEl(el){
   const book = el.dataset.book;
-  if(el.dataset.qstart) openTarget(book, {qStart:el.dataset.qstart, qEnd:el.dataset.qend, title:el.dataset.title});
-  else openTarget(book, {part:el.dataset.part, ch:el.dataset.ch, title:el.dataset.title});
+  navigatePage(book+'/'+(el.dataset.qstart?'Q.'+el.dataset.qstart:el.dataset.ch));
 }
 
 /* ───────────── drawer (provision dossier) ───────────── */
@@ -1572,7 +1703,7 @@ function renderCommentarySections(sections,qNumber){
       +'<div class="commentary-context-list">'+roots.map(renderContext).join('')+'</div></details>':'';
   return primary.map(renderFocus).join('')+context;
 }
-function renderDrawer(){
+function renderDrawer(packLabel){
   const ref=drawerRef, d=dossierFor(ref), n=total(d);
   const isCustom = !!(COMPONENTS[current] && COMPONENTS[current].custom);
   const refLabel=(COMPONENTS[current].abbr||current.toUpperCase())+' '+ref;
@@ -1653,6 +1784,8 @@ function renderDrawer(){
       + `<p class="cattrib">PCA Constitution — official Scripture proofs (pcaac.org)`
       + (tappable ? ` · verse text: Berean Standard Bible (public domain)` : ``) + `</p></div>`;
   } else if(dTab==='comm'){
+    const selectedPack=comms.findIndex(c=>c.label===packLabel);
+    if(selectedPack>=0) dCommSel=selectedPack;
     const sel = Math.min(Math.max(dCommSel,0), comms.length-1);
     if(comms.length>1)
       body += `<div class="csubtabs">${comms.map((c,i)=>`<button class="csub${i===sel?' on':''}" data-csub="${i}">${c.label.split(' — ')[0]}</button>`).join('')}</div>`;
@@ -1673,43 +1806,48 @@ function renderDrawer(){
       if(el && bd) bd.scrollTop += el.getBoundingClientRect().top - bd.getBoundingClientRect().top - 16; });
   }
 }
-let lastTrigger=null;
-function openDrawer(ref, options={}){
-  drawerRef=ref; dFilter='all'; dSort='desc'; dCommSel=0; dFnSel=null;
+function openDrawer(ref){
+  openPanel('drawer',{ref});
+}
+function showDrawer(saved){
+  const ref=saved.ref;
+  drawerRef=ref; dFilter=saved.filter||'all'; dSort=saved.sort||'desc'; dCommSel=saved.commentary||0; dFnSel=saved.footnote||null;
   // open on Proofs for Westminster provisions (their primary apparatus), else Citations
   const PRF = {wcf:window.WCF_PROOFS, wlc:window.WLC_PROOFS, wsc:window.WSC_PROOFS}[current];
-  dTab = options.tab || ((PRF && PRF[ref] && total(dossierFor(ref))===0) ? 'proofs' : 'cit');
-  if(dTab==='comm' && options.packLabel){
-    const packs=window.BCO_COMMENTARIES.filter(c=>(c.corpus||'bco')===current);
-    let selected=packs.findIndex(c=>c.label===options.packLabel);
-    const bp=window.BOOK_PACKS.find(b=>b.component.key===current);
-    if(selected<0 && bp && (bp.commentaryLabel||'Commentary')===options.packLabel) selected=packs.length;
-    dCommSel=Math.max(0,selected);
+  dTab = saved.tab || ((PRF && PRF[ref] && total(dossierFor(ref))===0) ? 'proofs' : 'cit');
+  renderDrawer(saved.packLabel);
+  if(saved.verses?.length){
+    const proofs=byId('dBody').querySelector('.proofs-view');
+    if(proofs){
+      const refs=proofs.querySelectorAll('.vref');
+      saved.verses.forEach(i=>refs[i]?.classList.add('open'));
+      rebuildVerses(proofs);
+    }
   }
-  lastTrigger = document.activeElement;
-  renderDrawer();
+  const note=byId('dBody').querySelector('.note-input');
+  if(note && noteDrafts.has(visit)) note.value=noteDrafts.get(visit);
   const dr=document.getElementById('drawer');
   dr.classList.add('show'); dr.setAttribute('aria-hidden','false');
   document.getElementById('overlay').classList.add('show');
-  if(options.noteIndex!==undefined){
-    requestAnimationFrame(()=>{ const el=document.getElementById('dnote-'+options.noteIndex), body=document.getElementById('dBody');
-      if(el&&body) body.scrollTop+=el.getBoundingClientRect().top-body.getBoundingClientRect().top-16; });
+  const body=byId('dBody');
+  if(saved.openSections) body.querySelectorAll('details').forEach((el,i)=>{ el.open=!!saved.openSections[i]; });
+  body.scrollTop=saved.top||0;
+  const target=saved.commentarySectionId ? byId('commentary-'+saved.commentarySectionId) : saved.noteIndex!==undefined ? byId('dnote-'+saved.noteIndex) : null;
+  if(target){
+    for(let el=target; el && el!==body; el=el.parentElement){
+      if(el.tagName==='DETAILS') el.open=true;
+    }
+    body.scrollTop+=target.getBoundingClientRect().top-body.getBoundingClientRect().top-16;
   }
-  if(options.commentarySectionId){
-    requestAnimationFrame(()=>{ const el=document.getElementById('commentary-'+options.commentarySectionId), body=document.getElementById('dBody');
-      if(!el||!body) return;
-      let parent=el.parentElement;
-      while(parent&&parent!==body){ if(parent.tagName==='DETAILS') parent.open=true; parent=parent.parentElement; }
-      body.scrollTop+=el.getBoundingClientRect().top-body.getBoundingClientRect().top-16;
-    });
-  }
-  setTimeout(()=>document.getElementById('closeDrawer').focus(), 60);
+  byId('closeDrawer').focus({preventScroll:true});
 }
-function closeDrawer(){
+function hideDrawer(){
   const dr=document.getElementById('drawer');
+  if(!dr.classList.contains('show')) return;
+  if(dr.contains(document.activeElement)) document.activeElement.blur();
   dr.classList.remove('show'); dr.setAttribute('aria-hidden','true');
   document.getElementById('overlay').classList.remove('show');
-  if(lastTrigger && lastTrigger.focus) lastTrigger.focus();
+  drawerRef=null;
 }
 
 /* ───────────── full-library search ───────────── */
@@ -1781,7 +1919,8 @@ function buildSearch(){
   return out;
 }
 const BOOK_LABEL={wcf:'WCF',wlc:'WLC',wsc:'WSC',bco:'BCO'};
-let palSel=0, palResults=[], palBooks=new Set(), palLastTrigger=null;
+let palSel=0, palResults=[], palBooks=new Set(), renderedHits=0;
+let lastSearchIndex=null, lastSearchKey='';
 function _highlight(value,query){
   let html=esc(value||'');
   const terms=PcaConstitutionSearch.parseQuery(query).terms.concat(PcaConstitutionSearch.parseQuery(query).phrases).sort((a,b)=>b.length-a.length);
@@ -1798,32 +1937,76 @@ function renderPalTools(total){
 function palRender(q){
   if(!SEARCH) SEARCH=buildSearch();
   const query=q.trim();
-  if(!query){ palResults=[]; palSel=0; renderPalTools(0); document.getElementById('palHits').innerHTML=`<div class="pal-empty"><b>Search every provision</b><br>Enter a reference, wording you remember, or a topic. Minor spelling mistakes are okay; put an exact phrase in quotation marks.</div>`; return; }
+  const key=JSON.stringify([query,...palBooks]);
+  if(lastSearchIndex===SEARCH && lastSearchKey===key) return;
+  lastSearchIndex=SEARCH; lastSearchKey=key;
+  const list=byId('palHits');
+  list.replaceChildren(); list.scrollTop=0; renderedHits=0; palSel=0;
+  if(!query){ palResults=[]; renderPalTools(0); list.innerHTML=`<div class="pal-empty"><b>Search every provision</b><br>Enter a reference, wording you remember, or a topic. Minor spelling mistakes are okay; put an exact phrase in quotation marks.</div>`; return; }
   const result=PcaConstitutionSearch.search(SEARCH,query,{books:palBooks});
-  palResults=result.results.slice(0,50).map(row=>({...row.record,_match:row}));
-  palSel=0; renderPalTools(result.total);
-  const hits=palResults.map((h,i)=>{
+  palResults=result.results.map(row=>({...row.record,_match:row}));
+  renderPalTools(result.total);
+  appendHits(50);
+  if(!palResults.length) list.innerHTML='<div class="pal-empty"><b>No matching provision.</b><br>Check the reference or try fewer words. Search is spelling-tolerant for words of four or more letters.</div>';
+}
+function appendHits(end){
+  const query=byId('palInput').value.trim();
+  const hits=palResults.slice(renderedHits,end).map((h,offset)=>{
+    const i=renderedHits+offset;
     const row=h._match, source=row.bestField==='title'?(h.title||h.text):row.bestField==='topics'?(h.topics||[]).join(' · '):h.text;
     const snippet=PcaConstitutionSearch.excerpt(source,row.bestToken,190);
     return `<div class="hit ${i===0?'sel':''}" data-i="${i}" role="option" aria-selected="${i===0}"><span class="ref">${esc(h.reference)}${h.packLabel?`<small class="source">${esc(h.packLabel)}</small>`:''}</span><span class="title">${_highlight(h.title||'Constitutional provision',query)}</span><span class="txt">${_highlight(snippet,query)}</span></div>`;
   }).join('');
-  document.getElementById('palHits').innerHTML=hits||`<div class="pal-empty"><b>No matching provision.</b><br>Check the reference or try fewer words. Search is spelling-tolerant for words of four or more letters.</div>`;
+  byId('palHits').insertAdjacentHTML('beforeend',hits);
+  renderedHits=Math.min(end,palResults.length);
+}
+function selectHit(index,reveal){
+  palSel=Math.max(0,Math.min(index,palResults.length-1));
+  if(reveal && palSel>=renderedHits) appendHits(palSel+50);
+  document.querySelectorAll('#palHits .hit').forEach((el,i)=>{
+    const selected=i===palSel;
+    el.classList.toggle('sel',selected); el.setAttribute('aria-selected',selected);
+    if(selected && reveal) el.scrollIntoView({block:'nearest'});
+  });
+}
+function restoreSearch(saved={}){
+  const input=byId('palInput');
+  input.value=saved.query||'';
+  palBooks=new Set(saved.books);
+  palRender(input.value);
+  if(saved.index>=renderedHits) appendHits(saved.index+50);
+  byId('palHits').scrollTop=saved.top||0;
+  selectHit(saved.index||0,visit.panel==='search');
+}
+function passageRoute(book,target){
+  const anchor=target.anchor;
+  if(anchor && (COMPONENTS[book].mode==='scroll' || pagedRoute(book,anchor).ch===String(target.ch))) return book+'/'+anchor;
+  return book+'/'+target.ch;
 }
 function palGo(i){
-  const h = palResults[i]; if(!h) return;
-  closePal();
-  openTarget(h.book, h.open);
-  if(h.noDrawer){ window.scrollTo(0,0); return; }
-  const el = document.getElementById('p-'+h.ref);
-  if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
-  const options=h.packKind==='notes'?{tab:'notes',noteIndex:h.noteIndex}
-    :h.packKind==='commentary'?{tab:'comm',packLabel:h.packLabel}
-      :h.packKind==='footnotes'?{tab:'fn'}:{};
-  if(h.commentarySectionId) options.commentarySectionId=h.commentarySectionId;
-  setTimeout(()=>openDrawer(h.ref,options), 300);
+  const hit=palResults[i]; if(!hit) return;
+  const stepping=!!visit.match;
+  const search=stepping?{...visit.match.search,index:i}:{...searchPosition(),index:i};
+  palSel=i;
+  const target=hit.noDrawer?hit.open:{...hit.open,anchor:hit.ref};
+  const match={origin:stepping?visit.match.origin:visit.key,search};
+  const options=hit.packKind==='notes'?{tab:'notes',noteIndex:hit.noteIndex}
+    :hit.packKind==='commentary'?{tab:'comm',packLabel:hit.packLabel}
+      :hit.packKind==='footnotes'?{tab:'fn'}:{};
+  if(hit.commentarySectionId) options.commentarySectionId=hit.commentarySectionId;
+  writeVisit({route:passageRoute(hit.book,target),target,match,panel:hit.noDrawer?null:'drawer',drawer:{ref:hit.ref,...options}},stepping);
 }
-function openPal(){ palLastTrigger=document.activeElement; document.getElementById('palWrap').classList.add('show'); const i=document.getElementById('palInput'); i.value=''; palBooks=new Set(); palRender(''); i.focus(); }
-function closePal(){ const wrap=document.getElementById('palWrap'), wasOpen=wrap.classList.contains('show'); wrap.classList.remove('show'); if(wasOpen&&palLastTrigger&&palLastTrigger.focus) palLastTrigger.focus(); }
+function renderMatchNav(){
+  byId('pageMatches').replaceChildren();
+  byId('drawerMatches').replaceChildren();
+  if(!visit.match) return;
+  const host=byId(visit.panel==='drawer'?'drawerMatches':'pageMatches');
+  host.innerHTML='<button data-results>‹ Back to results</button>'
+    +'<button data-step="-1" aria-label="Previous match" '+(palSel===0?'disabled':'')+'>‹</button>'
+    +'<span aria-live="polite">Match '+(palSel+1)+' of '+palResults.length+'</span>'
+    +'<button data-step="1" aria-label="Next match" '+(palSel+1>=palResults.length?'disabled':'')+'>›</button>';
+}
+function openPal(){ openPanel('search'); }
 
 /* tappable proof refs → reveal BSB verse text below the proof (per-ref + expand-all) */
 function rebuildVerses(view){
@@ -1854,14 +2037,28 @@ function toggleVref(vr){
 
 /* ───────────── events ───────────── */
 function closeMenu(){ const m=document.getElementById('mobileMenu'); if(m){ m.classList.remove('open'); const b=document.getElementById('hamburger'); b.setAttribute('aria-expanded','false'); b.setAttribute('aria-label','Open menu'); } }
-document.getElementById('brand').addEventListener('click', ()=>{ closeMenu(); showHome(); });
-document.getElementById('books').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) showComponent(b.dataset.book); });
-document.getElementById('hamburger').addEventListener('click', ()=>{ const m=document.getElementById('mobileMenu'); const open=m.classList.toggle('open'); const b=document.getElementById('hamburger'); b.setAttribute('aria-expanded', open); b.setAttribute('aria-label',open?'Close menu':'Open menu'); });
+byId('readerBack').addEventListener('click',readerBack);
+document.getElementById('brand').addEventListener('click', ()=>{ closeMenu(); navigatePage(''); });
+document.getElementById('books').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) navigatePage(b.dataset.book); });
+byId('hamburger').addEventListener('click', ()=>{ if(visit.panel==='menu') readerBack(); else openPanel('menu'); });
 document.body.addEventListener('click', e=>{
   if(e.target.closest('a[href="#"]')) e.preventDefault();   // placeholder citation links: don't navigate to '#'
-  const mEl=document.getElementById('mobileMenu');          // click-off to dismiss the hamburger menu
-  if(mEl && mEl.classList.contains('open') && !e.target.closest('#mobileMenu') && !e.target.closest('#hamburger')) closeMenu();
-  const ja = e.target.closest('[data-anchor]'); if(ja){ const el=document.getElementById('p-'+ja.dataset.anchor); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); return; }
+  if(visit.panel==='menu' && !e.target.closest('#mobileMenu,#hamburger,#readerBack,[data-book],[data-home],[data-about],[data-anchor],[data-ref],.bn,.home-jump')){
+    dismissPanel(); return;
+  }
+  if(e.target.closest('[data-results]')){ readerBack(); return; }
+  const step=e.target.closest('[data-step]');
+  if(step){
+    palGo(palSel+Number(step.dataset.step));
+    const nav=byId(visit.panel==='drawer'?'drawerMatches':'pageMatches');
+    (nav.querySelector('[data-step="'+step.dataset.step+'"]:enabled')||nav.querySelector('[data-results]')).focus({preventScroll:true});
+    return;
+  }
+  const ja=e.target.closest('[data-anchor]');
+  if(ja){
+    const target={...cur.o,anchor:ja.dataset.anchor};
+    navigatePage(passageRoute(current,target),target); return;
+  }
   const ns = e.target.closest('.note-save'); if(ns){ const ta=document.querySelector('#drawer .note-input'); const v=ta&&ta.value.trim(); if(v){ (NOTES[drawerRef]=NOTES[drawerRef]||[]).push({who:"You", when:noteDate(), text:v}); saveNotes(); SEARCH=null; } dTab='notes'; renderDrawer(); return; }
   const nd = e.target.closest('.note-del'); if(nd){ const i=+nd.dataset.i; if(NOTES[drawerRef]){ NOTES[drawerRef].splice(i,1); if(!NOTES[drawerRef].length) delete NOTES[drawerRef]; } saveNotes(); SEARCH=null; dTab='notes'; renderDrawer(); return; }
   const cb = e.target.closest('.csub'); if(cb){ dCommSel=+cb.dataset.csub; renderDrawer(); return; }
@@ -1872,14 +2069,13 @@ document.body.addEventListener('click', e=>{
   const vr = e.target.closest('.vref'); if(vr){ toggleVref(vr); return; }
   const va = e.target.closest('.vall'); if(va){ const view=va.closest('.proofs-view'); const open=va.getAttribute('aria-pressed')!=='true'; view.querySelectorAll('.vref').forEach(a=>a.classList.toggle('open',open)); rebuildVerses(view); return; }
   if(e.target.closest('.home-jump')){ openPal(); return; }
-  const mm = e.target.closest('.mm-item'); if(mm){ closeMenu(); if(mm.hasAttribute('data-home')) showHome(); else if(mm.hasAttribute('data-install')) promptInstall(); else if(mm.hasAttribute('data-import')) openPacks(); else if(mm.hasAttribute('data-about')) showAbout(); else if(mm.hasAttribute('data-share')) shareApp(); else showComponent(mm.dataset.book); return; }
-  const bn = e.target.closest('.bn'); if(bn){ const a=bn.dataset.bn; if(a==='library') showHome(); else if(a==='search') openPal(); else showComponent(current); return; }
-  const about = e.target.closest('[data-about]'); if(about){ showAbout(); return; }
-  const home = e.target.closest('[data-home]'); if(home){ showHome(); return; }
-  const railBack = e.target.closest('.rail-back,.read-back'); if(railBack){ showComponent(railBack.dataset.book); return; }
-  const entry = e.target.closest('.entry,.hentry'); if(entry){ showComponent(entry.dataset.book); return; }
+  const mm = e.target.closest('.mm-item'); if(mm){ if(mm.hasAttribute('data-home')) navigatePage(''); else if(mm.hasAttribute('data-install')){ dismissPanel(); promptInstall(); } else if(mm.hasAttribute('data-import')) openPanel('packs'); else if(mm.hasAttribute('data-about')) navigatePage('about'); else if(mm.hasAttribute('data-share')){ dismissPanel(); shareApp(); } else navigatePage(mm.dataset.book); return; }
+  const bn = e.target.closest('.bn'); if(bn){ const a=bn.dataset.bn; if(a==='library') navigatePage(''); else if(a==='search') openPal(); else navigatePage(current); return; }
+  const about = e.target.closest('[data-about]'); if(about){ navigatePage('about'); return; }
+  const home = e.target.closest('[data-home]'); if(home){ navigatePage(''); return; }
+  const bookLink = e.target.closest('.rail-back,.read-back,.entry,.hentry'); if(bookLink){ navigatePage(bookLink.dataset.book); return; }
   const toc = e.target.closest('.toc a'); if(toc){ openFromEl(toc); return; }
-  const pg = e.target.closest('.pgnav'); if(pg){ pg.hasAttribute('data-contents') ? showComponent(pg.dataset.book) : openFromEl(pg); return; }
+  const pg = e.target.closest('.pgnav'); if(pg){ pg.hasAttribute('data-contents') ? navigatePage(pg.dataset.book) : openFromEl(pg); return; }
   const den = e.target.closest('.density button'); if(den){ document.getElementById('doc').className='doc cat-'+den.dataset.density; document.querySelectorAll('.density button').forEach(b=>b.setAttribute('aria-pressed', b===den)); return; }
   const sig = e.target.closest('.sig, .sig-inline'); if(sig){ openDrawer(sig.dataset.ref); return; }
   const fn = e.target.closest('.fnref'); if(fn){ const pv=fn.closest('.prov[id]'); if(pv){ openDrawer(pv.id.slice(2)); dTab='fn'; dFnSel=parseInt(fn.textContent,10)||null; renderDrawer(); } return; }
@@ -1888,8 +2084,8 @@ document.body.addEventListener('click', e=>{
   const pm = e.target.closest('.pf-more'); if(pm){ const v=pm.nextElementSibling; v.classList.toggle('open'); pm.textContent = v.classList.contains('open')?'Hide full text ▴':'Show full text ▾'; return; }
   const ql = e.target.closest('.cat-list .prov.q'); if(ql){ ql.classList.toggle('expanded'); return; }
 });
-document.getElementById('closeDrawer').addEventListener('click', closeDrawer);
-document.getElementById('overlay').addEventListener('click', closeDrawer);
+byId('closeDrawer').addEventListener('click', dismissPanel);
+byId('overlay').addEventListener('click', dismissPanel);
 document.getElementById('openPal').addEventListener('click', openPal);
 /* Switch the BCO in place, keeping the current route and rebuilding translated navigation/search. */
 function setBcoLanguage(preference){
@@ -1919,12 +2115,13 @@ bcoTranslations().forEach(pack=>{
 const savedLanguage=readBcoLanguage();
 languageSelect.value=offeredLanguages.has(savedLanguage)?savedLanguage:'auto';
 languageSelect.addEventListener('change',()=>setBcoLanguage(languageSelect.value));
-document.getElementById('palClose').addEventListener('click', closePal);
-document.getElementById('palWrap').addEventListener('click', e=>{ if(e.target.id==='palWrap') closePal(); });   // click backdrop to dismiss
+byId('palClose').addEventListener('click', dismissPanel);
+byId('palWrap').addEventListener('click', e=>{ if(e.target.id==='palWrap') dismissPanel(); });
 document.getElementById('palTools').addEventListener('click', e=>{
   const b=e.target.closest('[data-search-book]'); if(!b) return;
   const book=b.dataset.searchBook; palBooks.has(book)?palBooks.delete(book):palBooks.add(book);
   palRender(document.getElementById('palInput').value);
+  rememberVisit(true);
 });
 
 /* ── packs & notes panel ── */
@@ -1942,16 +2139,14 @@ function renderPacks(){
     + `<button class="pack-btn import" data-act="import">Import a file…</button>`
     + `<p class="packs-note">Notes and imported books are kept in this browser's local storage and survive reloads. You can import a content pack or a historical BCO edition snapshot JSON. Public-domain packs (Ramsay commentary; a sample book) are included — just tap <b>Add</b>. Copyrighted commentary (e.g. Smith) isn't bundled; import it as your own JSON file. Imported books appear alongside the four standards. Everything exports/imports as portable JSON.</p>`;
 }
-function openPacks(){ renderPacks(); document.getElementById('packWrap').classList.add('show'); }
-function closePacks(){ document.getElementById('packWrap').classList.remove('show'); }
-document.getElementById('packClose').addEventListener('click', closePacks);
-document.getElementById('packWrap').addEventListener('click', e=>{ if(e.target.id==='packWrap') closePacks(); });
+byId('packClose').addEventListener('click', dismissPanel);
+byId('packWrap').addEventListener('click', e=>{ if(e.target.id==='packWrap') dismissPanel(); });
 document.getElementById('packsBody').addEventListener('click', e=>{
   const b=e.target.closest('[data-act]'); if(!b) return;
   if(b.dataset.act==='export-notes') exportNotes();
   else if(b.dataset.act==='import') document.getElementById('importFile').click();
   else if(b.dataset.act==='rm-comm'){ window.BCO_COMMENTARIES.splice(+b.dataset.i,1); saveCommentaries(); SEARCH=null; renderPacks(); if(document.getElementById('drawer').classList.contains('show')) renderDrawer(); }
-  else if(b.dataset.act==='rm-book'){ const k=b.dataset.key; window.BOOK_PACKS=window.BOOK_PACKS.filter(x=>x.component.key!==k); delete COMPONENTS[k]; delete SPINE[k]; saveBooks(); SEARCH=null; refreshNav(); renderPacks(); if(current===k) showHome(); else if(view==='home') showHome(); }
+  else if(b.dataset.act==='rm-book'){ const k=b.dataset.key; window.BOOK_PACKS=window.BOOK_PACKS.filter(x=>x.component.key!==k); delete COMPONENTS[k]; delete SPINE[k]; saveBooks(); SEARCH=null; refreshNav(); renderPacks(); if(current===k) writeVisit({route:'',panel:'packs',y:0},true); else if(view==='home') showHome(); }
   else if(b.dataset.act==='add-bundled'){ const p=(window.BUNDLED_PACKS||[]).find(x=>x.label===b.dataset.label); if(p){ importPack(p); SEARCH=null; if(p.kind==='book') refreshNav(); renderPacks(); if(view==='home') showHome(); else if(document.getElementById('drawer').classList.contains('show')) renderDrawer(); } }
 });
 document.getElementById('importFile').addEventListener('change', e=>{
@@ -1960,21 +2155,24 @@ document.getElementById('importFile').addEventListener('change', e=>{
   r.onload=()=>{ try{ const res=importPack(JSON.parse(r.result)); SEARCH=null; if(res.kind==='book') refreshNav(); renderPacks(); if(view==='home') showHome(); else if(document.getElementById('drawer').classList.contains('show')) renderDrawer(); alert(`Imported ${res.kind} pack — ${res.n} ${res.kind==='book'?'sections':'entries'}.`); }catch(err){ alert('Import failed: '+err.message); } };
   r.readAsText(f); e.target.value='';
 });
-document.getElementById('palInput').addEventListener('input', e=>palRender(e.target.value));
+document.getElementById('palInput').addEventListener('input', e=>{ palRender(e.target.value); rememberVisit(true); });
 document.getElementById('palHits').addEventListener('click', e=>{ const h=e.target.closest('.hit'); if(h&&h.dataset.i!=null) palGo(+h.dataset.i); });
+byId('palHits').addEventListener('scroll', e=>{
+  const list=e.currentTarget;
+  if(renderedHits<palResults.length && list.scrollTop+list.clientHeight>=list.scrollHeight-100) appendHits(renderedHits+50);
+},{passive:true});
 document.getElementById('palInput').addEventListener('keydown', e=>{
   if(e.key==='ArrowDown'){ e.preventDefault(); palSel=Math.min(palSel+1,palResults.length-1); }
   else if(e.key==='ArrowUp'){ e.preventDefault(); palSel=Math.max(palSel-1,0); }
   else if(e.key==='Enter'){ e.preventDefault(); palGo(palSel); return; }
   else return;
-  document.querySelectorAll('#palHits .hit').forEach((el,i)=>{ const selected=i===palSel; el.classList.toggle('sel',selected); el.setAttribute('aria-selected',selected); if(selected) el.scrollIntoView({block:'nearest'}); });
+  selectHit(palSel,true);
+  rememberVisit(true);
 });
 document.addEventListener('keydown', e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==='k'){ e.preventDefault(); openPal(); }
   if(e.key==='Escape'){
-    const menuOpen=document.getElementById('mobileMenu').classList.contains('open');
-    closeMenu(); closePal(); closeDrawer(); closePacks();
-    if(menuOpen) document.getElementById('hamburger').focus();
+    dismissPanel();
   }
 });
 
@@ -2021,9 +2219,11 @@ function refreshNav(){   // inject header + hamburger entries for pack-added boo
     if(menu){ const m=document.createElement('button'); m.className='mm-item'; m.dataset.book=c.key; m.setAttribute('data-customnav','1'); m.textContent=c.name; menu.appendChild(m); }
   });
 }
-window.addEventListener('hashchange', applyRoute);   // back/forward + manual edits
-refreshNav();                                        // surface any restored book packs in the nav
-applyRoute();                                        // initial render from the URL (deep link / reload)
+history.scrollRestoration='manual';
+window.addEventListener('popstate', e=>restoreVisit(e.state));
+window.addEventListener('pagehide', ()=>rememberVisit(true));
+refreshNav();
+restoreVisit(history.state);
 
 /* ── PWA: capture the install prompt so the hamburger "Install app" item can fire it ── */
 let deferredPrompt=null;
