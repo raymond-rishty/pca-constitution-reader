@@ -41,7 +41,7 @@ window.BUNDLED_PACKS.push({
   ],
   "chapters": {
     "1": {
-      "title": "ORGANIZATION OF A GENERAL ASSEMBLY’S MEETING",
+      "title": "Organization of a General Assembly’s Meeting",
       "sections": [
         {
           "ref": "1",
@@ -101,7 +101,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "2": {
-      "title": "THE MODERATOR",
+      "title": "The Moderator",
       "sections": [
         {
           "ref": "2",
@@ -141,7 +141,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "3": {
-      "title": "THE STATED CLERK",
+      "title": "The Stated Clerk",
       "sections": [
         {
           "ref": "3",
@@ -393,7 +393,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "4": {
-      "title": "COMMITTEES AND AGENCIES",
+      "title": "Committees and Agencies",
       "sections": [
         {
           "ref": "4",
@@ -888,7 +888,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "5": {
-      "title": "ADMINISTRATIVE COMMITTEE OF GENERAL ASSEMBLY",
+      "title": "Administrative Committee of General Assembly",
       "sections": [
         {
           "ref": "5",
@@ -1022,7 +1022,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "6": {
-      "title": "PROGRAM COMMITTEES",
+      "title": "Program Committees",
       "sections": [
         {
           "ref": "6",
@@ -1072,7 +1072,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "7": {
-      "title": "THE COOPERATIVE MINISTRIES COMMITTEE",
+      "title": "The Cooperative Ministries Committee",
       "sections": [
         {
           "ref": "7",
@@ -1330,7 +1330,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "8": {
-      "title": "SPECIAL COMMITTEES",
+      "title": "Special Committees",
       "sections": [
         {
           "ref": "8",
@@ -1547,7 +1547,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "9": {
-      "title": "AD INTERIM COMMITTEES",
+      "title": "Ad Interim Committees",
       "sections": [
         {
           "ref": "9",
@@ -1617,7 +1617,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "10": {
-      "title": "THE ASSEMBLY ARRANGEMENTS",
+      "title": "The Assembly Arrangements",
       "sections": [
         {
           "ref": "10",
@@ -1781,7 +1781,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "11": {
-      "title": "COMMUNICATIONS AND OVERTURES",
+      "title": "Communications and Overtures",
       "sections": [
         {
           "ref": "11",
@@ -1947,7 +1947,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "12": {
-      "title": "REPORTS TO THE GENERAL ASSEMBLY",
+      "title": "Reports to the General Assembly",
       "sections": [
         {
           "ref": "12",
@@ -1987,7 +1987,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "13": {
-      "title": "NEW BUSINESS",
+      "title": "New Business",
       "sections": [
         {
           "ref": "13",
@@ -2047,7 +2047,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "14": {
-      "title": "COMMITTEES OF COMMISSIONERS FOR PERMANENT COMMITTEES AND AGENCIES",
+      "title": "Committees of Commissioners for Permanent Committees and Agencies",
       "sections": [
         {
           "ref": "14",
@@ -2549,7 +2549,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "15": {
-      "title": "THE OVERTURES COMMITTEE",
+      "title": "The Overtures Committee",
       "sections": [
         {
           "ref": "15",
@@ -2907,7 +2907,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "16": {
-      "title": "REVIEW OF PRESBYTERY RECORDS",
+      "title": "Review of Presbytery Records",
       "sections": [
         {
           "ref": "16",
@@ -3425,7 +3425,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "17": {
-      "title": "STANDING JUDICIAL COMMISSION",
+      "title": "Standing Judicial Commission",
       "sections": [
         {
           "ref": "17",
@@ -3565,7 +3565,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "18": {
-      "title": "ASSEMBLY EXPENSES",
+      "title": "Assembly Expenses",
       "sections": [
         {
           "ref": "18",
@@ -3610,7 +3610,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "19": {
-      "title": "PARLIAMENTARY PROCEDURE",
+      "title": "Parliamentary Procedure",
       "sections": [
         {
           "ref": "19",
@@ -3741,7 +3741,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "20": {
-      "title": "AMENDMENT OR SUSPENSION OF RULES",
+      "title": "Amendment or Suspension of Rules",
       "sections": [
         {
           "ref": "20",

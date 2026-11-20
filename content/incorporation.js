@@ -22,7 +22,7 @@ window.BUNDLED_PACKS.push({
   ],
   "chapters": {
     "certificate": {
-      "title": "CERTIFICATE OF INCORPORATION",
+      "title": "Certificate of Incorporation",
       "sections": [
         {
           "ref": "Certificate of Incorporation",

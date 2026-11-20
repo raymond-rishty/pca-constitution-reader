@@ -31,7 +31,7 @@ window.BUNDLED_PACKS.push({
   ],
   "chapters": {
     "preface": {
-      "title": "PREFACE",
+      "title": "Preface",
       "sections": [
         {
           "ref": "preface",
@@ -52,7 +52,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "I": {
-      "title": "ARTICLE I. NAME AND LOCATION",
+      "title": "Article I. Name and Location",
       "sections": [
         {
           "ref": "I.1",
@@ -82,7 +82,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "II": {
-      "title": "ARTICLE II. MEMBERS AND MEETINGS OF THE CORPORATION",
+      "title": "Article II. Members and Meetings of the Corporation",
       "sections": [
         {
           "ref": "II.1",
@@ -147,7 +147,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "III": {
-      "title": "ARTICLE III. BOARD OF DIRECTORS",
+      "title": "Article III. Board of Directors",
       "sections": [
         {
           "ref": "III.1",
@@ -222,7 +222,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "IV": {
-      "title": "ARTICLE IV. OFFICERS",
+      "title": "Article IV. Officers",
       "sections": [
         {
           "ref": "IV.1",
@@ -267,7 +267,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "V": {
-      "title": "ARTICLE V. THE PARTICULAR PERMANENT COMMITTEES",
+      "title": "Article V. The Particular Permanent Committees",
       "sections": [
         {
           "ref": "V.A",
@@ -384,7 +384,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "VI": {
-      "title": "ARTICLE VI. OTHER BOARDS AND AGENCIES",
+      "title": "Article VI. Other Boards and Agencies",
       "sections": [
         {
           "ref": "VI",
@@ -505,7 +505,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "VII": {
-      "title": "ARTICLE VII. FISCAL MATTERS",
+      "title": "Article VII. Fiscal Matters",
       "sections": [
         {
           "ref": "VII.1",
@@ -540,7 +540,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "VIII": {
-      "title": "ARTICLE VIII. ECCLESIASTICAL MATTERS",
+      "title": "Article VIII. Ecclesiastical Matters",
       "sections": [
         {
           "ref": "VIII.1",
@@ -555,7 +555,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "IX": {
-      "title": "ARTICLE IX. AMENDMENTS TO THE BYLAWS",
+      "title": "Article IX. Amendments to the Bylaws",
       "sections": [
         {
           "ref": "IX",
