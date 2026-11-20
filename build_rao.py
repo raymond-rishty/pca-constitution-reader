@@ -78,8 +78,12 @@ def build(source: str) -> dict:
                 current["blocks"].append(item)
         # Articles themselves are sometimes cited (e.g. "RAO 20").  They remain
         # addressable without duplicating every numbered provision in the reading view.
-        article_intro = prose or [["p", 0, f"Article {article}: {title}. See the numbered provisions below."]]
-        sections.insert(0, {"ref": article, "blocks": article_intro, "prose": True})
+        article_intro = {"ref": article, "prose": True}
+        if prose:
+            article_intro["blocks"] = prose
+        else:
+            article_intro["body"] = ""
+        sections.insert(0, article_intro)
         chapters[article] = {"title": title, "sections": sections}
         order.append(article)
 
