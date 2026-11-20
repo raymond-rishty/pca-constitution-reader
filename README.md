@@ -4,6 +4,8 @@ A personal study reader for the Presbyterian Church in America (PCA) constitutio
 
 The deployed reader is a single-page application. Its compact agent map is [`llms.txt`](llms.txt); this guide carries the longer usage and authority notes that do not belong in that index.
 
+The reader includes a searchable BCO subject index and supplementary PCA documents. To refresh these texts from their official sources, follow the [content pack instructions](docs/content-packs.md#official-pca-supplementary-texts).
+
 ## Scope and authority
 
 - The Westminster Confession and Catechisms are the American revision received by the PCA in 1788, presented with Scripture proof references and supporting verse text.
