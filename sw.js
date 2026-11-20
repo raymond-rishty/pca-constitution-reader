@@ -1,6 +1,6 @@
 /* PCA Constitution — service worker: offline-first app shell + runtime-cached fonts.
    Bump VERSION when shipping new content/markup to roll the cache. */
-const VERSION = 'pcacon-v57';
+const VERSION = 'pcacon-v58';
 const CORE = VERSION + '-core';
 const FONTS = VERSION + '-fonts';
 
@@ -24,8 +24,7 @@ const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
     const c = await caches.open(CORE);
-    // cache individually so one failure can't abort the whole install
-    await Promise.allSettled(SHELL.map(u => c.add(new Request(u, {cache: 'reload'}))));
+    await c.addAll(SHELL.map(u => new Request(u, {cache: 'reload'})));
     self.skipWaiting();
   })());
 });
