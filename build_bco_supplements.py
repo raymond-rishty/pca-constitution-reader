@@ -88,8 +88,8 @@ def build(doc, source):
                 continue
             item = block(row)
             if not sections or item[1] == 0:
-                slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
-                sections.append({"ref": slug, "blocks": [], "prose": True})
+                topic_id = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+                sections.append({"ref": topic_id, "blocks": [], "prose": True})
             item[-1] = html.escape(item[-1], quote=False)
             sections[-1]["blocks"].append(item)
     elif key == "omsjc":
