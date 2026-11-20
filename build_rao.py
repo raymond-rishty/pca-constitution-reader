@@ -34,6 +34,25 @@ def text(element) -> str:
     return re.sub(r"\s+", " ", element.text_content()).strip()
 
 
+def heading_title_case(heading: str) -> str:
+    words = heading.split()
+    minor_words = {"a", "an", "and", "as", "at", "by", "for", "in", "of", "on", "or", "out", "the", "to", "with"}
+    acronyms = {"BCO", "NAPARC", "OMSJC", "PCA", "RAO", "SJC"}
+    for index, word in enumerate(words):
+        bare = word.strip("().,;:")
+        if bare.upper() in acronyms:
+            words[index] = word.replace(bare, bare.upper())
+        elif index == 1 and words[0] == "Article" and re.fullmatch(r"[IVXLCDM]+", bare):
+            continue
+        elif word[0].isdigit():
+            continue
+        elif 0 < index < len(words) - 1 and word.lower() in minor_words and not words[index - 1].endswith("."):
+            words[index] = word.lower()
+        else:
+            words[index] = word.capitalize()
+    return " ".join(words)
+
+
 def block(element) -> list[str]:
     value = text(element)
     indent = 0
@@ -78,9 +97,13 @@ def build(source: str) -> dict:
                 current["blocks"].append(item)
         # Articles themselves are sometimes cited (e.g. "RAO 20").  They remain
         # addressable without duplicating every numbered provision in the reading view.
-        article_intro = prose or [["p", 0, f"Article {article}: {title}. See the numbered provisions below."]]
-        sections.insert(0, {"ref": article, "blocks": article_intro, "prose": True})
-        chapters[article] = {"title": title, "sections": sections}
+        article_intro = {"ref": article, "prose": True}
+        if prose:
+            article_intro["blocks"] = prose
+        else:
+            article_intro["body"] = ""
+        sections.insert(0, article_intro)
+        chapters[article] = {"title": heading_title_case(title), "sections": sections}
         order.append(article)
 
     assert order == [str(n) for n in range(1, 21)], f"expected RAO articles 1–20, got {order}"

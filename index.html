@@ -1538,7 +1538,9 @@ function showChapter(book, o){
   ch.provs.forEach(p=>{
     if(p.prose || !p.ref){
       const proseBody = p.blocks ? renderBlocks(p.blocks, '') : (p.body||'');
-      doc += `<div class="prov prose"${p.ref?` id="p-${p.ref}"`:''}><div class="body">${proseBody}</div></div>`;
+      const id = p.ref ? ` id="p-${p.ref}"` : '';
+      if(proseBody) doc += `<div class="prov prose"${id}><div class="body">${proseBody}</div></div>`;
+      else if(id) doc += `<div${id}></div>`;
       return;
     }  // prose (front/appendix); keep id if it has footnotes
     const d = dossierFor(p.ref), n = total(d);
