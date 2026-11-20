@@ -1,4 +1,10 @@
-/* BCO — personal use only (© PCA, do not publish). HTML base + 2025-verified. */
+/* BCO — personal use only (© PCA). English text verified against the 2026 edition. */
+window.BCO_ENGLISH_EDITION = {
+  "year": 2026,
+  "assembly": "53rd General Assembly",
+  "source": "https://www.pcaac.org/wp-content/uploads/2026/11/BCO_2026.pdf",
+  "sha256": "d4f8f1d17e33a85ee89220dbb297ee1aab02e51e5c52575f46e1187079828210"
+};
 window.BCO = {
 "pref-1": {
 "id": "pref-1",

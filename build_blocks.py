@@ -212,8 +212,8 @@ print("sections receiving blocks:", nblk)
 if '--write' in sys.argv:
     if drift:
         print("REFUSING TO WRITE: real drift present — vet first"); sys.exit(1)
-    with open(bcojs,"w") as f:
-        f.write("/* BCO — personal use only (© PCA, do not publish). HTML base + 2025-verified. */\n")
+    with open(bcojs,"w", encoding="utf-8") as f:
+        f.write("/* BCO — personal use only (© PCA). HTML extraction pending edition verification. */\n")
         f.write("window.BCO = " + json.dumps(bco, ensure_ascii=False, indent=0) + ";\n")
         f.write("window.BCO_ORDER = " + json.dumps(order) + ";\n")
     print("WROTE", bcojs)

@@ -1248,7 +1248,17 @@ function applyRoute(){
   else openTarget(book, pagedRoute(book, rest));
 }
 
-const EDITION_LINE = "Book of Church Order through the 52nd General Assembly (2025) · Westminster Standards in the American revision (received 1788)";
+const ENGLISH_BCO_EDITION = window.BCO_ENGLISH_EDITION;
+
+function englishBcoEditionLine(){
+  return ENGLISH_BCO_EDITION
+    ? `English Book of Church Order through the ${ENGLISH_BCO_EDITION.assembly} (${ENGLISH_BCO_EDITION.year})`
+    : 'English Book of Church Order';
+}
+
+function activeBcoEditionLine(){
+  return BCO_EDITION.lang==='en' ? englishBcoEditionLine() : BCO_EDITION.label;
+}
 
 function showAbout(){
   setView("about");
@@ -1260,7 +1270,8 @@ function showAbout(){
 
     <h2 class="about-h">Edition &amp; currency</h2>
     <ul class="about-list">
-      <li><b>Book of Church Order</b> — current through the <b>52nd General Assembly (2025)</b>, including the Preface, Preliminary Principles, and Appendices.</li>
+      <li><b>${englishBcoEditionLine()}</b>, including the Preface, Preliminary Principles, and Appendices.${ENGLISH_BCO_EDITION ? ` Verified against the <a href="${ENGLISH_BCO_EDITION.source}">official ${ENGLISH_BCO_EDITION.year} edition (PDF)</a>.` : ''}</li>
+      ${bcoTranslations().map(pack=>`<li><b>${pack.component.name||pack.label}</b>. ${pack.notice||''}</li>`).join('')}
       <li><b>Westminster Confession &amp; Catechisms</b> — the American revision, as received in <b>1788</b> (the text held by the PCA), presented with the Scripture proof texts.</li>
     </ul>
 
@@ -1306,7 +1317,7 @@ function showHome(){
     <button class="home-jump" id="homeJump"><span><span class="mag">⌕</span>&nbsp; Search the full Constitution — try “chief end,” presbytery, or BCO 24-1…</span></button>
     <div class="hentries">${entry('wcf')}${entry('wlc')}${entry('wsc')}${entry('bco')}</div>
     ${addedSection}
-    <p class="home-edition">${EDITION_LINE} · <a class="home-about" data-about>About &amp; sources</a></p>
+    <p class="home-edition">${activeBcoEditionLine()} · Westminster Standards in the American revision (received 1788) · <a class="home-about" data-about>About &amp; sources</a></p>
   </div>`;
   window.scrollTo(0,0);
 }
@@ -2259,7 +2270,15 @@ async function shareApp(){
 }
 
 /* ── PWA: register the service worker (installable + full offline) ── */
-if('serviceWorker' in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
+if('serviceWorker' in navigator){
+  const previousWorker=navigator.serviceWorker.controller;
+  if(previousWorker){
+    navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+      if(navigator.serviceWorker.controller!==previousWorker) window.location.reload();
+    }, {once:true});
+  }
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
 </script>
 </body>
 </html>
