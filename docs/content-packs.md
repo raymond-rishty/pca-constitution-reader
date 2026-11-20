@@ -310,6 +310,6 @@ The schema is intentionally stricter than the importer: it requires the fields a
 
 ## Official PCA supplementary texts
 
-The reader loads the RAO, OMSJC, Certificate of Incorporation, Corporate Bylaws, NAPARC agreements, and BCO subject index from `content/bco-supplements.js`. Each document’s contents page shows its edition and official source link.
+The reader loads each supplementary document from its own pack in `content/`: `rao.js`, `omsjc.js`, `incorporation.js`, `corporate-bylaws.js`, `naparc.js`, and `bco-subject-index.js`. Each document’s contents page shows its edition and official source link.
 
-To refresh the bundled texts, run `python build_bco_supplements.py` with Python, lxml, and curl, then commit the updated `content/bco-supplements.js` and bump the cache version in `sw.js`.
+To refresh the bundled texts, run `python build_bco_supplements.py` with Python, lxml, and curl, then commit the updated pack files and bump the cache version in `sw.js`.
