@@ -57,9 +57,8 @@ window.BUNDLED_PACKS.push({
           "ref": "Comity.1",
           "blocks": [
             [
-              "i",
-              1,
-              "1.",
+              "p",
+              0,
               "We will be sensitive to the presence of existing churches and missions ministries of other NAPARC churches and will refrain from enlisting members and will take care in receiving members of these existing ministries."
             ]
           ]
@@ -68,9 +67,8 @@ window.BUNDLED_PACKS.push({
           "ref": "Comity.2",
           "blocks": [
             [
-              "i",
-              1,
-              "2.",
+              "p",
+              0,
               "We will communicate with the equivalent or appropriate agency (denominational missions committee or board, Presbytery missions or church extension committee, or session) before initiating church planting activities in a community where NAPARC churches or missions exist."
             ]
           ]
@@ -79,9 +77,8 @@ window.BUNDLED_PACKS.push({
           "ref": "Comity.3",
           "blocks": [
             [
-              "i",
-              1,
-              "3.",
+              "p",
+              0,
               "We will provide information on at least an annual basis describing progress in our ministries and future plans."
             ]
           ]
@@ -90,9 +87,8 @@ window.BUNDLED_PACKS.push({
           "ref": "Comity.4",
           "blocks": [
             [
-              "i",
-              1,
-              "4.",
+              "p",
+              0,
               "We will encourage our regional home missions leadership to develop good working relationships."
             ],
             [
@@ -122,9 +118,8 @@ window.BUNDLED_PACKS.push({
           "ref": "Transfer.1",
           "blocks": [
             [
-              "i",
-              1,
-              "1.",
+              "p",
+              0,
               "Regular Transfer of Membership"
             ],
             [
@@ -138,9 +133,8 @@ window.BUNDLED_PACKS.push({
           "ref": "Transfer.2",
           "blocks": [
             [
-              "i",
-              1,
-              "2.",
+              "p",
+              0,
               "Transfer with Irregularities"
             ],
             [
@@ -173,9 +167,8 @@ window.BUNDLED_PACKS.push({
           "ref": "Transfer.3",
           "blocks": [
             [
-              "i",
-              1,
-              "3.",
+              "p",
+              0,
               "Recourse and Appeal"
             ],
             [
@@ -189,9 +182,8 @@ window.BUNDLED_PACKS.push({
           "ref": "Transfer.4",
           "blocks": [
             [
-              "i",
-              1,
-              "4.",
+              "p",
+              0,
               "Congregational Transfer"
             ],
             [

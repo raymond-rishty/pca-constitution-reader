@@ -35,8 +35,8 @@ def chapter(title, rows, marker, prefix=""):
             sections.append({"ref": prefix + match[1], "blocks": []})
             # Use the reader's reference label for the printed section number.
             # Retain extra source wording such as "Section" and ordinal headings.
-            if match.start(1) == 0 and prefix == "" and match[1][0].isdigit():
-                item = ["p", item[1], value[match.end():].lstrip()]
+            if match.start(1) == 0 and match[1][0].isdigit() and prefix in ("", "Comity.", "Transfer."):
+                item = ["p", 0 if prefix else item[1], value[match.end():].lstrip()]
         elif not sections:
             sections.append({"ref": prefix.rstrip(".") or title, "prose": True, "blocks": []})
         sections[-1]["blocks"].append(item)
