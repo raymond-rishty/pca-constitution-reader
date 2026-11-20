@@ -134,6 +134,12 @@
   .prov .n:hover{border-bottom-color:var(--accent)}
   .prov .body .lead{margin:0}
   .prov .body .bpara{margin-top:.6em; margin-bottom:.6em}
+  .appendix-subitems,.appendix-tax ul{padding-inline-start:1.55em}
+  .appendix-subitems{margin:.4em 0 0}
+  .appendix-tax h2,.appendix-tax h3{margin:0; font-size:inherit}
+  .appendix-tax h2{margin-block-end:.45em}
+  .appendix-tax ul{margin:.2em 0 .65em}
+  .appendix-tax ul:last-child{margin-block-end:0}
   .prov .body .fnref{font-size:.62em; font-weight:600; color:var(--accent); vertical-align:super; padding:0 1px; cursor:pointer}
   .prov .body .fn{display:block; font-family:var(--sans); font-size:.8rem; line-height:1.55; color:var(--muted); border-top:1px solid var(--line); margin-top:.8em; padding-top:.5em}
   .prov .body .fn sup{color:var(--accent); font-weight:600; padding-right:2px}
@@ -1014,11 +1020,16 @@ function buildChapter(book, o){
     const subtitle = isChapter ? bc.title : "";
     if(bc.vacated) return {kicker, title, subtitle, railSub:[], provs:[{ref:null, body:BCO_EDITION.component.vacatedText||"This chapter has been vacated."}]};
     const provs = (bc.paras||[]).map(p=>({ref:null, body:p}))
-      .concat((bc.sections||[]).map(s=>Object.assign({ref:s.ref, body:s.body, blocks:s.blocks}, bc.part==='dow' ? {con:!!s.binding} : {})));
+      .concat((bc.sections||[]).flatMap(s=>{
+        const provision={ref:s.ref, body:s.body, blocks:s.blocks, con:bc.part==='dow'&&!!s.binding};
+        return s.heading ? [{ref:null,body:`<b>${s.heading}</b>`}, provision] : [provision];
+      }));
     if(o.ch==='appH'){
       const figure=BCO_APPENDIX_H_FIGURES[BCO_EDITION.lang]||BCO_APPENDIX_H_FIGURES.en;
       const image=`<img class="pack-figure" src="${figure.src}" alt="${figure.alt}">`;
-      if(provs[0]?.blocks?.length){
+      if(BCO_EDITION.lang==='en'){
+        provs.push({ref:null,body:image});
+      } else if(provs[0]?.blocks?.length){
         const [opening,...rest]=provs[0].blocks;
         provs[0]=Object.assign({},provs[0],{blocks:[opening,['p',0,image],...rest]});
       } else {
@@ -1243,7 +1254,17 @@ function applyRoute(){
   else openTarget(book, pagedRoute(book, rest));
 }
 
-const EDITION_LINE = "Book of Church Order through the 52nd General Assembly (2025) · Westminster Standards in the American revision (received 1788)";
+const ENGLISH_BCO_EDITION = window.BCO_ENGLISH_EDITION;
+
+function englishBcoEditionLine(){
+  return ENGLISH_BCO_EDITION
+    ? `English Book of Church Order through the ${ENGLISH_BCO_EDITION.assembly} (${ENGLISH_BCO_EDITION.year})`
+    : 'English Book of Church Order';
+}
+
+function activeBcoEditionLine(){
+  return BCO_EDITION.lang==='en' ? englishBcoEditionLine() : BCO_EDITION.label;
+}
 
 function showAbout(){
   setView("about");
@@ -1255,7 +1276,8 @@ function showAbout(){
 
     <h2 class="about-h">Edition &amp; currency</h2>
     <ul class="about-list">
-      <li><b>Book of Church Order</b> — current through the <b>52nd General Assembly (2025)</b>, including the Preface, Preliminary Principles, and Appendices.</li>
+      <li><b>${englishBcoEditionLine()}</b>, including the Preface, Preliminary Principles, and Appendices.${ENGLISH_BCO_EDITION ? ` Verified against the <a href="${ENGLISH_BCO_EDITION.source}">official ${ENGLISH_BCO_EDITION.year} edition (PDF)</a>.` : ''}</li>
+      ${bcoTranslations().map(pack=>`<li><b>${pack.component.name||pack.label}</b>. ${pack.notice||''}</li>`).join('')}
       <li><b>Westminster Confession &amp; Catechisms</b> — the American revision, as received in <b>1788</b> (the text held by the PCA), presented with the Scripture proof texts.</li>
     </ul>
 
@@ -1301,7 +1323,7 @@ function showHome(){
     <button class="home-jump" id="homeJump"><span><span class="mag">⌕</span>&nbsp; Search the full Constitution — try “chief end,” presbytery, or BCO 24-1…</span></button>
     <div class="hentries">${entry('wcf')}${entry('wlc')}${entry('wsc')}${entry('bco')}</div>
     ${addedSection}
-    <p class="home-edition">${EDITION_LINE} · <a class="home-about" data-about>About &amp; sources</a></p>
+    <p class="home-edition">${activeBcoEditionLine()} · Westminster Standards in the American revision (received 1788) · <a class="home-about" data-about>About &amp; sources</a></p>
   </div>`;
   window.scrollTo(0,0);
 }
@@ -1493,8 +1515,8 @@ function showChapter(book, o){
   let gut = '';
   ch.provs.forEach(p=>{
     if(p.prose || !p.ref){
-      const proseBody = p.blocks ? `<div class="body">${renderBlocks(p.blocks, '')}</div>` : `<span class="body">${p.body||''}</span>`;
-      doc += `<div class="prov prose"${p.ref?` id="p-${p.ref}"`:''}>${proseBody}</div>`;
+      const proseBody = p.blocks ? renderBlocks(p.blocks, '') : (p.body||'');
+      doc += `<div class="prov prose"${p.ref?` id="p-${p.ref}"`:''}><div class="body">${proseBody}</div></div>`;
       return;
     }  // prose (front/appendix); keep id if it has footnotes
     const d = dossierFor(p.ref), n = total(d);
@@ -2254,7 +2276,15 @@ async function shareApp(){
 }
 
 /* ── PWA: register the service worker (installable + full offline) ── */
-if('serviceWorker' in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
+if('serviceWorker' in navigator){
+  const previousWorker=navigator.serviceWorker.controller;
+  if(previousWorker){
+    navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+      if(navigator.serviceWorker.controller!==previousWorker) window.location.reload();
+    }, {once:true});
+  }
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
 </script>
 </body>
 </html>

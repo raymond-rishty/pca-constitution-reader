@@ -1,11 +1,17 @@
-/* BCO — personal use only (© PCA, do not publish). HTML base + 2025-verified. */
+/* BCO — personal use only (© PCA). English text verified against the 2026 edition. */
+window.BCO_ENGLISH_EDITION = {
+  "year": 2026,
+  "assembly": "53rd General Assembly",
+  "source": "https://www.pcaac.org/wp-content/uploads/2026/11/BCO_2026.pdf",
+  "sha256": "d4f8f1d17e33a85ee89220dbb297ee1aab02e51e5c52575f46e1187079828210"
+};
 window.BCO = {
 "pref-1": {
 "id": "pref-1",
 "part": "front",
 "title": "Preface",
 "paras": [
-"<b>Includes all amendments approved up to and including the 53rd General Assembly held in Louisville, Kentucky, June 22-26, 2026</b> <b>I. THE KING AND HEAD OF THE CHURCH</b>",
+"<b>I. THE KING AND HEAD OF THE CHURCH</b>",
 "Jesus Christ, upon whose shoulders the government rests, whose name is called Wonderful, Counselor, the Mighty God, the Everlasting Father, the Prince of Peace; of the increase of whose government and peace there shall be no end; who sits upon the throne of David, and upon His kingdom to order it and to establish it with judgment and justice from henceforth, even forever (Isaiah 9:6-7); having all power given unto Him in heaven and in earth by the Father, who raised Him from the dead and set Him at His own right hand, far above all principality and power, and might, and dominion, and every name that is named, not only in this world, but also in that which is to come, and has put all things under His feet, and gave Him to be the Head over all things to the Church, which is His body, the fullness of Him that filleth all in all (Ephesians 1:20-23); He, being ascended up far above all heavens, that He might fill all things, received gifts for His Church, and gave all offices necessary for the edification of His Church and the perfecting of His saints (Ephesians 4:10-13).",
 "Jesus, the Mediator, the sole Priest, Prophet, King, Saviour, and Head of the Church, contains in Himself, by way of eminency, all the offices in His Church, and has many of their names attributed to Him in the Scriptures. He is Apostle, Teacher, Pastor, Minister, Bishop and the only Lawgiver in Zion.",
 "It belongs to His Majesty from His throne of glory to rule and teach the Church through His Word and Spirit by the ministry of men; thus mediately exercising His own authority and enforcing His own laws, unto the edification and establishment of His Kingdom.",
@@ -18,6 +24,7 @@ window.BCO = {
 "part": "front",
 "title": "Preliminary Principles",
 "paras": [
+"<b>II. PRELIMINARY PRINCIPLES</b>",
 "The Presbyterian Church in America, in setting forth the form of government founded upon and agreeable to the Word of God, reiterates the following great principles which have governed the formation of the plan:"
 ],
 "sections": [
@@ -60,8 +67,8 @@ window.BCO = {
 "part": "front",
 "title": "The Constitution Defined",
 "paras": [
-"The Constitution of the Presbyterian Church in America, which is subject to and subordinate to the Scriptures of the Old and New Testaments, the inerrant Word Of God, consists of its doctrinal standards set forth in the <i>Westminster Confession of Faith</i>, together with the <i>Larger and Shorter Catechisms</i>, and the <i>Book of Church Order</i>, comprising the Form of Government, the Rules of Discipline and the Directory for Worship; all as adopted by the Church.",
-"Copyright © 2026 by the Office of the Stated Clerk of the General Assembly of the Presbyterian Church in America All rights reserved"
+"<b>III. THE CONSTITUTION DEFINED</b>",
+"The Constitution of the Presbyterian Church in America, which is subject to and subordinate to the Scriptures of the Old and New Testaments, the inerrant Word Of God, consists of its doctrinal standards set forth in the <i>Westminster Confession of Faith</i>, together with the <i>Larger and Shorter Catechisms</i>, and the <i>Book of Church Order</i>, comprising the Form of Government, the Rules of Discipline and the Directory for Worship; all as adopted by the Church."
 ]
 },
 "1": {
@@ -182,7 +189,8 @@ window.BCO = {
 "sections": [
 {
 "ref": "5-1",
-"body": "A mission church may be properly described in the same manner as the particular church is described in <i>BCO</i> 4-1. It is distinguished from a particular church in that it has no permanent governing body, and thus must be governed or supervised by others. However, its goal is to mature and be organized as a particular church as soon as this can be done decently and in good order."
+"body": "A mission church may be properly described in the same manner as the particular church is described in <i>BCO</i> 4-1. It is distinguished from a particular church in that it has no permanent governing body, and thus must be governed or supervised by others. However, its goal is to mature and be organized as a particular church as soon as this can be done decently and in good order.",
+"heading": "A. Mission Churches"
 },
 {
 "ref": "5-2",
@@ -331,17 +339,12 @@ window.BCO = {
 },
 {
 "ref": "5-8",
-"body": "It is the intention of the Presbyterian Church in America that mission churches enjoy the same status as particular churches in relation to civil government. <b>B. The Organization of a Particular Church</b>",
+"body": "It is the intention of the Presbyterian Church in America that mission churches enjoy the same status as particular churches in relation to civil government.",
 "blocks": [
 [
 "p",
 0,
 "It is the intention of the Presbyterian Church in America that mission churches enjoy the same status as particular churches in relation to civil government."
-],
-[
-"p",
-0,
-"<b>B. The Organization of a Particular Church</b>"
 ]
 ]
 },
@@ -454,11 +457,12 @@ window.BCO = {
 2,
 "<b>I now pronounce and declare that you are constituted a church according to the Word of God and the faith and order of the Presbyterian Church in America. In the name of the Father and of the Son and of the Holy Spirit. Amen. </b>"
 ]
-]
+],
+"heading": "B. The Organization of a Particular Church"
 },
 {
 "ref": "5-10",
-"body": "Upon organization, the newly elected Session should meet as soon as is practicable to elect a stated clerk and formulate a budget. If there is no pastor, the Session may elect as moderator one of their own number or any teaching elder of the Presbytery with Presbytery's approval. Further, if there is no pastor, action shall be taken to secure, as soon as practicable, the regular administration of Word and Sacraments."
+"body": "Upon organization, the newly elected Session should meet as soon as is practicable to elect a stated clerk and formulate a budget. If there is no pastor, the session may elect as moderator one of their own number or any teaching elder of the Presbytery with Presbytery's approval. Further, if there is no pastor, action shall be taken to secure, as soon as practicable, the regular administration of Word and Sacraments."
 }
 ],
 "vacated": false
@@ -488,7 +492,7 @@ window.BCO = {
 },
 "7": {
 "part": "fog",
-"title": "Church Officers—General Classification",
+"title": "Church Officers — General Classification",
 "sections": [
 {
 "ref": "7-1",
@@ -711,7 +715,7 @@ window.BCO = {
 },
 {
 "ref": "11-4",
-"body": "For the orderly and efficient dispatch of ecclesiastical business, it is necessary that the sphere of action of each court should be distinctly defined. The Session exercises jurisdiction over a single church, the Presbytery over what is common to the ministers, Sessions, and churches within a prescribed district, and the General Assembly over such matters as concern the whole Church. The jurisdiction of these courts is limited by the express provisions of the Constitution. Every court has the right to resolve questions of doctrine and discipline seriously and reasonably proposed, and in general to maintain truth and righteousness, condemning erroneous opinions and practices which tend to the injury of the peace, purity, or progress of the Church. Although each court exercises exclusive original jurisdiction over all matters especially belonging to it, the lower courts are subject to the review and control of the higher courts, in regular gradation. These courts are not separate and independent tribunals, but they have a mutual relation, and every act of jurisdiction is the act of the whole Church performed by it through the appropriate organ",
+"body": "For the orderly and efficient dispatch of ecclesiastical business, it is necessary that the sphere of action of each court should be distinctly defined. The Session exercises jurisdiction over a single church, the Presbytery over what is common to the ministers, Sessions, and churches within a prescribed district, and the General Assembly over such matters as concern the whole Church. The jurisdiction of these courts is limited by the express provisions of the Constitution. Every court has the right to resolve questions of doctrine and discipline seriously and reasonably proposed, and in general to maintain truth and righteousness, condemning erroneous opinions and practices which tend to the injury of the peace, purity, or progress of the Church. Although each court exercises exclusive original jurisdiction over all matters especially belonging to it, the lower courts are subject to the review and control of the higher courts, in regular gradation. These courts are not separate and independent tribunals, but they have a mutual relation, and every act of jurisdiction is the act of the whole Church performed by it through the appropriate organ.",
 "blocks": [
 [
 "p",
@@ -721,7 +725,7 @@ window.BCO = {
 [
 "p",
 0,
-"Every court has the right to resolve questions of doctrine and discipline seriously and reasonably proposed, and in general to maintain truth and righteousness, condemning erroneous opinions and practices which tend to the injury of the peace, purity, or progress of the Church. Although each court exercises exclusive original jurisdiction over all matters especially belonging to it, the lower courts are subject to the review and control of the higher courts, in regular gradation. These courts are not separate and independent tribunals, but they have a mutual relation, and every act of jurisdiction is the act of the whole Church performed by it through the appropriate organ"
+"Every court has the right to resolve questions of doctrine and discipline seriously and reasonably proposed, and in general to maintain truth and righteousness, condemning erroneous opinions and practices which tend to the injury of the peace, purity, or progress of the Church. Although each court exercises exclusive original jurisdiction over all matters especially belonging to it, the lower courts are subject to the review and control of the higher courts, in regular gradation. These courts are not separate and independent tribunals, but they have a mutual relation, and every act of jurisdiction is the act of the whole Church performed by it through the appropriate organ."
 ]
 ]
 }
@@ -841,7 +845,7 @@ window.BCO = {
 },
 {
 "ref": "13-2",
-"body": "A minister shall be required to hold his membership in the Presbytery within whose geographical bounds he resides, unless there are reasons which are satisfactory to his Presbytery why he should not do so. When a minister labors outside the geographical bounds of, or in a work not under the jurisdiction of his Presbytery, at home or abroad, it shall be only with the full concurrence of and under circumstances agreeable to his Presbytery, and to the Presbytery within whose geographical bounds he labors, if one exists. When a minister shall continue on the rolls of his Presbytery without a call to a particular work for a prolonged period, not exceeding three years, the procedure as set forth in <i>BCO</i> 34-10 shall be followed. A minister without call shall make or file a report to his Presbytery at least once each year. <i>[<b>EDITORIAL COMMENT: </b>The provision for a minister to hold his membership in the presbytery within whose geographical bounds he resides does not apply to the non-geographical Korean Language Presbyteries as long as the General Assembly mandates their existence.]</i>",
+"body": "A minister shall be required to hold his membership in the Presbytery within whose geographical bounds he resides, unless there are reasons which are satisfactory to his Presbytery why he should not do so. When a minister labors outside the geographical bounds of, or in a work not under the jurisdiction of his Presbytery, at home or abroad, it shall be only with the full concurrence of and under circumstances agreeable to his Presbytery, and to the Presbytery within whose geographical bounds he labors, if one exists. When a minister shall continue on the rolls of his Presbytery without a call to a particular work for a prolonged period, not exceeding three years, the procedure as set forth in <i>BCO</i> 34-10 shall be followed. A minister without call shall make or file a report to his Presbytery at least once each year. <i>[<b>EDITORIAL COMMENT: </b>The provision for a minister to hold his membership in the Presbytery within whose geographical bounds he resides does not apply to the non-geographical Korean Language Presbyteries as long as the General Assembly mandates their existence.]</i>",
 "blocks": [
 [
 "p",
@@ -851,7 +855,7 @@ window.BCO = {
 [
 "p",
 0,
-"<i>[<b>EDITORIAL COMMENT: </b>The provision for a minister to hold his membership in the presbytery within whose geographical bounds he resides does not apply to the non-geographical Korean Language Presbyteries as long as the General Assembly mandates their existence.]</i>"
+"<i>[<b>EDITORIAL COMMENT: </b>The provision for a minister to hold his membership in the Presbytery within whose geographical bounds he resides does not apply to the non-geographical Korean Language Presbyteries as long as the General Assembly mandates their existence.]</i>"
 ]
 ]
 },
@@ -930,17 +934,12 @@ window.BCO = {
 },
 {
 "ref": "13-9",
-"body": "The Presbytery has power to receive and issue* appeals, complaints, and references brought before it in an orderly manner. In cases in which the Session cannot exercise its authority, it shall have power to assume original jurisdiction. It has power: <i>* [<b>Editor's note:</b> \"Issue\" means \"settling the issue of the case.\"]</i> a. To receive under its care candidates for the ministry; to examine and license candidates for the holy ministry; to receive, dismiss, ordain, install, remove and judge ministers; b. To review the records of church Sessions, redress whatever they may have done contrary to order and take effectual care that they observe the Constitution of the Church; c. To establish the pastoral relation and to dissolve it at the request of one or both of the parties, or where the interest of religion imperatively demands it; d. To set apart evangelists to their proper work; to require ministers to devote themselves diligently to their sacred calling and to censure the delinquent; e. To see that the lawful injunctions of the higher courts are obeyed; f. To condemn erroneous opinions which injure the purity or peace of the Church; to visit churches for the purpose of inquiring into and redressing the evils that may have arisen in them; to unite or divide churches, at the request of the members thereof; to form and receive new churches; to take special oversight of churches without pastors; to dissolve churches; to dismiss churches with their consent; g. To devise measures for the enlargement of the Church within its bounds; in general, to order whatever pertains to the spiritual welfare of the churches under its care; h. And, finally, to propose to the Assembly such measures as may be of common advantage to the Church at large.",
+"body": "The Presbytery has power to receive and issue* appeals, complaints, and references brought before it in an orderly manner. In cases in which the Session cannot exercise its authority, it shall have power to assume original jurisdiction. It has power: a. To receive under its care candidates for the ministry; to examine and license candidates for the holy ministry; to receive, dismiss, ordain, install, remove and judge ministers; b. To review the records of church Sessions, redress whatever they may have done contrary to order and take effectual care that they observe the Constitution of the Church; c. To establish the pastoral relation and to dissolve it at the request of one or both of the parties, or where the interest of religion imperatively demands it; d. To set apart evangelists to their proper work; to require ministers to devote themselves diligently to their sacred calling and to censure the delinquent; e. To see that the lawful injunctions of the higher courts are obeyed; f. To condemn erroneous opinions which injure the purity or peace of the Church; to visit churches for the purpose of inquiring into and redressing the evils that may have arisen in them; to unite or divide churches, at the request of the members thereof; to form and receive new churches; to take special oversight of churches without pastors; to dissolve churches; to dismiss churches with their consent; g. To devise measures for the enlargement of the Church within its bounds; in general, to order whatever pertains to the spiritual welfare of the churches under its care; h. And, finally, to propose to the Assembly such measures as may be of common advantage to the Church at large. <i>* Editor's note: \"Issue\" means \"settling the issue of the case.\"</i>",
 "blocks": [
 [
 "p",
 0,
 "The Presbytery has power to receive and issue* appeals, complaints, and references brought before it in an orderly manner. In cases in which the Session cannot exercise its authority, it shall have power to assume original jurisdiction. It has power:"
-],
-[
-"p",
-0,
-"<i>* [<b>Editor's note:</b> \"Issue\" means \"settling the issue of the case.\"]</i>"
 ],
 [
 "i",
@@ -989,6 +988,11 @@ window.BCO = {
 1,
 "h.",
 "And, finally, to propose to the Assembly such measures as may be of common advantage to the Church at large."
+],
+[
+"p",
+0,
+"<i>* Editor's note: \"Issue\" means \"settling the issue of the case.\"</i>"
 ]
 ]
 },
@@ -1329,7 +1333,7 @@ window.BCO = {
 },
 {
 "ref": "14-6",
-"body": "The General Assembly shall have power: a. To receive and issue* all appeals, references, and complaints regularly brought before it from the lower courts; to bear testimony against error in doctrine and immorality in practice, injuriously affecting the Church; to decide in all controversies respecting doctrine and discipline; <i>* [<b>Editor's note:</b> \"Issue\" means \"settling the issue of the case\".]</i> b. To give its advice and instruction, in conformity with the Constitution, in all cases submitted to it; c. To review the records of the Presbyteries, to take care that the lower courts observe the Constitution; to redress whatever they may have done contrary to order; d. To devise measures for promoting the prosperity and enlargement of the Church; e. To erect new Presbyteries, and unite and divide those which were erected with their consent; f. To institute and superintend the agencies necessary in the general work of evangelization; to appoint ministers of such labors as fall under its jurisdiction; g. To suppress schismatical contentions and disputations, according to the rules provided therefor; h. To receive under its jurisdiction, with the consent of three-fourths (3/4) of the Presbyteries, other ecclesiastical bodies whose organization is conformed to the doctrine and order of this Church; to authorize Presbyteries to exercise similar power in receiving bodies suited to become constituents of those courts, and lying within their geographical bounds respectively; i. To superintend the affairs of the whole Church; j. To correspond with other churches; to unite with other ecclesiastical bodies whose organization is conformed to the doctrines and order of this Church, such union to be effected by a mode of procedure defined in <i>BCO</i> 26; and k. In general to recommend measures for the promotion of charity, truth and holiness through all the churches under its care.",
+"body": "The General Assembly shall have power: a. To receive and issue* all appeals, references, and complaints regularly brought before it from the lower courts; to bear testimony against error in doctrine and immorality in practice, injuriously affecting the Church; to decide in all controversies respecting doctrine and discipline; b. To give its advice and instruction, in conformity with the Constitution, in all cases submitted to it; c. To review the records of the Presbyteries, to take care that the lower courts observe the Constitution; to redress whatever they may have done contrary to order; d. To devise measures for promoting the prosperity and enlargement of the Church; e. To erect new Presbyteries, and unite and divide those which were erected with their consent; f. To institute and superintend the agencies necessary in the general work of evangelization; to appoint ministers of such labors as fall under its jurisdiction; g. To suppress schismatical contentions and disputations, according to the rules provided therefor; h. To receive under its jurisdiction, with the consent of three-fourths (3/4) of the Presbyteries, other ecclesiastical bodies whose organization is conformed to the doctrine and order of this Church; to authorize Presbyteries to exercise similar power in receiving bodies suited to become constituents of those courts, and lying within their geographical bounds respectively; i. To superintend the affairs of the whole Church; j. To correspond with other churches; to unite with other ecclesiastical bodies whose organization is conformed to the doctrines and order of this Church, such union to be effected by a mode of procedure defined in <i>BCO</i> 26; and k. In general to recommend measures for the promotion of charity, truth and holiness through all the churches under its care. <i>* Editor's note: \"Issue\" means \"settling the issue of the case\".</i>",
 "blocks": [
 [
 "p",
@@ -1341,11 +1345,6 @@ window.BCO = {
 1,
 "a.",
 "To receive and issue* all appeals, references, and complaints regularly brought before it from the lower courts; to bear testimony against error in doctrine and immorality in practice, injuriously affecting the Church; to decide in all controversies respecting doctrine and discipline;"
-],
-[
-"p",
-1,
-"<i>* [<b>Editor's note:</b> \"Issue\" means \"settling the issue of the case\".]</i>"
 ],
 [
 "i",
@@ -1406,6 +1405,11 @@ window.BCO = {
 1,
 "k.",
 "In general to recommend measures for the promotion of charity, truth and holiness through all the churches under its care."
+],
+[
+"p",
+0,
+"<i>* Editor's note: \"Issue\" means \"settling the issue of the case\".</i>"
 ]
 ]
 },
@@ -1471,7 +1475,7 @@ window.BCO = {
 },
 {
 "ref": "15-5",
-"body": "a. In the cases committed to it, the Standing Judicial Commission shall have the judicial powers and be governed by the judicial procedures of the General Assembly. The decision of the Standing Judicial Commission shall be the final decision of the General Assembly except as set forth below, to which there may be no complaint or appeal. Members of the Standing Judicial Commission may file concurring or dissenting opinions, or a minority report as set forth in (c) below. The General Assembly may direct the Standing Judicial Commission to retry a case if upon the review of its minutes exceptions are taken with respect to that case. b. In each case the Standing Judicial Commission shall issue a summary of the facts, a statement of the issues, its judgment and its reasoning, together with any concurring or dissenting opinions, all of which shall be entered on the minutes of the General Assembly and shall be reported by the Stated Clerk to the next General Assembly. The judgment shall be effective from the time of its announcement to the parties. c.(1) If, within twenty-four (24) hours of the time of adjournment of a Standing Judicial Commission meeting at which a final decision was rendered in a case, at least one-third (1/3) of the voting members of the Standing Judicial Commission file written notice of their intention to file a minority decision with the Stated Clerk of the General Assembly, and within twenty (20) days from the adjournment do file such a minority decision, such minority decision shall be considered a minority report and shall be referred, with the report of the Standing Judicial Commission, to the General Assembly. In each instance \"file\" shall be understood as defined by the <i>Operating Manual for Standing Judicial Commission</i>. (2) No such reference* from the Standing Judicial Commission shall be considered by the General Assembly unless the report of the Standing Judicial Commission and the minority report have been mailed to the clerk of Session of each church at least thirty (30) days prior to the meeting of the General Assembly. (3) The Assembly shall act upon such a reference* from the Standing Judicial Commission, in each case without question, discussion, debate, or amendment, as follows: *NOTE: It was the opinion of the 26th General Assembly that \"reference\" is NOT to be understood as the technical term \"reference\" in <i>BCO</i> 41-1. (a) The Standing Judicial Commission shall have 30 minutes to present its decision to the Assembly. (b) The minority shall have 30 minutes to present its decision to the Assembly. (c) The Standing Judicial Commission shall have 10 minutes to reply to the minority report. (d) The decision of the minority shall be proposed and the General Assembly shall, without question, discussion, debate, or amendment approve or disapprove of the minority report. (e) If the General Assembly disapproves the minority report, the General Assembly shall take up the decision of the Standing Judicial Commission and without question, discussion, debate, or amendment, approve or disapprove of the decision of the Standing Judicial Commission. (4) If the General Assembly approves of a proposed decision, it shall be the decision of the General Assembly, and printed in its minutes. There may be no complaint or appeal from such a final decision of the General Assembly. If the General Assembly finally disapproves of both proposed decisions, it must set the case for hearing before the General Assembly or a special commission appointed by it, and in either instance the case shall be tried on the record as delivered to the Stated Clerk. Any such special commission shall then proceed to consider the case and shall report its decision, in like manner, to the General Assembly for its approval or disapproval. In any event, the full record of the case, including written testimony of witnesses, all documents, exhibits and papers shall be delivered to the Stated Clerk for permanent preservation.",
+"body": "a. In the cases committed to it, the Standing Judicial Commission shall have the judicial powers and be governed by the judicial procedures of the General Assembly. The decision of the Standing Judicial Commission shall be the final decision of the General Assembly except as set forth below, to which there may be no complaint or appeal. Members of the Standing Judicial Commission may file concurring or dissenting opinions, or a minority report as set forth in (c) below. The General Assembly may direct the Standing Judicial Commission to retry a case if upon the review of its minutes exceptions are taken with respect to that case. b. In each case the Standing Judicial Commission shall issue a summary of the facts, a statement of the issues, its judgment and its reasoning, together with any concurring or dissenting opinions, all of which shall be entered on the minutes of the General Assembly and shall be reported by the Stated Clerk to the next General Assembly. The judgment shall be effective from the time of its announcement to the parties. c. (1) If, within twenty-four (24) hours of the time of adjournment of a Standing Judicial Commission meeting at which a final decision was rendered in a case, at least one-third (1/3) of the voting members of the Standing Judicial Commission file written notice of their intention to file a minority decision with the Stated Clerk of the General Assembly, and within twenty (20) days from the adjournment do file such a minority decision, such minority decision shall be considered a minority report and shall be referred, with the report of the Standing Judicial Commission, to the General Assembly. In each instance \"file\" shall be understood as defined by the <i>Operating Manual for Standing Judicial Commission</i>. (2) No such reference* from the Standing Judicial Commission shall be considered by the General Assembly unless the report of the Standing Judicial Commission and the minority report have been mailed to the clerk of Session of each church at least thirty (30) days prior to the meeting of the General Assembly. (3) The Assembly shall act upon such a reference* from the Standing Judicial Commission, in each case without question, discussion, debate, or amendment, as follows: (a) The Standing Judicial Commission shall have 30 minutes to present its decision to the Assembly. (b) The minority shall have 30 minutes to present its decision to the Assembly. (c) The Standing Judicial Commission shall have 10 minutes to reply to the minority report. (d) The decision of the minority shall be proposed and the General Assembly shall, without question, discussion, debate, or amendment approve or disapprove of the minority report. (e) If the General Assembly disapproves the minority report, the General Assembly shall take up the decision of the Standing Judicial Commission and without question, discussion, debate, or amendment, approve or disapprove of the decision of the Standing Judicial Commission. (4) If the General Assembly approves of a proposed decision, it shall be the decision of the General Assembly, and printed in its minutes. There may be no complaint or appeal from such a final decision of the General Assembly. If the General Assembly finally disapproves of both proposed decisions, it must set the case for hearing before the General Assembly or a special commission appointed by it, and in either instance the case shall be tried on the record as delivered to the Stated Clerk. Any such special commission shall then proceed to consider the case and shall report its decision, in like manner, to the General Assembly for its approval or disapproval. In any event, the full record of the case, including written testimony of witnesses, all documents, exhibits and papers shall be delivered to the Stated Clerk for permanent preservation. *NOTE: It was the opinion of the 26th General Assembly that \"reference\" is NOT to be understood as the technical term \"reference\" in <i>BCO</i> 41-1.",
 "blocks": [
 [
 "i",
@@ -1488,7 +1492,7 @@ window.BCO = {
 [
 "p",
 0,
-"c.(1) If, within twenty-four (24) hours of the time of adjournment of a Standing Judicial Commission meeting at which a final decision was rendered in a case, at least one-third (1/3) of the voting members of the Standing Judicial Commission file written notice of their intention to file a minority decision with the Stated Clerk of the General Assembly, and within twenty (20) days from the adjournment do file such a minority decision, such minority decision shall be considered a minority report and shall be referred, with the report of the Standing Judicial Commission, to the General Assembly. In each instance \"file\" shall be understood as defined by the <i>Operating Manual for Standing Judicial Commission</i>."
+"c. (1) If, within twenty-four (24) hours of the time of adjournment of a Standing Judicial Commission meeting at which a final decision was rendered in a case, at least one-third (1/3) of the voting members of the Standing Judicial Commission file written notice of their intention to file a minority decision with the Stated Clerk of the General Assembly, and within twenty (20) days from the adjournment do file such a minority decision, such minority decision shall be considered a minority report and shall be referred, with the report of the Standing Judicial Commission, to the General Assembly. In each instance \"file\" shall be understood as defined by the <i>Operating Manual for Standing Judicial Commission</i>."
 ],
 [
 "i",
@@ -1501,11 +1505,6 @@ window.BCO = {
 1,
 "(3)",
 "The Assembly shall act upon such a reference* from the Standing Judicial Commission, in each case without question, discussion, debate, or amendment, as follows:"
-],
-[
-"p",
-0,
-"*NOTE: It was the opinion of the 26th General Assembly that \"reference\" is NOT to be understood as the technical term \"reference\" in <i>BCO</i> 41-1."
 ],
 [
 "i",
@@ -1542,6 +1541,11 @@ window.BCO = {
 2,
 "(4)",
 "If the General Assembly approves of a proposed decision, it shall be the decision of the General Assembly, and printed in its minutes. There may be no complaint or appeal from such a final decision of the General Assembly. If the General Assembly finally disapproves of both proposed decisions, it must set the case for hearing before the General Assembly or a special commission appointed by it, and in either instance the case shall be tried on the record as delivered to the Stated Clerk. Any such special commission shall then proceed to consider the case and shall report its decision, in like manner, to the General Assembly for its approval or disapproval. In any event, the full record of the case, including written testimony of witnesses, all documents, exhibits and papers shall be delivered to the Stated Clerk for permanent preservation."
+],
+[
+"p",
+0,
+"*NOTE: It was the opinion of the 26th General Assembly that \"reference\" is NOT to be understood as the technical term \"reference\" in <i>BCO</i> 41-1."
 ]
 ]
 },
@@ -1693,11 +1697,12 @@ window.BCO = {
 "sections": [
 {
 "ref": "19-1",
-"body": "To preserve the purity of the preaching of the Gospel, no man is permitted to preach in the pulpits of the Presbyterian Church in America on a regular basis without proper licensure from the Presbytery having jurisdiction where he will preach. An ordained teaching elder who is a member in good standing of another Presbytery of the Presbyterian Church in America may be licensed after being examined as to his views, according to the provision of <i>BCO</i> 13-6. This license shall immediately become void if the minister's own Presbytery administers against him a censure of suspension from office or the sacraments, or deposition from office, or of excommunication (in the event of such censures, the Presbytery with jurisdiction shall always notify the licensing Presbytery). A ruling elder, a candidate for the ministry, a minister from some other denomination, or some other man may be licensed for the purpose of regularly providing the preaching of the Word upon his giving satisfaction to the Presbytery of his gifts and passing the licensure examination. (See also <i>BCO</i> 22-5 and 22-6.)"
+"body": "To preserve the purity of the preaching of the Gospel, no man is permitted to preach in the pulpits of the Presbyterian Church in America on a regular basis without proper licensure from the Presbytery having jurisdiction where he will preach. An ordained teaching elder who is a member in good standing of another Presbytery of the Presbyterian Church in America may be licensed after being examined as to his views, according to the provision of <i>BCO</i> 13-6. This license shall immediately become void if the minister's own Presbytery administers against him a censure of suspension from office or the sacraments, or deposition from office, or of excommunication (in the event of such censures, the Presbytery with jurisdiction shall always notify the licensing Presbytery). A ruling elder, a candidate for the ministry, a minister from some other denomination, or some other man may be licensed for the purpose of regularly providing the preaching of the Word upon his giving satisfaction to the Presbytery of his gifts and passing the licensure examination. (See also <i>BCO</i> 22-5 and 22-6.)",
+"heading": "A. Licensure"
 },
 {
 "ref": "19-2",
-"body": "Examination for Licensure. The examination for licensure shall be as follows: a. Give a statement of his Christian experience and inward call to preach the Gospel in written form and/or orally before the Presbytery (at the discretion of the Presbytery); b. Be tested with a written and/or oral examination by the Presbytery (at the discretion of the Presbytery) for his: 1. basic knowledge of Biblical doctrine as outlined in the <i>Confession of Faith</i> and <i>Larger and Shorter Catechisms</i> of the Presbyterian Church in America. 2. practical knowledge of Bible content. 3. basic knowledge of the government of the Presbyterian Church in America as defined in <i>The Book of Church Order</i>. c. Be examined orally before Presbytery for his views in the areas outlined in part b above. d. Provide his written sermon on an assigned passage of Scripture embodying both explanation and application, and present orally his sermon or exhortation before Presbytery or before a committee of Presbytery. e. While our Constitution does not require the applicant's affirmation of every statement and/or proposition of doctrine in our <i>Confession of Faith and Catechisms,</i> it is the right and responsibility of the Presbytery to determine if the applicant is out of accord with any of the fundamentals of these doctrinal standards and, as a consequence, may not be able in good faith sincerely to receive and adopt the <i>Confession of Faith and Catechisms</i> of this church as containing the system of doctrine taught in the Holy Scriptures (cf. <i>BCO</i> 19-3, Q.2). f. Therefore, in examining an applicant for licensure, the Presbytery shall inquire not only into the candidate's knowledge and views in the areas specified above, but also shall require the candidate to state the specific instances in which he may differ with the <i>Confession of Faith</i> and <i>Catechisms</i> in any of their statements and/or propositions. The court may grant an exception to any difference of doctrine only if in the court's judgment the applicant's declared difference is not out of accord with any fundamental of our system of doctrine because the difference is neither hostile to the system nor strikes at the vitals of religion. No Presbytery shall omit any of these parts of examination except in extraordinary cases; and whenever a Presbytery shall omit any of these parts, it shall always make a record of the reasons therefor, and of the trial parts omitted.",
+"body": "Examination for Licensure. The examination for licensure shall be as follows: a. Give a statement of his Christian experience and inward call to preach the Gospel in written form and/or orally before the Presbytery (at the discretion of the Presbytery): b. Be tested with a written and/or oral examination by the Presbytery (at the discretion of the Presbytery) for his: 1. basic knowledge of Biblical doctrine as outlined in the <i>Confession of Faith</i> and <i>Larger and Shorter Catechisms</i> of the Presbyterian Church in America. 2. practical knowledge of Bible content. 3. basic knowledge of the government of the Presbyterian Church in America as defined in <i>The Book of Church Order</i>. c. Be examined orally before Presbytery for his views in the areas outlined in part b above. d. Provide his written sermon on an assigned passage of Scripture embodying both explanation and application, and present orally his sermon or exhortation before Presbytery or before a committee of Presbytery. e. While our Constitution does not require the applicant's affirmation of every statement and/or proposition of doctrine in our <i>Confession of Faith and Catechisms,</i> it is the right and responsibility of the Presbytery to determine if the applicant is out of accord with any of the fundamentals of these doctrinal standards and, as a consequence, may not be able in good faith sincerely to receive and adopt the <i>Confession of Faith and Catechisms</i> of this church as containing the system of doctrine taught in the Holy Scriptures (cf. <i>BCO</i> 19-3, Q.2). f. Therefore, in examining an applicant for licensure, the Presbytery shall inquire not only into the candidate's knowledge and views in the areas specified above, but also shall require the candidate to state the specific instances in which he may differ with the <i>Confession of Faith</i> and <i>Catechisms</i> in any of their statements and/or propositions. The court may grant an exception to any difference of doctrine only if in the court's judgment the applicant's declared difference is not out of accord with any fundamental of our system of doctrine because the difference is neither hostile to the system nor strikes at the vitals of religion. No Presbytery shall omit any of these parts of examination except in extraordinary cases; and whenever a Presbytery shall omit any of these parts, it shall always make a record of the reasons therefor, and of the trial parts omitted.",
 "blocks": [
 [
 "p",
@@ -1713,7 +1718,7 @@ window.BCO = {
 "i",
 1,
 "a.",
-"Give a statement of his Christian experience and inward call to preach the Gospel in written form and/or orally before the Presbytery (at the discretion of the Presbytery);"
+"Give a statement of his Christian experience and inward call to preach the Gospel in written form and/or orally before the Presbytery (at the discretion of the Presbytery):"
 ],
 [
 "i",
@@ -1885,17 +1890,12 @@ window.BCO = {
 },
 {
 "ref": "19-6",
-"body": "The license to preach the Gospel shall expire at the end of four years. The Presbytery may, if it thinks proper, renew it without further examination. The licentiate must apply for renewal prior to expiration. If the license expires, the stated clerk shall report the expiration to the Presbytery and to the individual's Session, and such action shall be recorded in the minutes. The procedures of <i>BCO</i> 19-2 must be followed for re-licensure and such fact shall be recorded in the minutes. The license may be terminated at any time by a simple majority vote of the issuing Presbytery. The Presbytery shall always record its reasons for this action in its minutes. <b>B. Internship</b>",
+"body": "The license to preach the Gospel shall expire at the end of four years. The Presbytery may, if it thinks proper, renew it without further examination. The licentiate must apply for renewal prior to expiration. If the license expires, the stated clerk shall report the expiration to the Presbytery and to the individual's Session, and such action shall be recorded in the minutes. The procedures of <i>BCO</i> 19-2 must be followed for re-licensure and such fact shall be recorded in the minutes. The license may be terminated at any time by a simple majority vote of the issuing Presbytery. The Presbytery shall always record its reasons for this action in its minutes.",
 "blocks": [
 [
 "p",
 0,
 "The license to preach the Gospel shall expire at the end of four years. The Presbytery may, if it thinks proper, renew it without further examination. The licentiate must apply for renewal prior to expiration. If the license expires, the stated clerk shall report the expiration to the Presbytery and to the individual's Session, and such action shall be recorded in the minutes. The procedures of <i>BCO</i> 19-2 must be followed for re-licensure and such fact shall be recorded in the minutes. The license may be terminated at any time by a simple majority vote of the issuing Presbytery. The Presbytery shall always record its reasons for this action in its minutes."
-],
-[
-"p",
-0,
-"<b>B. Internship</b>"
 ]
 ]
 },
@@ -1918,7 +1918,8 @@ window.BCO = {
 0,
 "The nature of the internship shall be determined by the Presbytery, but it should involve the candidate in full scope of the duties of any regular ministerial calling approved by the Presbytery. It is to be both a time of practical instruction and testing by the Presbytery, and may be in any work which the Presbytery deems to be a suitable ministry to test the intern's gifts. The intern should be closely supervised by the Presbytery throughout this trial period."
 ]
-]
+],
+"heading": "B. Internship"
 },
 {
 "ref": "19-8",
@@ -2368,7 +2369,7 @@ window.BCO = {
 },
 {
 "ref": "21-5",
-"body": "The day appointed for the ordination having come, and the Presbytery being convened, a sermon suitable for the occasion shall be preached by a person appointed or invited by the Presbytery. The Presbytery member appointed to preside shall afterwards briefly recite from the pulpit the proceedings of the Presbytery preparatory to the ordination; he shall point out the nature and importance of the ordinance, and endeavor to impress the audience with a proper sense of the solemnity of the transaction. <b>Questions for Ordination</b>1 <i>1 For an assistant minister, only questions 1-7 shall be used.</i> Then, addressing himself to the candidate, he shall propose to him the following questions: <b>1. Do you believe the Scriptures of the Old and New Testaments, as originally given, to be the inerrant Word of God, the only infallible rule of faith and practice?</b> <b>2. Do you sincerely receive and adopt the <i>Confession of Faith</i> and the <i>Catechisms</i> of this Church, as containing the system of doctrine taught in the Holy Scriptures; and do you further promise that if at any time you find yourself out of accord with any of the fundamentals of this system of doctrine, you will on your own initiative, make known to your Presbytery the change which has taken place in your views since the assumption of this ordination vow?</b> <b>3. Do you approve of the form of government and discipline of the Presbyterian Church in America, in conformity with the general principles of Biblical polity?</b> <b>4. Do you promise subjection to your brethren in the Lord?</b> <b>5. Have you been induced, as far as you know your own heart, to seek the office of the holy ministry from love to God and a sincere desire to promote His glory in the Gospel of His Son?</b> <b>6. Do you promise to be zealous and faithful in maintaining the truths of the Gospel and the purity and peace and unity of the Church, whatever persecution or opposition may arise unto you on that account?</b> <b>7. Do you engage to be faithful and diligent in the exercise of all your duties as a Christian and a minister of the Gospel, whether personal or relational, private or public; and to endeavor by the grace of God to adorn the profession of the Gospel in your manner of life, and to walk with exemplary piety before the flock of which God shall make you overseer?</b> <b>8. Are you now willing to take the charge of this church, agreeable to your declaration when accepting their call? And do you, relying upon God for strength, promise to discharge to it the duties of a pastor?</b> <b>Questions to Congregation</b>2 <i>2For assistant minister, address the Session omitting the last phrase of questions 1 and 2.</i>",
+"body": "The day appointed for the ordination having come, and the Presbytery being convened, a sermon suitable for the occasion shall be preached by a person appointed or invited by the Presbytery. The Presbytery member appointed to preside shall afterwards briefly recite from the pulpit the proceedings of the Presbytery preparatory to the ordination; he shall point out the nature and importance of the ordinance, and endeavor to impress the audience with a proper sense of the solemnity of the transaction. <b>Questions for Ordination</b><sup>1</sup> Then, addressing himself to the candidate, he shall propose to him the following questions: <b>1. Do you believe the Scriptures of the Old and New Testaments, as originally given, to be the inerrant Word of God, the only infallible rule of faith and practice?</b> <b>2. Do you sincerely receive and adopt the <i>Confession of Faith</i> and the <i>Catechisms</i> of this Church, as containing the system of doctrine taught in the Holy Scriptures; and do you further promise that if at any time you find yourself out of accord with any of the fundamentals of this system of doctrine, you will on your own initiative, make known to your Presbytery the change which has taken place in your views since the assumption of this ordination vow?</b> <b>3. Do you approve of the form of government and discipline of the Presbyterian Church in America, in conformity with the general principles of Biblical polity?</b> <b>4. Do you promise subjection to your brethren in the Lord?</b> <b>5. Have you been induced, as far as you know your own heart, to seek the office of the holy ministry from love to God and a sincere desire to promote His glory in the Gospel of His Son?</b> <b>6. Do you promise to be zealous and faithful in maintaining the truths of the Gospel and the purity and peace and unity of the Church, whatever persecution or opposition may arise unto you on that account?</b> <b>7. Do you engage to be faithful and diligent in the exercise of all your duties as a Christian and a minister of the Gospel, whether personal or relational, private or public; and to endeavor by the grace of God to adorn the profession of the Gospel in your manner of life, and to walk with exemplary piety before the flock of which God shall make you overseer?</b> <b>8. Are you now willing to take the charge of this church, agreeable to your declaration when accepting their call? And do you, relying upon God for strength, promise to discharge to it the duties of a pastor?</b> <b>Questions to Congregation</b><sup>2</sup> <i><sup>1</sup> For an assistant minister, only questions 1-7 shall be used.</i> <i><sup>2</sup> For assistant minister, address the Session omitting the last phrase of questions 1 and 2.</i>",
 "blocks": [
 [
 "p",
@@ -2378,12 +2379,7 @@ window.BCO = {
 [
 "p",
 0,
-"<b>Questions for Ordination</b>1"
-],
-[
-"p",
-0,
-"<i>1 For an assistant minister, only questions 1-7 shall be used.</i>"
+"<b>Questions for Ordination</b><sup>1</sup>"
 ],
 [
 "p",
@@ -2433,12 +2429,17 @@ window.BCO = {
 [
 "p",
 0,
-"<b>Questions to Congregation</b>2"
+"<b>Questions to Congregation</b><sup>2</sup>"
 ],
 [
 "p",
 0,
-"<i>2For assistant minister, address the Session omitting the last phrase of questions 1 and 2.</i>"
+"<i><sup>1</sup> For an assistant minister, only questions 1-7 shall be used.</i>"
+],
+[
+"p",
+0,
+"<i><sup>2</sup> For assistant minister, address the Session omitting the last phrase of questions 1 and 2.</i>"
 ]
 ]
 },
@@ -2475,7 +2476,7 @@ window.BCO = {
 },
 {
 "ref": "21-7",
-"body": "The people having answered these questions in the affirmative, by holding up their right hands, the candidate shall kneel, and the presiding minister shall, with prayer and the laying on of hands of the Presbytery, according to the apostolic example, solemnly set him apart to the holy office of the Gospel ministry. Prayer being ended, he shall rise from his knees; and the minister who presides shall first, followed by all members of the Presbytery, take him by the right hand, saying, in words to this effect: <b>We give you the right hand of fellowship, to take part in this ministry with us.</b> The presiding minister shall then say: <b>I now pronounce and declare that __________________ has been regularly elected, ordained, and installed pastor of this congregation, agreeable to the Word of God, and according to the Constitution of the Presbyterian Church in America; and that as such he is entitled to all support, encouragement, honor, and obedience in the Lord: In the name of the Father, and of the Son, and of the Holy Ghost. Amen.</b> After which the minister presiding, or some other teaching or ruling elder appointed for the purpose, shall give a solemn charge to the pastor and to the congregation, to persevere in the discharge of their reciprocal duties, and then after prayer and the singing of a psalm, or hymn, the congregation shall be dismissed with the benediction. The Presbytery shall duly record its proceedings.3 <i>3For assistant minister, add the word ‘assistant' before ‘pastor', and charge the Session rather than the congregation</i>",
+"body": "The people having answered these questions in the affirmative, by holding up their right hands, the candidate shall kneel, and the presiding minister shall, with prayer and the laying on of hands of the Presbytery, according to the apostolic example, solemnly set him apart to the holy office of the Gospel ministry. Prayer being ended, he shall rise from his knees; and the minister who presides shall first, followed by all members of the Presbytery, take him by the right hand, saying, in words to this effect: <b>We give you the right hand of fellowship, to take part in this ministry with us.</b> The presiding minister shall then say: <b>I now pronounce and declare that __________________ has been regularly elected, ordained, and installed pastor of this congregation, agreeable to the Word of God, and according to the Constitution of the Presbyterian Church in America; and that as such he is entitled to all support, encouragement, honor, and obedience in the Lord: In the name of the Father, and of the Son, and of the Holy Ghost. Amen.</b> After which the minister presiding, or some other teaching or ruling elder appointed for the purpose, shall give a solemn charge to the pastor and to the congregation, to persevere in the discharge of their reciprocal duties, and then after prayer and the singing of a psalm, or hymn, the congregation shall be dismissed with the benediction. The Presbytery shall duly record its proceedings.<sup>3</sup> <i><sup>3</sup> For assistant minister, add the word ‘assistant' before ‘pastor', and charge the Session rather than the congregation.</i>",
 "blocks": [
 [
 "p",
@@ -2500,18 +2501,18 @@ window.BCO = {
 [
 "p",
 0,
-"After which the minister presiding, or some other teaching or ruling elder appointed for the purpose, shall give a solemn charge to the pastor and to the congregation, to persevere in the discharge of their reciprocal duties, and then after prayer and the singing of a psalm, or hymn, the congregation shall be dismissed with the benediction. The Presbytery shall duly record its proceedings.3"
+"After which the minister presiding, or some other teaching or ruling elder appointed for the purpose, shall give a solemn charge to the pastor and to the congregation, to persevere in the discharge of their reciprocal duties, and then after prayer and the singing of a psalm, or hymn, the congregation shall be dismissed with the benediction. The Presbytery shall duly record its proceedings.<sup>3</sup>"
 ],
 [
 "p",
 0,
-"<i>3For assistant minister, add the word ‘assistant' before ‘pastor', and charge the Session rather than the congregation</i>"
+"<i><sup>3</sup> For assistant minister, add the word ‘assistant' before ‘pastor', and charge the Session rather than the congregation.</i>"
 ]
 ]
 },
 {
 "ref": "21-8",
-"body": "After the installation, the heads of families of the congregation then present, or at least the ruling elders and deacons, should come forward to their pastor, and give him their right hand, in token of cordial reception and affectionate regard. <b>Questions for Installation</b>4 <i>4For assistant minister, substitute the word ‘serve' for ‘take charge of', and add the word ‘assistant' before ‘pastor'.</i>",
+"body": "After the installation, the heads of families of the congregation then present, or at least the ruling elders and deacons, should come forward to their pastor, and give him their right hand, in token of cordial reception and affectionate regard. <b>Questions for Installation</b><sup>4</sup> <i><sup>4</sup> For assistant minister, substitute the word ‘serve' for ‘take charge of', and add the word ‘assistant' before ‘pastor'.</i>",
 "blocks": [
 [
 "p",
@@ -2521,18 +2522,18 @@ window.BCO = {
 [
 "p",
 0,
-"<b>Questions for Installation</b>4"
+"<b>Questions for Installation</b><sup>4</sup>"
 ],
 [
 "p",
 0,
-"<i>4For assistant minister, substitute the word ‘serve' for ‘take charge of', and add the word ‘assistant' before ‘pastor'.</i>"
+"<i><sup>4</sup> For assistant minister, substitute the word ‘serve' for ‘take charge of', and add the word ‘assistant' before ‘pastor'.</i>"
 ]
 ]
 },
 {
 "ref": "21-9",
-"body": "In the installation of an ordained minister, the following questions are to be substituted for those addressed to a candidate for ordination, namely: <b>1. Are you now willing to take charge of this congregation as their pastor, agreeable to your declaration in accepting its call?</b> <b>2. Do you conscientiously believe and declare, as far as you know your own heart, that, in taking upon you this charge, you are influenced by a sincere desire to promote the glory of God and the good of the Church?</b> <b>3. Do you solemnly promise that, by the assistance of the grace of God, you will endeavor faithfully to discharge all the duties of a pastor to this congregation, and will be careful to maintain a deportment in all respects becoming a minister of the Gospel of Christ, agreeable to your ordination engagements?</b> <b>Questions to Congregation</b>5 <i>5For assistant minister, address the Session omitting the last phrase of questions 1 and 2.</i>",
+"body": "In the installation of an ordained minister, the following questions are to be substituted for those addressed to a candidate for ordination, namely: <b>1. Are you now willing to take charge of this congregation as their pastor, agreeable to your declaration in accepting its call?</b> <b>2. Do you conscientiously believe and declare, as far as you know your own heart, that, in taking upon you this charge, you are influenced by a sincere desire to promote the glory of God and the good of the Church?</b> <b>3. Do you solemnly promise that, by the assistance of the grace of God, you will endeavor faithfully to discharge all the duties of a pastor to this congregation, and will be careful to maintain a deportment in all respects becoming a minister of the Gospel of Christ, agreeable to your ordination engagements?</b> <b>Questions to Congregation</b><sup>5</sup> <i><sup>5</sup> For assistant minister, address the Session omitting the last phrase of questions 1 and 2.</i>",
 "blocks": [
 [
 "p",
@@ -2557,12 +2558,12 @@ window.BCO = {
 [
 "p",
 0,
-"<b>Questions to Congregation</b>5"
+"<b>Questions to Congregation</b><sup>5</sup>"
 ],
 [
 "p",
 0,
-"<i>5For assistant minister, address the Session omitting the last phrase of questions 1 and 2.</i>"
+"<i><sup>5</sup> For assistant minister, address the Session omitting the last phrase of questions 1 and 2.</i>"
 ]
 ]
 },
@@ -2746,7 +2747,8 @@ window.BCO = {
 0,
 "If one-fourth (1/4) of the persons entitled to vote shall at any time request the Session to call a congregational meeting for the purpose of electing additional officers, it shall be the duty of the Session to call such a meeting on the above procedure. The number of officers to be elected shall be determined by the congregation after hearing the Session's recommendation."
 ]
-]
+],
+"heading": "Election"
 },
 {
 "ref": "24-2",
@@ -2779,17 +2781,12 @@ window.BCO = {
 },
 {
 "ref": "24-5",
-"body": "On the election of a ruling elder or deacon, if it appears that a large minority of the voters are averse to a candidate, and cannot be induced to concur in the choice, the moderator shall endeavor to dissuade the majority from prosecuting it further; but if the electors are nearly or quite unanimous, or if the majority insist upon their right to choose their officers, the election shall stand. <b>Ordination and Installation</b>",
+"body": "On the election of a ruling elder or deacon, if it appears that a large minority of the voters are averse to a candidate, and cannot be induced to concur in the choice, the moderator shall endeavor to dissuade the majority from prosecuting it further; but if the electors are nearly or quite unanimous, or if the majority insist upon their right to choose their officers, the election shall stand.",
 "blocks": [
 [
 "p",
 0,
 "On the election of a ruling elder or deacon, if it appears that a large minority of the voters are averse to a candidate, and cannot be induced to concur in the choice, the moderator shall endeavor to dissuade the majority from prosecuting it further; but if the electors are nearly or quite unanimous, or if the majority insist upon their right to choose their officers, the election shall stand."
-],
-[
-"p",
-0,
-"<b>Ordination and Installation</b>"
 ]
 ]
 },
@@ -2867,7 +2864,8 @@ window.BCO = {
 0,
 "After which the minister or any other member of the Session shall give to the ruling elder (or deacon) and to the church an exhortation suited to the occasion."
 ]
-]
+],
+"heading": "Ordination and Installation"
 },
 {
 "ref": "24-7",
@@ -3792,7 +3790,7 @@ window.BCO = {
 },
 "34": {
 "part": "rod",
-"title": "Special Rules Pertaining to Process Against a Minister",
+"title": "Special Rules Pertaining to Process Against a Minister (Teaching Elder)",
 "sections": [
 {
 "ref": "34-1",
@@ -4116,7 +4114,7 @@ window.BCO = {
 },
 {
 "ref": "36-8",
-"body": "When members of a court wish to consider the elevation of an indefinite suspension, whether from office or from the Sacraments (<i>BCO</i> 36-5) to the censure of deposition or excommunication respectively, it shall not be required to initiate process de novo according to <i>BCO</i> 31-2 or <i>BCO</i> 32-2. The indefinitely suspended person is not in good standing and has already been found impenitent, resulting in indefinite suspension (<i>BCO</i> 30-3). However, the indefinitely suspended person has a right to a hearing in the matter. The court supervising the indefinite suspension may consider a motion to find him \u201cincorrigible and contumacious\u201d (cf. <i>BCO</i> 30-4) and present evidence to that effect. The court shall give at least thirty (30) days' notice of such a motion to the indefinitely suspended person and permit him the privilege of the floor to plead and give evidence of his repentance before the court having jurisdiction (<i>BCO</i> 33-1, 34-1) and not any trial commission. The court, upon completing its hearing, shall vote to determine whether or not to elevate the indefinite suspension to deposition or excommunication. A person whose suspension is so elevated has the right of Appeal (<i>BCO</i> 42-2)."
+"body": "When members of a court wish to consider the elevation of an indefinite suspension, whether from office or from the Sacraments (<i>BCO</i> 36-5) to the censure of deposition or excommunication respectively, it shall not be required to initiate process de novo according to <i>BCO</i> 31-2 or <i>BCO</i> 32-2. The indefinitely suspended person is not in good standing and has already been found impenitent, resulting in indefinite suspension (<i>BCO</i> 30-3). However, the indefinitely suspended person has a right to a hearing in the matter. The court supervising the indefinite suspension may consider a motion to find him “incorrigible and contumacious” (cf. <i>BCO</i> 30-4) and present evidence to that effect. The court shall give at least thirty (30) days' notice of such a motion to the indefinitely suspended person and permit him the privilege of the floor to plead and give evidence of his repentance before the court having jurisdiction (<i>BCO</i> 33-1, 34-1) and not any trial commission. The court, upon completing its hearing, shall vote to determine whether or not to elevate the indefinite suspension to deposition or excommunication. A person whose suspension is so elevated has the right of Appeal (<i>BCO</i> 42-2)."
 }
 ],
 "vacated": false
@@ -4356,7 +4354,7 @@ window.BCO = {
 },
 "39": {
 "part": "rod",
-"title": "Modes in Which the Proceedings of Lower Courts Come",
+"title": "Modes in Which the Proceedings of Lower Courts Come Under the Supervision of Higher Courts",
 "sections": [
 {
 "ref": "39-1",
@@ -4875,7 +4873,7 @@ window.BCO = {
 },
 {
 "ref": "47-3",
-"body": "The end of public worship is the glory of God. His people should engage in all its several parts with an eye single to His glory. Public worship has as its aim the building of Christ's Church by the perfecting of the saints and the addition to its membership of such as are being saved—all to the glory of God. Through public worship on the Lord's day Christians should learn to serve God all the days of the week in their every activity, remembering, whether they eat or drink, or whatever they do, to do all to the glory of God (1 Corinthians 10:31).",
+"body": "The end of public worship is the glory of God. His people should engage in all its several parts with an eye single to His glory. Public worship has as its aim the building of Christ's Church by the perfecting of the saints and the addition to its membership of such as are being saved — all to the glory of God. Through public worship on the Lord's day Christians should learn to serve God all the days of the week in their every activity, remembering, whether they eat or drink, or whatever they do, to do all to the glory of God (1 Corinthians 10:31).",
 "binding": false
 },
 {
@@ -4909,7 +4907,10 @@ window.BCO = {
 "binding": false
 }
 ],
-"vacated": false
+"vacated": false,
+"paras": [
+"Temporary statement adopted by the Third General Assembly to preface the Directory for Worship: The Directory for Worship is an approved guide and should be taken seriously as the mind of the Church agreeable to the Standards. However, it does not have the force of law and is not to be considered obligatory in all its parts. BCO 56, 57 and 58 have been given full constitutional authority by the Eleventh General Assembly after being submitted to the Presbyteries and receiving the necessary approval of two-thirds (2/3) of the Presbyteries. BCO 59-3, as amended, has been given full constitutional authority by the Forty-seventh General Assembly after being submitted to the Presbyteries and receiving the necessary approval of two-thirds (2/3) of the Presbyteries."
+]
 },
 "48": {
 "part": "dow",
@@ -5197,7 +5198,8 @@ window.BCO = {
 {
 "ref": "56-1",
 "body": "Baptism is not to be unnecessarily delayed; not to be administered, in any case, by any private person; but by a minister of Christ, called to be the steward of the mysteries of God.",
-"binding": true
+"binding": true,
+"heading": "The Baptism of Infants and Children"
 },
 {
 "ref": "56-2",
@@ -5826,6 +5828,9 @@ window.BCO = {
 "part": "appx",
 "title": "Appendix A — Marriage Service",
 "paras": [
+"Editorial Note: None of these Appendices have constitutional authority. They are provided for information.",
+"<b>OPTIONAL FORMS FOR PARTICULAR SERVICES</b>",
+"These forms were approved by the General Assembly, to be printed with the Book of Church Order, but not to be a part of the Constitution. They were derived from the PCUS Book as approved in 1893, and from the OPC Book as approved in 1940. Appendix G was adapted from forms used by the OPC and RPCNA.",
 "<i>MARRIAGE SERVICE</i> Whether the marriage is in the church or in a private house, the betrothed shall present themselves attended by witnesses, the man having the woman at his left hand, before the minister, who shall say:",
 "<b>The Lord bless you, and keep you; the Lord make His face shine upon you, and be gracious to you; the Lord lift up His countenance upon you, and give you peace (Numbers 6:24-26).</b>",
 "<b>If any here present can show just cause why these persons may not lawfully be joined together in marriage, let them now speak, or hereafter forever hold their peace.</b>",
@@ -6027,6 +6032,7 @@ window.BCO = {
 "Prayer:",
 "<b>Almighty God, who has sanctified the grave by Your Son's rest therein, and by His glorious resurrection has brought life and immortality to light, accept, we pray, our unfeigned thanks for the victory which He has obtained for us and for all who sleep in Him, and keep us who are still in the body, in everlasting fellowship with all that wait for You on earth, and with all that are around You in heaven, in union with Him who is the resurrection and the life, who lives and reigns with You and the Holy Ghost, ever one God, world without end. Amen.</b>",
 "<b>O Merciful God, the Father of our Lord Jesus Christ, who is the resurrection and the life; in whom whosoever believes, shall live, though he die; and whosoever lives and believes in Him, shall not die eternally; who also has taught us, by His holy Apostle Paul, not to be sorry, as men without hope, for those who sleep in Him; we humbly beseech You, O Father, to raise us from the death of sin unto the life of righteousness; that when we shall depart this life, we may rest in Him; and that, at the general resurrection in the last day, we may be found acceptable in Your sight; and receive that blessing, which Your well-beloved Son shall then pronounce to all who love and fear You, saying, Come, blessed children of my Father, receive the kingdom prepared for you from the beginning of the world. Grant this, we beseech You O merciful Father, through Jesus Christ, our Mediator and Redeemer. Amen.*</b>",
+"<i>*This prayer is from John Knox's Liturgy.</i>",
 "Benediction:",
 "<b>Now may the God of peace who brought up our Lord Jesus from the dead, that great Shepherd of the sheep, through the blood of the everlasting covenant, make you complete in every good work to do His will, working in you what is well pleasing in His sight, through Jesus Christ, to whom be glory forever and ever. Amen (Hebrews 13:20-21).</b>"
 ]
@@ -6120,7 +6126,6 @@ window.BCO = {
 "And now, this _______________ day of ____________, A.D. ___________, comes _________________________ and gives notice of intention to appeal to ___________________ from the judgment of _________________ in the case of ___________________ (here insert the name of the accused).",
 "_______________________________________Appellant",
 "Date: ___________________",
-"FORMS FOR JUDICIAL BUSINESS APPENDIX G",
 "<b>V. APPEAL</b>",
 "To _________________, Clerk (or Moderator) of __________________ (here insert the title of the judicatory to which the appeal is taken) of the Presbyterian Church in America.",
 "And now, this _____________ day of _____________, A.D. __________________________, comes __________________________ and appeals from the judgment of ________________________________ in the case of _________ (here insert the name of the accused), and in support of said appeal sets forth the following specifications of error:",
@@ -6148,42 +6153,21 @@ window.BCO = {
 "5. At its discretion and with the consent of both parties, the Commission may decide to accept email, fax or similar means for filings after establishing procedures to confirm the date that a document is filed and received.",
 "6. Record of the Case – After the Commission is appointed, the Presbytery Stated Clerk shall promptly ensure delivery of the Record to each Commission member and to all parties to the case. It shall be delivered to the appellant/ complainant in person or in some other manner providing verification of the date of receipt. If the appellant/complainant believes the Record is incomplete or incorrect, he shall, within 14 days of receiving such Record, file written notice with the Commission and with the Session (clerk or respondent). Such notice shall specify the alleged defects and suggestions for corrections. Failure to file a timely objection will constitute acceptance of the Record. Within 14 days of receiving such written notice, the Session shall file a written response with the Commission and with the appellant/complainant. The chairman shall promptly send to the commissioners the notice of objection and the Session's response. If no objection is filed, the parties are considered to have received the perfected Record on the day they received the original Record.",
 "7. Resolving Disputes on the Record – If the Session agrees to any suggested correction, the Record shall be revised accordingly. If the Session does not agree to a suggested correction, the Commission shall consider the written arguments of both parties and rule whether the change(s) should be made. This ruling shall be made within 14 days of when the Commission received the Session's response and the chairman shall promptly notify the parties of the ruling. If the original Record is revised, the chairman shall ensure both parties receive the perfected Record and the date of its receipt shall be recorded. In this event, the chairman shall also ensure the commissioners receive copies of the revision.",
-"8. Filing Briefs – After the Record has been perfected, the parties may file briefs with the Commission. Such briefs are optional and additional to the notice of appeal/complaint (<i>BCO</i> 42-4, 43-3) and to the Session's initial response (<i>BCO</i> 42-5, 43-6).",
-"1. The appellant/complainant's brief shall be filed no later than 14 days after he receives the perfected Record (or the original Record if undisputed.) The Commission will immediately send this brief to the Session and the delivery date shall be recorded. The chairman will promptly send this brief to the commissioners.",
-"2. The Session's brief shall be filed no later than 28 days after it receives the perfected Record (or the original Record if undisputed) or 14 days after it receives the appellant/complainant's brief, whichever is later. The Commission will immediately send this brief to the appellant/complainant. The chairman will promptly send this brief to the commissioners.",
-"3. The Commission should not schedule the hearing for sooner than 42 days after the date the parties receive the perfected Record (or the original Record if undisputed), unless both parties, in writing, waive their right to file briefs.",
-"4. The briefs shall include the party's position with regard to: a summary of the facts, a summary of the proceedings before the Session, a proposed statement of the issue(s), the proposed judgment & relief, and the argument in favor of judgment & relief.",
-"5. No brief shall make reference to any evidence not already part of the perfected Record. The Commission may, at its discretion, strike the part of any brief that makes such reference. Parties may petition the Commission to strike any alleged new evidence from a brief. At the same time, briefs may mention and the Commission may take judicial notice of facts not subject to reasonable dispute.",
-"6. A brief is limited to 10 pages. It must be typewritten on 8½ x 11-inch paper, with 1-inch margins on all sides, and no smaller than 10-point type. Any brief that does not meet these standards of form shall be returned to the sending party with reasons. If this occurs, a revised brief may be submitted, provided such brief is filed with the Commission within 5 days of when the party received notification that the brief did not meet the standard of form.",
-"9. Before the hearing begins, the chairman shall call the members of the Commission to order and he shall:",
-"1. Open the meeting with prayer and certify a quorum is present.",
-"2. Ask each member individually if he has read the Record and all briefs. Any member who cannot affirm such is disqualified from deliberating and voting.",
-"3. Remind the members to disregard all evidence not in the Record, even though such evidence may be found in the briefs of the parties or in oral argument.",
-"4. Read to the members the four principles adopted as Standards of Review in <i>BCO</i> 39-3.",
-"10. During the hearing:",
-"1. Before arguments begin, commissioners may question the parties on any matter before the court.",
-"2. The arguments shall be heard in the following order: 1) the appellant/complainant opens, 2) the Session responds, and 3) the appellant/complainant closes. Each party should be present to hear the arguments of the other.",
-"3. A party shall have a maximum of 30 minutes to argue his case. For the appellant/complainant, these 30 minutes are inclusive of both his opening and closing arguments. He may divide that time as he chooses.",
-"4. At any time during which a party is presenting an argument, a commissioner may ask questions of that party. The time taken for such questions shall not form a part of the argument time of the party questioned.",
+"8. Filing Briefs – After the Record has been perfected, the parties may file briefs with the Commission. Such briefs are optional and additional to the notice of appeal/complaint (<i>BCO</i> 42-4, 43-3) and to the Session's initial response (<i>BCO</i> 42-5, 43-6). <ol class=\"appendix-subitems\"><li value=\"1\">The appellant/complainant's brief shall be filed no later than 14 days after he receives the perfected Record (or the original Record if undisputed.) The Commission will immediately send this brief to the Session and the delivery date shall be recorded. The chairman will promptly send this brief to the commissioners.</li> <li value=\"2\">The Session's brief shall be filed no later than 28 days after it receives the perfected Record (or the original Record if undisputed) or 14 days after it receives the appellant/complainant's brief, whichever is later. The Commission will immediately send this brief to the appellant/complainant. The chairman will promptly send this brief to the commissioners.</li> <li value=\"3\">The Commission should not schedule the hearing for sooner than 42 days after the date the parties receive the perfected Record (or the original Record if undisputed), unless both parties, in writing, waive their right to file briefs.</li> <li value=\"4\">The briefs shall include the party's position with regard to: a summary of the facts, a summary of the proceedings before the Session, a proposed statement of the issue(s), the proposed judgment & relief, and the argument in favor of judgment & relief.</li> <li value=\"5\">No brief shall make reference to any evidence not already part of the perfected Record. The Commission may, at its discretion, strike the part of any brief that makes such reference. Parties may petition the Commission to strike any alleged new evidence from a brief. At the same time, briefs may mention and the Commission may take judicial notice of facts not subject to reasonable dispute.</li> <li value=\"6\">A brief is limited to 10 pages. It must be typewritten on 8½ x 11-inch paper, with 1-inch margins on all sides, and no smaller than 10-point type. Any brief that does not meet these standards of form shall be returned to the sending party with reasons. If this occurs, a revised brief may be submitted, provided such brief is filed with the Commission within 5 days of when the party received notification that the brief did not meet the standard of form.</li></ol>",
+"9. Before the hearing begins, the chairman shall call the members of the Commission to order and he shall: <ol class=\"appendix-subitems\"><li value=\"1\">Open the meeting with prayer and certify a quorum is present.</li> <li value=\"2\">Ask each member individually if he has read the Record and all briefs. Any member who cannot affirm such is disqualified from deliberating and voting.</li> <li value=\"3\">Remind the members to disregard all evidence not in the Record, even though such evidence may be found in the briefs of the parties or in oral argument.</li> <li value=\"4\">Read to the members the four principles adopted as Standards of Review in <i>BCO</i> 39-3.</li></ol>",
+"10. During the hearing: <ol class=\"appendix-subitems\"><li value=\"1\">Before arguments begin, commissioners may question the parties on any matter before the court.</li> <li value=\"2\">The arguments shall be heard in the following order: 1) the appellant/complainant opens, 2) the Session responds, and 3) the appellant/complainant closes. Each party should be present to hear the arguments of the other.</li> <li value=\"3\">A party shall have a maximum of 30 minutes to argue his case. For the appellant/complainant, these 30 minutes are inclusive of both his opening and closing arguments. He may divide that time as he chooses.</li> <li value=\"4\">At any time during which a party is presenting an argument, a commissioner may ask questions of that party. The time taken for such questions shall not form a part of the argument time of the party questioned.</li></ol>",
 "11. Judgment – As soon as possible after hearing oral arguments, the Commission shall go into closed session and discuss the issues in the case. In that discussion, the Commission may frame the issues and vote on a Judgment. Or, the Commission may adjourn and reconvene within the next 10 days, as often as necessary, to do so.",
-"12. Written Decision – After the Judgment is adopted, the chairman shall designate a member who voted with the majority to draft the written decision. If the chairman did not vote in the majority, the majority will select their own drafter. The decision shall contain four parts:",
-"1. Summary of Facts (chronological summary of relevant history and facts bearing on case)",
-"2. Statement of the Issue(s) (concise framing by the court of specific issue(s) being judged in case)",
-"3. Judgment (definite conclusion rendered on the specific issue(s) being adjudged)",
-"4. Reasoning and Opinion (reasons for judgment rendered and resolution of any disputed facts)",
+"12. Written Decision – After the Judgment is adopted, the chairman shall designate a member who voted with the majority to draft the written decision. If the chairman did not vote in the majority, the majority will select their own drafter. The decision shall contain four parts: <ol class=\"appendix-subitems\"><li value=\"1\">Summary of Facts (chronological summary of relevant history and facts bearing on case)</li> <li value=\"2\">Statement of the Issue(s) (concise framing by the court of specific issue(s) being judged in case)</li> <li value=\"3\">Judgment (definite conclusion rendered on the specific issue(s) being adjudged)</li> <li value=\"4\">Reasoning and Opinion (reasons for judgment rendered and resolution of any disputed facts)</li></ol>",
 "The drafter of the decision shall send it to the commissioners promptly enough so that within 21 days of adopting the Judgment, the Commission shall adopt a written decision and approve the minutes of its meetings. Any Commission member may file a concurring or dissenting opinion.",
-"13. Reporting – Within 42 days after the hearing, the Commission shall file its report with the Presbytery Stated Clerk. In addition, any commissioner writing a concurring or dissenting opinion shall file it with the Presbytery Stated Clerk within 42 days after the hearing. The Commission's report shall include the following:",
-"1. Commission's written decision, including the vote.",
-"2. Minutes of the meetings of the Commission.",
-"3. Briefs of the Parties",
-"4. Record of the Case as perfected",
+"13. Reporting – Within 42 days after the hearing, the Commission shall file its report with the Presbytery Stated Clerk. In addition, any commissioner writing a concurring or dissenting opinion shall file it with the Presbytery Stated Clerk within 42 days after the hearing. The Commission's report shall include the following: <ol class=\"appendix-subitems\"><li value=\"1\">Commission's written decision, including the vote.</li> <li value=\"2\">Minutes of the meetings of the Commission.</li> <li value=\"3\">Briefs of the Parties</li> <li value=\"4\">Record of the Case as perfected</li></ol>",
+"14. Distribution – The Presbytery Stated Clerk shall promptly forward to both parties a copy of the Commission's decision and any concurring or dissenting opinions. The Stated Clerk shall send the same to the members of the Presbytery.",
 "15. For the purposes of computing times, the day of the act or event from which a designated period of time begins shall not be included. The last day of the period shall be included, unless it is a Saturday, Sunday or postal holiday, in which case the period extends until the end of the next day which is not a Saturday, Sunday or postal holiday. \"Filing\" shall not be timely unless the documents are received by the appropriate party within the time fixed for such filing. \"Received\" shall be when the documents are actually delivered to the party.",
 "16. The Commission may extend any of the deadline dates in this Appendix, or page limits for briefs, upon its determination that so doing is required in the interest of justice.",
 "SUMMARY – This procedure would only apply to a Presbytery Judicial Commission acting as an appellate court. This procedure does not apply if a Presbytery chooses to hear any case as a whole body.",
 "These procedures provide three distinct six-week (42 day) periods:",
 "1. Resolving any disputes on the Record",
-"2. Filing, distributing and reading briefs",
-"3. Conducting hearing, deliberating and filing full report with Stated Clerk",
+"2. Filing, distributing, and reading briefs",
+"3. Conducting hearing, deliberating, and filing full report with Stated Clerk",
 "Long Process – If the Record is disputed, and the parties choose to file briefs, and the full time is taken for all deadlines, the Commission might not file its final report with the Stated Clerk until four months (126 days) after the Presbytery meeting at which it was appointed. However, if the full time is not taken for all deadlines, the Commission may be able to file its report in time for the next Presbytery meeting, even if the Record is disputed and briefs are filed.",
 "Medium Process – If either the Record is not disputed or the parties waive their right to file briefs, and the full time is taken for all deadlines, a Commission should file its final report within 84 days (12 weeks). In most Presbyteries, this should be in time for the next meeting.",
 "Short Process – If the Record is not disputed, and the parties waive their right to file briefs, the Commission should file its report within 42 days of the hearing, which could be held as soon as the Commissioners have read the Record. This scenario would also result in Presbytery receiving the Commission's report at the next Presbytery meeting."
@@ -6194,7 +6178,7 @@ window.BCO = {
 "part": "appx",
 "title": "Appendix I — Biblical Conflict Resolution",
 "paras": [
-"<i>BIBLICAL CONFLICT RESOLUTION</i> <b>PREFACE</b>",
+"<b>PREFACE</b>",
 "When the 30th General Assembly approved including Appendix I, Biblical Conflict Resolution, in the<i> BCO</i>, it was approved \"as a non-binding informational Appendix to the <i>BCO</i>\" (<i>M30GA</i>, 2002, page 297, item 30-62, recommendation 14). Appendix I, has no binding constitutional authority.",
 "As we continue to seek to become a church holy before God, the manner in which we respond to sin and conflicts in the body, and gently shepherd those caught in sin, will reflect our commitment to the authority of God's Word and the spirit of love, which should define all of our actions and relationships. Biblical peacemaking is one of God's highest priorities (Matt. 5:23-24; Rom. 12:18; Gal. 6:1); therefore, it must be one of our highest priorities. The <i>Book of Church Order</i> (<i>BCO</i>) reflects our commitment to following God's procedure for reclaiming those going astray. It says, \"Scriptural law is the basis of all discipline because it is the revelation of God's Holy will. Proper disciplinary principles are set forth in the Scriptures and must be followed\" (<i>BCO</i> 27-5). It also says, \"An injured party shall not become a prosecutor of personal offenses without having tried the means of reconciliation and of reclaiming the offender, required by Christ\" (<i>BCO</i> 31-5). The purpose of this Appendix is to provide guidance through the steps of biblical peacemaking required as pre-conditions to judicial process in cases of personal offense (<i>BCO</i> 31-5), and for use whenever possible in cases of general offense (<i>BCO</i> 31-7).",
 "Each presbytery should endeavor to have several elders trained in the methods of \"Christian conciliation\" (including mediation and arbitration), and available to serve as Christian conciliators in cases that could and should be resolved privately before judicial process is initiated. We would do well to follow the wisdom of those who have considered the importance of this matter. For example, Elder Edmund Clowney states, \"Discipline…is not first an exercise of negative judgment, a matter of church courts and censures. It begins with the care of friends with whom we strive to follow Christ\" (Clowney, E.P., <i>The Church</i>, IVP, 1995).",
@@ -6207,17 +6191,15 @@ window.BCO = {
 "d) If rejection persists, then the church must act through her court unto admonition, suspension, excommunication and deposition.",
 "This Appendix addresses the first three steps, (a) through (c), by providing an expanded discussion of the implications raised by Scriptural direction for a complete process at each step. Step (d), formal church discipline, is addressed by Part II of the <i>Book of Church Order</i>, The Rules of Discipline.",
 "<b>1. The first step – Instruction in the Word.</b>",
-"Many Christians do not fully understand the emphasis God places on living at peace and in unity with others (Eph. 4: 3). Preaching and teaching should regularly address this emphasis and the purposes for church discipline as set forth in <i>BCO</i> 27-3 and <i>BCO</i> 27-4. Attention should be drawn to the fact that the main procedural passage related to church discipline, Matthew 18:15-20, is set forth in the context of two powerful parables teaching the extent and depth of God's love in reclaiming those who have strayed (Matt. 18:10-14), and the vast measure of His forgiveness and the expansive forgiveness He expects from His children toward one another (Matt. 18:21-35). The extent of instruction on reconciliation provided to church members in \"new member classes\" and regular preaching from the pulpit will have a significant bearing on the extent to which a church member understands the benefits of church discipline and has consented to ecclesiastical jurisdiction (which is helpful for the church if it is to avoid legal liability for the proper exercise of church discipline).",
+"Many Christians do not fully understand the emphasis God places on living at peace and in unity with others (Eph. 4:3). Preaching and teaching should regularly address this emphasis and the purposes for church discipline as set forth in <i>BCO</i> 27-3 and <i>BCO</i> 27-4. Attention should be drawn to the fact that the main procedural passage related to church discipline, Matthew 18:15-20, is set forth in the context of two powerful parables teaching the extent and depth of God's love in reclaiming those who have strayed (Matt. 18:10-14), and the vast measure of His forgiveness and the expansive forgiveness He expects from His children toward one another (Matt. 18:21-35). The extent of instruction on reconciliation provided to church members in \"new member classes\" and regular preaching from the pulpit will have a significant bearing on the extent to which a church member understands the benefits of church discipline and has consented to ecclesiastical jurisdiction (which is helpful for the church if it is to avoid legal liability for the proper exercise of church discipline).",
 "Teaching God's Word concerning sin, and conflicts that result from it, and how Christians should respond biblically to conflict, will equip church members to become peacemakers themselves. Peacemaking has always been one of a Christian's most important ministries. As we are reminded in 2 Corinthians 5:18, God \"reconciled us to himself through Christ and gave us the ministry of reconciliation.\" One of the most powerful ways that we can encourage reconciliation with God is to model reconciliation among people. When others see us resolve our differences in a loving and biblical manner, they are inclined to give more weight to what we say about the Lord (John 13:34-35; 17:20-23). On the other hand, when they see Christians embroiled in disputes, they tend to write God's people off as hypocrites and dismiss the claims of Christ (Rom. 2:21-24; 1 Cor. 6:1-8).",
-"The Bible sets forth a process for resolving personal and substantive disputes in a constructive manner. This process is sometimes referred to as \"Christian conciliation\" and it may be used to resolve everything from minor personal differences to church divisions or lawsuits involving church members. As indicated in passages such as Proverbs 19:11, Matthew 5:23-25 and 18:15-20, 1 Corinthians 6:1-8, and Galatians 6:1, conciliation involves three basic steps: (1) when Christians are involved in a conflict that is too serious to",
-"overlook, the first thing that they should do is meet together privately and in person to try to resolve their differences; (2) if this effort is unsuccessful, they should ask one or more other Christians to meet with them and help them to seek reconciliation and a voluntary settlement of their differences (a process sometimes referred to as mediation); and (3) if they cannot arrive at a voluntary settlement, they should ask one or more other Christians to hear both sides of the matter and render a biblically based decision that both sides are obligated to accept (a process sometimes referred to as arbitration).",
+"The Bible sets forth a process for resolving personal and substantive disputes in a constructive manner. This process is sometimes referred to as \"Christian conciliation\" and it may be used to resolve everything from minor personal differences to church divisions or lawsuits involving church members. As indicated in passages such as Proverbs 19:11, Matthew 5:23-25 and 18:15-20, 1 Corinthians 6:1-8, and Galatians 6:1, conciliation involves three basic steps: (1) when Christians are involved in a conflict that is too serious to overlook, the first thing that they should do is meet together privately and in person to try to resolve their differences; (2) if this effort is unsuccessful, they should ask one or more other Christians to meet with them and help them to seek reconciliation and a voluntary settlement of their differences (a process sometimes referred to as mediation); and (3) if they cannot arrive at a voluntary settlement, they should ask one or more other Christians to hear both sides of the matter and render a biblically based decision that both sides are obligated to accept (a process sometimes referred to as arbitration).",
 "There are many benefits to resolving disputes through Christian conciliation. It prevents a public quarrel that would dishonor the Lord Jesus Christ and diminish the credibility and witness of His Church. Conciliation also allows Christians to demonstrate their faith in Christ and their confidence in His teachings (John 13:34; 14:15; 17:20-23). In addition, conciliation encourages forgiveness and promotes reconciliation, which can help to preserve valuable relationships and strengthen the Church (Eph. 4:29-32; Col. 3:12-17). Conciliation also helps people to identify and deal with the root causes of conflict, which may include such things as pride, selfishness, fear, vengeance, greed, bitterness, or unforgiveness (see Matt. 7:3-5). This allows people to make changes in their lives so that they will enjoy more peaceful relationships in the future (Eph. 4:1-3, 22-24).",
 "Christian conciliation is especially beneficial for people who sincerely want to do what is right and are open to learning where they have been wrong (Prov. 15:31-32). Conciliators can help them to identify improper attitudes or unwise practices, to understand more fully the effects of their decision and actions, and to make improvements in their lives that will help them to honor and serve the Lord more effectively in the future (1 Peter 2:12).",
 "Teaching and Ruling elders are encouraged to learn all they can about Christian conciliation and develop local ministries that will equip members under their care to respond to conflicts in a manner that reflects the power of Christ working in their lives. The more church members understand these concepts and benefits, the more likely they will be to apply biblical principles when conflicts occur.",
 "<b>2. The second step – An individual's responsibility to admonish another</b> (Matt. 18:15; Gal. 6:1).",
 "Scripture warns against making a premature judgment about a matter (Matt. 7:1-5). By first going personally and in private to those who have offended, we provide the opportunity for clarification of misunderstandings and avoid premature judgment. This step includes the three responses of personal peacemaking as follows:",
-"Overlook an offense: An individual may overlook an offense of another if it is minor in nature and it has not significantly dishonored God, damaged a",
-"personal relationship, or hurt other people (including the offender). \"A man's wisdom gives him patience; it is to his glory to overlook an offense\" (Prov. 19:11).",
+"Overlook an offense: An individual may overlook an offense of another if it is minor in nature and it has not significantly dishonored God, damaged a personal relationship, or hurt other people (including the offender). \"A man's wisdom gives him patience; it is to his glory to overlook an offense\" (Prov. 19:11).",
 "Discussion: When personal wrongs are too serious to overlook, the parties are required to seek to resolve them privately through loving confrontation and confession. \"If your brother has something against you…go and be reconciled\" (Matt. 5:23-24). \"If your brother sins against you, go and show him his fault, just between the two of you\" (Matt. 18:15).",
 "Negotiation: When a substantive issue related to money, property, or other material issues or rights divides Christians, a process of biblical negotiation should be followed that will meet the interests of all those involved. \"Each of you should look not only to your own interests, but also to the interests of others\" (Phil. 2:4).",
 "Privately responding to conflict early, before it escalates, through the means of these three forms of personal peacemaking will often result in reconciliation and no need for further peacemaking attention. Successful personal peacemaking is usually based on at least one parties' willingness to accept responsibility for how they have contributed to the conflict and by being willing to humble themselves for the greater goal of God's glory through \"making every effort\" (Eph. 4:3) to keep the unity of the spirit.",
@@ -6227,8 +6209,7 @@ window.BCO = {
 "Arbitration: When two parties to a conflict cannot come to a voluntary agreement on a substantive issue, one or more arbitrators may be appointed to listen to the arguments and evidence of each side and render a binding decision. \"If you have disputes about such matters, appoint as judges even men of little account in the church\" (1 Cor. 6:1-8).",
 "Church Discipline: Formal church discipline, pursuant to the procedures of <i>BCO</i> Part II, is reserved for those cases where the person who professes to be a Christian refuses to be reconciled, repent of personal sin, and do what is right. Church leaders bearing ecclesiastical jurisdiction over such persons should formally intervene to promote justice, repentance, and forgiveness. \"If he refuses to listen, tell it to the church\" (Matt. 18:17-20).",
 "<b>APPLICATION OF THE PRINCIPLES</b>",
-"Judicial cases that come to the attention of church courts frequently begin as personal disputes between two or more individuals. Typically, when one side feels they are not getting what they want, they bring charges of sin against the other side. In this manner, sessions and presbyteries are drawn into conflicts that would better be resolved at a personal level through Christian conciliation. Of course, when conflicted parties refuse to be reconciled, the accountability afforded by formal church discipline should be used to further the goals of purity in the Church, the rebuke of offenses, the removal of scandal, and the spiritual good of offenders (1 Cor. 5:5). Every effort should be made, however, to resolve the conflict through repentance, confession, forgiveness and reconciliation before formal charges are entertained by a church court. The intent of the relevant <i>BCO</i> provisions is to encourage Christian unity before the formal provisions of church discipline are brought to bear on a situation. Of course, not every situation will lend itself to Christian conciliation. However, every effort should be made to utilize private confrontation, mediation, and arbitration in order to",
-"reserve the use of formal church discipline, and the time of church courts, for those matters related to the purity of the Church and the keeping and reclaiming of disobedient sinners (<i>BCO</i> 27-3). Many of these ends will be realized through the processes of Christian conciliation and, therefore, should be viewed as prerequisite procedures to the formal disciplinary process.",
+"Judicial cases that come to the attention of church courts frequently begin as personal disputes between two or more individuals. Typically, when one side feels they are not getting what they want, they bring charges of sin against the other side. In this manner, sessions and presbyteries are drawn into conflicts that would better be resolved at a personal level through Christian conciliation. Of course, when conflicted parties refuse to be reconciled, the accountability afforded by formal church discipline should be used to further the goals of purity in the Church, the rebuke of offenses, the removal of scandal, and the spiritual good of offenders (1 Cor. 5:5). Every effort should be made, however, to resolve the conflict through repentance, confession, forgiveness and reconciliation before formal charges are entertained by a church court. The intent of the relevant <i>BCO</i> provisions is to encourage Christian unity before the formal provisions of church discipline are brought to bear on a situation. Of course, not every situation will lend itself to Christian conciliation. However, every effort should be made to utilize private confrontation, mediation, and arbitration in order to reserve the use of formal church discipline, and the time of church courts, for those matters related to the purity of the Church and the keeping and reclaiming of disobedient sinners (<i>BCO</i> 27-3). Many of these ends will be realized through the processes of Christian conciliation and, therefore, should be viewed as prerequisite procedures to the formal disciplinary process.",
 "<b>FAILURE TO FOLLOW THE STEPS</b>",
 "Churches unwilling or unable to instruct their members completely in the full breadth of the steps of conciliation and discipline encourage resorting to unbiblical, worldly responses to conflict. The escape responses of denial, flight, and even suicide can be expected if church members are not positively directed to the biblical processes of Christian conciliation. Others, when not given the hope of having matters responded to within the body of Christ, will resort to civil litigation, verbal and physical attack, and possibly even murder to remove an opponent where there is no avenue for a just resolution.",
 "Moving a case too quickly to formal church discipline can build barriers that could otherwise be dealt with in mediation or arbitration. Every church and presbytery is encouraged to equip elders and mature members with the skills of Christian conciliation, and to exhaust conciliation processes and remedies before moving to formal church discipline.",
@@ -6245,7 +6226,7 @@ window.BCO = {
 "Name (Printed) Signature",
 "__________________________________________________________________________________________",
 "Parent's or Guardian's Name (for minors) Parent's or Guardian's Signature",
-"This agreement is subject to arbitration pursuant to the [state] arbitration act, title ##, chapter #, [state] code annotated.",
+"THIS AGREEMENT IS SUBJECT TO ARBITRATION PURSUANT TO THE [STATE] ARBITRATION ACT, TITLE ##, CHAPTER #, [STATE] CODE ANNOTATED.",
 "<b>AMEND CHURCH BYLAWS TO ALLOW CONTINUING CHURCH JURISDICTION</b>",
 "The following clause is recommended for inclusion in local church bylaws to allow the continuing ecclesiastical jurisdiction over a member who may otherwise simply flee from the church to avoid biblical discipline:",
 "Members may be removed from membership at their own request following the steps of appropriate pastoral care as set forth in <i>BCO</i> 38-4. If a member requests to withdraw because of specific problems or disappointments with the church, the Session shall attempt to resolve those matters so that the member may remain in the church and enjoy greater fruitfulness and personal spiritual growth. If the Session is unable to resolve those matters, it shall offer to assist the member in locating a church of like faith and practice that can respond more effectively to his gifts and needs. If it appears to the Session that a member has requested removal merely to avoid church discipline, that request shall not be given effect until the disciplinary process has been properly concluded.",
@@ -6260,22 +6241,19 @@ window.BCO = {
 "title": "Appendix J — Sample Form For Terms Of Call",
 "paras": [
 "<i>SAMPLE FORM FOR TERMS OF CALL</i> ____(Church Name)________ (PCA) being on sufficient grounds well satisfied of the ministerial qualifications of you, ___(Minister's Name) ___, and having good hopes from our knowledge of your labors that your ministrations in the Gospel will be profitable to our special interests, do earnestly call you to undertake the pastoral office in said congregation, promising you, in the discharge of your duty, all proper support, encouragement and obedience in the Lord. That you may be free from worldly cares and avocations, we hereby promise and oblige ourselves to provide you with the following salary, benefits, vacations, and leaves of absence.",
-"<b>Salary and Housing Allowances</b> ____________________________ basis (weekly, monthly, etc.) <b> Gross Salary</b>, which includes housing allowance $___________________ Amount Designated as Housing Allowance* $___________________",
-"<b>Benefits </b> Primary Benefits Healthcare and Medicare Supplement Insurance/Allowance $____________________ Retirement Savings** -amount equal to _____% of salary + housing $____________________ Long Term Disability Insurance – replaces ______% of salary + housing $____________________ Life Insurance – amount equal to ______ times salary + housing $____________________ Social Security/Medicare Allowance $____________________ Equity Allowance for ministers who are living in a manse $____________________ Leadership Counseling/Coaching $____________________ Secondary Benefits Dental $____________________ Vision $____________________ HSA (Health Savings Account)*** $____________________ <b>Total Benefits</b> $____________________",
+"<b>Salary and Housing Allowances</b> ____________________________ basis (weekly, monthly, etc.) <b> Gross Salary</b>, which includes housing allowance $___________________ Amount Designated as Housing Allowance<sup>*</sup> $___________________",
+"<b>Benefits </b> Primary Benefits Healthcare and Medicare Supplement Insurance/Allowance $____________________ Retirement Savings<sup>**</sup> -amount equal to _____% of salary + housing $____________________ Long Term Disability Insurance – replaces ______% of salary + housing $____________________ Life Insurance – amount equal to ______ times salary + housing $____________________ Social Security/Medicare Allowance $____________________ Equity Allowance for ministers who are living in a manse $____________________ Leadership Counseling/Coaching $____________________ Secondary Benefits Dental $____________________ Vision $____________________ HSA (Health Savings Account)<sup>***</sup> $____________________ <b>Total Benefits</b> $____________________",
 "<b>Temporary Benefits</b> Relocation expenses will be reimbursed but shall not exceed the following $____________________ Other $____________________ <b>Temporary Benefits Total </b>$___________________",
 "<b>TOTAL AMOUNTS</b> $____________________",
-"<b>Vacations and Leaves of Absence</b> Vacation _____ Days Holiday Leave _____ Days Paid Sick Leave _____ Days Paternity Leave _____ Days Bereavement _____ Days Educational Leave _____ Days Sabbatical Leave_____ Days, after _____ years",
+"<b>Vacations and Leaves of Absence</b> Vacation _____ Days Holiday Leave _____ Days Paid Sick Leave _____ Days Paternity Leave _____ Days Bereavement _____ Days Educational Leave _____ Days Sabbatical Leave _____ Days, after _____ years",
 "<b>Attestation </b>I, having moderated the congregational meeting which extended a call to _______(Minister's Name)_____ for his ministerial services, do certify that the call has been made in all respects according to the rules laid down in the Book of Church Order, and that the persons who signed the call were authorized to do so by vote of the congregation.",
 "Clerk of Session: Minister-Elect: Signature: ______________________________ Signature: _______________________________ Print Name: _____________________________ Print Name: ______________________________ Date: _________________________________ Date: ___________________________________",
 "Send a copy to each of the following: 1) Minister-Elect 2) Stated clerk of the Presbytery",
-"*Section 107 of the Internal Revenue Code allows a minister to exclude a housing allowance from their taxable salary for eligible housing related expenses (i.e., mortgage payment, rent payments, utilities, etc.). It is important to note that the housing allowance is excludable for income tax purposes only (e.g., federal, and most states). It is not excludable for Self-Employment tax purposes (i.e., SECA) which are paid into the Social Security and Medicare system.",
+"<p class=\"fn\"><sup>*</sup>Section 107 of the Internal Revenue Code allows a minister to exclude a housing allowance from their taxable salary for eligible housing related expenses (i.e., mortgage payment, rent payments, utilities, etc.). It is important to note that the housing allowance is excludable for income tax purposes only (e.g., federal, and most states). It is not excludable for Self-Employment tax purposes (i.e., SECA) which are paid into the Social Security and Medicare system.</p>",
 "A minister's total cash salary can be broken down into two parts: 1) Taxable Salary and 2) Housing Allowance (Partially Taxable Salary).",
-"Minister's Salary",
-"Taxable Salary",
-"Housing Allowance (Partially Taxable Salary)",
-"Taxable for Self-Employment Tax purposes Taxable for Federal Income Tax purposes Taxable only for Self-Employment Tax purposes ** There is an annual limit on the amount of total contributions (i.e., employee and employer contributions) that can be made to a 403(b) plan. This limit is referred to as the 415(c) limit. However, it is important to note that a minister's housing allowance cannot be included as part of includible compensation because it is not a component of a minister's gross income (1.425-2(d) of income tax regulations). This limit may reduce the amount that can be contributed to a retirement account even though the call package guidelines formula includes it (i.e., retirement contributions are a percentage of salary and housing allowance).",
-"*** Health Savings Account requires a high deductible heath savings account eligible plan.",
-"Copyright © 2026 by the Office of the Stated Clerk of the General Assembly of the Presbyterian Church in America All rights reserved"
+"<section class=\"appendix-tax\"> <h2>Minister's Salary</h2> <h3>Taxable Salary</h3> <ul><li>Taxable for Self-Employment Tax purposes</li> <li>Taxable for Federal Income Tax purposes</li></ul> <h3>Housing Allowance (Partially Taxable Salary)</h3> <ul><li>Taxable only for Self-Employment Tax purposes</li></ul></section>",
+"<p class=\"fn\"><sup>**</sup> There is an annual limit on the amount of total contributions (i.e., employee and employer contributions) that can be made to a 403(b) plan. This limit is referred to as the 415(c) limit. However, it is important to note that a minister's housing allowance cannot be included as part of includible compensation because it is not a component of a minister's gross income (1.425-2(d) of income tax regulations). This limit may reduce the amount that can be contributed to a retirement account even though the call package guidelines formula includes it (i.e., retirement contributions are a percentage of salary and housing allowance).</p>",
+"<p class=\"fn\"><sup>***</sup> Health Savings Account requires a high deductible heath savings account eligible plan.</p>"
 ]
 }
 };

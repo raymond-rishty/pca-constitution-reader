@@ -519,8 +519,8 @@ def do(name):
             entries[e["id"]] = e; order.append(e["id"])
         os.makedirs(OUT, exist_ok=True)
         path = os.path.join(OUT, "bco.js")
-        with open(path, "w") as f:
-            f.write("/* BCO — personal use only (© PCA, do not publish). HTML base + 2025-verified. */\n")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("/* BCO — personal use only (© PCA). HTML extraction pending edition verification. */\n")
             f.write("window.BCO = " + json.dumps(entries, ensure_ascii=False, indent=0) + ";\n")
             f.write("window.BCO_ORDER = " + json.dumps(order) + ";\n")
         nsec = sum(len(c.get('sections', [])) for c in ch.values())

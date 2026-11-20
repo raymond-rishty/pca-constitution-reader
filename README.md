@@ -55,7 +55,7 @@ The page loads static JavaScript data files. They are useful for retrieval or pa
 - [`content/wsc.js`](content/wsc.js) assigns the `WSC` question-and-answer array.
 - [`content/wlc.js`](content/wlc.js) assigns the `WLC` question-and-answer array.
 - [`content/wcf.js`](content/wcf.js) assigns the `WCF` chapter/section object.
-- [`content/bco.js`](content/bco.js) assigns the `BCO` provision object and `BCO_ORDER` chapter list.
+- [`content/bco.js`](content/bco.js) assigns the `BCO` provision object, `BCO_ORDER` chapter list, and `BCO_ENGLISH_EDITION` source metadata. See [English BCO edition verification](docs/bco-edition-verification.md) for the release checks.
 - [`content/proofs.js`](content/proofs.js) and [`content/verses.js`](content/verses.js) provide supporting Scripture data.
 
 These files are JavaScript assignments rather than standalone JSON. Parse the relevant global and preserve the displayed reference identifiers.
