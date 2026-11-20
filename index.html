@@ -134,6 +134,12 @@
   .prov .n:hover{border-bottom-color:var(--accent)}
   .prov .body .lead{margin:0}
   .prov .body .bpara{margin-top:.6em; margin-bottom:.6em}
+  .appendix-subitems,.appendix-tax ul{padding-inline-start:1.55em}
+  .appendix-subitems{margin:.4em 0 0}
+  .appendix-tax h2,.appendix-tax h3{margin:0; font-size:inherit}
+  .appendix-tax h2{margin-block-end:.45em}
+  .appendix-tax ul{margin:.2em 0 .65em}
+  .appendix-tax ul:last-child{margin-block-end:0}
   .prov .body .fnref{font-size:.62em; font-weight:600; color:var(--accent); vertical-align:super; padding:0 1px; cursor:pointer}
   .prov .body .fn{display:block; font-family:var(--sans); font-size:.8rem; line-height:1.55; color:var(--muted); border-top:1px solid var(--line); margin-top:.8em; padding-top:.5em}
   .prov .body .fn sup{color:var(--accent); font-weight:600; padding-right:2px}
@@ -1509,8 +1515,8 @@ function showChapter(book, o){
   let gut = '';
   ch.provs.forEach(p=>{
     if(p.prose || !p.ref){
-      const proseBody = p.blocks ? `<div class="body">${renderBlocks(p.blocks, '')}</div>` : `<span class="body">${p.body||''}</span>`;
-      doc += `<div class="prov prose"${p.ref?` id="p-${p.ref}"`:''}>${proseBody}</div>`;
+      const proseBody = p.blocks ? renderBlocks(p.blocks, '') : (p.body||'');
+      doc += `<div class="prov prose"${p.ref?` id="p-${p.ref}"`:''}><div class="body">${proseBody}</div></div>`;
       return;
     }  // prose (front/appendix); keep id if it has footnotes
     const d = dossierFor(p.ref), n = total(d);

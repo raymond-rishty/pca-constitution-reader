@@ -15,6 +15,8 @@ QUOTES = str.maketrans({"’": "'", "‘": "'", "“": '"', "”": '"'})
 
 
 def visible(text):
+    # Explicit HTML list values preserve the printed item numbers in Appendix H.
+    text = re.sub(r'<li value="(\d+)">', r'\1. ', text)
     return " ".join(html.unescape(re.sub(r"<[^>]+>", "", text)).split())
 
 
@@ -89,8 +91,8 @@ def arrange_pdf(entries, text):
     row = next(i for i, p in enumerate(app_j) if p.startswith("Minister's Salary "))
     columns = re.fullmatch(
         r"(Minister's Salary) (Taxable Salary) (Housing Allowance \(Partially Taxable Salary\)) "
-        r"(• Taxable for Self-Employment Tax purposes) (• Taxable only for Self-Employment Tax) "
-        r"(• Taxable for Federal Income Tax purposes) (purposes)", app_j[row])
+        r"• (Taxable for Self-Employment Tax purposes) • (Taxable only for Self-Employment Tax) "
+        r"• (Taxable for Federal Income Tax purposes) (purposes)", app_j[row])
     title, taxable, housing, employment, housing_employment, federal, continuation = columns.groups()
     app_j[row:row + 1] = [title, taxable, employment, federal, housing, housing_employment + " " + continuation]
 
