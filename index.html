@@ -612,6 +612,7 @@
 <script src="content/citations-counts.js"></script>
 <script src="content/ramsay.js"></script>
 <script src="content/rao.js"></script>
+<script src="content/bco-supplements.js"></script>
 <script src="content/translations/bco-2025-es.js"></script>
 <script src="content/translations/bco-2026-ko.js"></script>
 <script src="vendor/minisearch.js"></script>
@@ -741,7 +742,11 @@ function registerBook(pack){            // make COMPONENTS/SPINE aware of a cust
   const i = window.BOOK_PACKS.findIndex(b=>b.component.key===k);
   if(i>=0) window.BOOK_PACKS[i]=pack; else window.BOOK_PACKS.push(pack);
 }
-const saveBooks = ()=>{ try{ localStorage.setItem("pcacon.books", JSON.stringify(window.BOOK_PACKS)); }catch(e){} };
+const officialSupplements = new Map((window.BUNDLED_PACKS||[])
+  .filter(p=>p.kind==='book' && p.component.nonConstitutional && p.component.division==='supplemental'
+    && p.notice?.startsWith('Official PCA source: '))
+  .map(p=>[p.component.key,p]));
+const saveBooks = ()=>{ try{ localStorage.setItem("pcacon.books", JSON.stringify(window.BOOK_PACKS.filter(p=>!officialSupplements.has(p.component.key)))); }catch(e){} };
 const DIVISIONS = {                     // home groupings (order = display order)
   doctrinal:{label:"Doctrinal Standards", one:"Doctrinal Standard", order:1},
   order:{label:"Church Order", one:"Church Order", order:2},
@@ -792,6 +797,7 @@ const BCO_EDITION_FORMAT = "pca-reader-bco-edition";
     }
   }catch(e){}
 })();
+officialSupplements.forEach(registerBook);
 const saveNotes = ()=>{ try{ localStorage.setItem("pcacon.notes", JSON.stringify(NOTES)); }catch(e){} };
 const saveCommentaries = ()=>{ try{
   // Structured commentary blocks already contain the full rendered text. Keep
@@ -862,6 +868,7 @@ function importPack(obj){
     saveCommentaries();
   } else if(obj.kind==="book"){                        // a whole new corpus (presbytery rules, bylaws…)
     if(!obj.component || !obj.component.key) throw new Error("Book pack missing component.key.");
+    if(officialSupplements.has(obj.component.key)) throw new Error("This document is supplied by the reader.");
     registerBook(obj); saveBooks();
     return {kind:obj.kind, n:Object.values(obj.chapters||{}).reduce((a,c)=>a+((c.sections||[]).length),0)};
   } else throw new Error("Unsupported pack kind: "+obj.kind);
@@ -996,7 +1003,7 @@ function buildChapter(book, o){
     const pd = pagedData(book), bc = pd && pd.map[o.ch];
     const partNames={front:"Preface & Principles",fog:"Form of Government",rod:"Rules of Discipline",dow:"Directory for Worship",appx:"Appendices"};
     const partName=bc&&partNames[bc.part], isNumbered=bc&&['fog','rod','dow'].includes(bc.part);
-    const kicker=COMPONENTS[book].name+(partName?" · "+partName:'');
+    const kicker=COMPONENTS[book].name+(partName?" · "+partName:'')+(COMPONENTS[book].nonConstitutional?" · Supplementary PCA material":"");
     const title=bc&&isNumbered?"Chapter "+o.ch:(bc&&(bc.title||("Chapter "+o.ch)));
     const subtitle=bc&&isNumbered?bc.title:"";
     if(bc && bc.vacated) return {kicker, title, subtitle, railSub:[], provs:[{ref:null,body:"This chapter has been vacated."}]};
@@ -1215,6 +1222,12 @@ function pagedRoute(book, rest){
       return {ch:chapter, anchor:section};
     }
   }
+  if(officialSupplements.has(book)){
+    const {map, order} = pagedData(book);
+    if(Object.hasOwn(map,rest)) return {ch:rest};
+    const ch = order.find(id=>map[id].sections.some(s=>s.ref===rest));
+    if(ch) return {ch,anchor:rest};
+  }
   if(book !== 'bco'){
     const match = /^(\d+)(?:-(\d+))?(?:\.[A-Za-z0-9]+|\([A-Za-z0-9]+\))?$/i.exec(rest);
     return {ch: match ? String(Number(match[1])) : rest, anchor: match && match[2] ? String(Number(match[1]))+'-'+String(Number(match[2])) : undefined};
@@ -1243,7 +1256,7 @@ function applyRoute(){
   else openTarget(book, pagedRoute(book, rest));
 }
 
-const EDITION_LINE = "Book of Church Order through the 52nd General Assembly (2025) · Westminster Standards in the American revision (received 1788)";
+const EDITION_LINE = "Book of Church Order through the 53rd General Assembly (2026) · Westminster Standards in the American revision (received 1788)";
 
 function showAbout(){
   setView("about");
@@ -1255,7 +1268,7 @@ function showAbout(){
 
     <h2 class="about-h">Edition &amp; currency</h2>
     <ul class="about-list">
-      <li><b>Book of Church Order</b> — current through the <b>52nd General Assembly (2025)</b>, including the Preface, Preliminary Principles, and Appendices.</li>
+      <li><b>Book of Church Order</b> — current through the <b>53rd General Assembly (2026)</b>, including the Preface, Preliminary Principles, and Appendices.</li>
       <li><b>Westminster Confession &amp; Catechisms</b> — the American revision, as received in <b>1788</b> (the text held by the PCA), presented with the Scripture proof texts.</li>
     </ul>
 
@@ -1298,7 +1311,7 @@ function showHome(){
     <h1 class="home-title">The Constitution of the Presbyterian Church in America</h1>
     <div class="home-rule"></div>
     <p class="home-subordinate">Subject to and subordinate to the Scriptures of the Old and New Testaments, the inerrant Word of God.</p>
-    <button class="home-jump" id="homeJump"><span><span class="mag">⌕</span>&nbsp; Search the full Constitution — try “chief end,” presbytery, or BCO 24-1…</span></button>
+    <button class="home-jump" id="homeJump"><span><span class="mag">⌕</span>&nbsp; Search the Constitution and supplementary documents — try “chief end,” presbytery, or BCO 24-1…</span></button>
     <div class="hentries">${entry('wcf')}${entry('wlc')}${entry('wsc')}${entry('bco')}</div>
     ${addedSection}
     <p class="home-edition">${EDITION_LINE} · <a class="home-about" data-about>About &amp; sources</a></p>
@@ -1343,6 +1356,10 @@ function showComponent(book){
           return `<li><a data-book="bco" data-ch="${id}"><span class="tn">${numbered?id:''}</span><span class="tt">${bc.title||'(Vacated)'}</span>${bc.vacated?'<span class="sample">vacated</span>':''}</a></li>`;
         }).join('')}</ol></div>`;
     }).join('');
+    const indexLink = officialSupplements.has('bco-subject-index')
+      ? 'data-book="bco-subject-index"'
+      : 'href="https://www.pcaac.org/book-of-church-order/index/"';
+    toc += `<div class="part-block"><h3>Index</h3><ol class="toc one"><li><a ${indexLink}><span class="tt">BCO subject index</span></a></li></ol></div>`;
   } else { // bco fallback (illustrative)
     toc = BCO_PARTS.map(p=>`<div class="part-block">
       <h3>${p.name}</h3><p class="prange">${p.range}${p.note?` — <em>${p.note}</em>`:''}</p>
@@ -1366,10 +1383,11 @@ function showComponent(book){
       : ((book==='wsc'&&window.WSC)||(book==='wlc'&&window.WLC)||(book==='wcf'&&window.WCF))
       ? 'Full text — public-domain OPC edition (the standard the PCA has adopted). Scripture proof texts are pending a proof-text source (WCF 21 shows a sample).'
       : c.custom
-      ? (c.nonConstitutional ? 'Supplementary PCA material — current text through the 52nd General Assembly (2025); not part of the PCA Constitution.' : 'Imported document — added from a pack and stored on this device; a local governing document, not part of the PCA Constitution.')
+      ? (c.nonConstitutional ? 'Supplementary PCA material.' : 'Imported document — added from a pack and stored on this device; a local governing document, not part of the PCA Constitution.')
       : c.mode==='scroll'
       ? 'Design prototype — placeholder text. The catechism opens as one long-scrolling page; every question is individually anchored and deep-linkable.'
       : 'Design prototype — text is placeholder and the chapter list is illustrative. The chapter marked “sample” opens a live reading view.'}</p>
+    ${officialSupplements.has(book)?`<p class="comp-note"><a href="${esc(officialSupplements.get(book).notice.slice('Official PCA source: '.length))}">Official PCA source</a></p>`:''}
     ${book==='bco'&&BCO_EDITION.notice?`<div class="advisory-note"><strong>${BCO_EDITION.component.noticeLabel||'Edition note'}:</strong> ${BCO_EDITION.notice}</div>`:''}
   </div>`;
   window.scrollTo(0,0);
@@ -1881,7 +1899,8 @@ function buildSearch(){
       const ch=bp.chapters[id]||{};
       (ch.sections||[]).forEach(s=>{
         const text=s.body||((s.blocks||[]).map(b=>b[0]==='i'?`${b[2]} ${b[3]}`:b[2]).join(' '));
-        out.push(_searchRecord(k,s.ref||id,{ch:id},ch.title||'',_plain(text)));
+        const prose = !!s.prose && officialSupplements.has(k);
+        out.push(_searchRecord(k,s.ref||id,prose?{ch:id,anchor:s.ref}:{ch:id},ch.title||'',_plain(text),prose));
       });
     });
     Object.entries(bp.commentary||{}).forEach(([ref,content])=>addPackContent(k,ref,'Bundled commentary',content,'commentary',bp.commentaryLabel||'Commentary'));
@@ -2134,7 +2153,7 @@ function renderPacks(){
   document.getElementById('packsBody').innerHTML =
       `<div class="pack-row"><div><b>My notes</b><span class="pack-sub">${nc} note${nc!==1?'s':''} · stored on this device</span></div><button class="pack-btn" data-act="export-notes"${nc?'':' disabled'}>Export…</button></div>`
     + window.BCO_COMMENTARIES.map((c,i)=>`<div class="pack-row"><div><b>${c.label}</b><span class="pack-sub">Commentary · ${Object.keys(c.entries||{}).length+(c.sections||[]).length} sections</span></div><button class="pack-btn" data-act="rm-comm" data-i="${i}">Remove</button></div>`).join('')
-    + window.BOOK_PACKS.map(b=>`<div class="pack-row"><div><b>${b.component.name}</b><span class="pack-sub">Book · ${bookSecs(b)} sections</span></div><button class="pack-btn" data-act="rm-book" data-key="${b.component.key}">Remove</button></div>`).join('')
+    + window.BOOK_PACKS.filter(b=>!officialSupplements.has(b.component.key)).map(b=>`<div class="pack-row"><div><b>${b.component.name}</b><span class="pack-sub">Book · ${bookSecs(b)} sections</span></div><button class="pack-btn" data-act="rm-book" data-key="${b.component.key}">Remove</button></div>`).join('')
     + available.map(p=>`<div class="pack-row"><div><b>${p.kind==='book'?p.component.name:p.label}</b><span class="pack-sub">${p.notice||((p.kind==='book'?'Book · '+bookSecs(p):'Commentary · '+Object.keys(p.entries).length)+' sections · public domain, included')}</span></div><button class="pack-btn" data-act="add-bundled" data-label="${p.label}">Add</button></div>`).join('')
     + `<button class="pack-btn import" data-act="import">Import a file…</button>`
     + `<p class="packs-note">Notes and imported books are kept in this browser's local storage and survive reloads. You can import a content pack or a historical BCO edition snapshot JSON. Public-domain packs (Ramsay commentary; a sample book) are included — just tap <b>Add</b>. Copyrighted commentary (e.g. Smith) isn't bundled; import it as your own JSON file. Imported books appear alongside the four standards. Everything exports/imports as portable JSON.</p>`;

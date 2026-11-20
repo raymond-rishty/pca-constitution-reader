@@ -307,3 +307,7 @@ Neither import path performs full JSON Schema validation or validates provision-
 
 
 The schema is intentionally stricter than the importer: it requires the fields a well-formed producer should emit, constrains block tuple shapes and divisions, and disallows unknown fields within the documented v1 structures. Some cross-field invariants — especially that every `order` value names a key in `chapters` — are documented requirements that standard JSON Schema cannot conveniently enforce without additional validation logic.
+
+## Official PCA texts for local study
+
+Run `python build_bco_supplements.py` with Python, lxml, and curl to generate the RAO, OMSJC, Certificate of Incorporation, Corporate Bylaws, NAPARC agreements, and BCO subject index for local study. The reader loads the resulting `content/bco-supplements.js` on startup. The generated text is ignored by Git. Each document’s contents page shows its edition and official source link.
