@@ -1269,7 +1269,11 @@ function applyRoute(){
     if(bundled){ registerBook(bundled); saveBooks(); SEARCH=null; refreshNav(); }
   }
   if(!COMPONENTS[book]){ Object.assign(visit,{route:'',target:null,panel:null,match:null}); showHome(); return; }
-  if(!rest){ showComponent(book); return; }
+  if(!rest){
+    if(book==='bco-subject-index') openTarget(book,{ch:'subjects'});
+    else showComponent(book);
+    return;
+  }
   if(visit.target) openTarget(book, visit.target);
   else if(COMPONENTS[book].mode === 'scroll') openTarget(book, {anchor: rest});
   else openTarget(book, pagedRoute(book, rest));
@@ -1555,13 +1559,17 @@ function showChapter(book, o){
   document.querySelectorAll('#books button').forEach(b=>b.setAttribute('aria-current', b.dataset.book===book));
   const ch = buildChapter(book, o);
   const c = COMPONENTS[book];
+  const isBcoIndex = book==='bco-subject-index';
+  const contentsBook = isBcoIndex ? 'bco' : book;
+  const contentsName = isBcoIndex ? 'BCO contents' : c.name;
   // rail
-  let rail = `<a class="rail-back" data-book="${book}">‹ ${c.abbr} contents</a><p class="crumb">${ch.title}</p>`;
+  let rail = `<a class="rail-back" data-book="${contentsBook}">‹ ${COMPONENTS[contentsBook].abbr} contents</a><p class="crumb">${ch.title}</p>`;
   if(ch.railSub && ch.railSub.length) rail += `<ol class="sub">` + ch.railSub.map(r=>`<li><a class="jump" data-anchor="${r}">${provisionLabel(book,r)}</a></li>`).join('') + `</ol>`;
   document.getElementById('rail').innerHTML = rail;
   // doc
-  let doc = `<a class="read-back" data-book="${book}">‹ ${c.name}</a>`
+  let doc = `<a class="read-back" data-book="${contentsBook}">‹ ${contentsName}</a>`
     + `<p class="kicker">${ch.kicker}</p><h1>${ch.title}</h1>`
+    + (isBcoIndex ? `<p class="subtitle">${esc(c.meta)} · <a href="${esc(officialSupplements.get(book)?.notice.slice('Official PCA source: '.length) || 'https://www.pcaac.org/book-of-church-order/index/')}">Official PCA source</a></p>` : '')
     + (ch.subtitle ? `<p class="subtitle">${ch.subtitle}</p>` : '')
     + (ch.advisoryNote ? `<div class="advisory-note">${ch.advisoryNote}</div>` : '');
   let gut = '';
@@ -1593,7 +1601,7 @@ function showChapter(book, o){
   // footer pager (sequential nav) — flows across BCO parts, stops at component edges
   const s = SPINE[book], i = spineIndex(book, o);
   const prev = i>0 ? s[i-1] : null, next = (i>=0 && i<s.length-1) ? s[i+1] : null;
-  doc += `<nav class="pager">`
+  if(!isBcoIndex) doc += `<nav class="pager">`
     + (prev ? pgLink('prev', book, prev) : `<a class="pg prev disabled pgnav" data-book="${book}" data-contents>‹ Contents</a>`)
     + `<span class="pg pos">${i>=0?i+1:'—'} / ${s.length}</span>`
     + (next ? pgLink('next', book, next) : `<a class="pg next disabled pgnav" data-book="${book}" data-contents>Contents ›</a>`)
@@ -2156,7 +2164,7 @@ document.body.addEventListener('click', e=>{
   const va = e.target.closest('.vall'); if(va){ const view=va.closest('.proofs-view'); const open=va.getAttribute('aria-pressed')!=='true'; view.querySelectorAll('.vref').forEach(a=>a.classList.toggle('open',open)); rebuildVerses(view); return; }
   if(e.target.closest('.home-jump')){ openPal(); return; }
   const mm = e.target.closest('.mm-item'); if(mm){ if(mm.hasAttribute('data-home')) navigatePage(''); else if(mm.hasAttribute('data-install')){ dismissPanel(); promptInstall(); } else if(mm.hasAttribute('data-import')) openPanel('packs'); else if(mm.hasAttribute('data-about')) navigatePage('about'); else if(mm.hasAttribute('data-share')){ dismissPanel(); shareApp(); } else navigatePage(mm.dataset.book); return; }
-  const bn = e.target.closest('.bn'); if(bn){ const a=bn.dataset.bn; if(a==='library') navigatePage(''); else if(a==='search') openPal(); else navigatePage(current); return; }
+  const bn = e.target.closest('.bn'); if(bn){ const a=bn.dataset.bn; if(a==='library') navigatePage(''); else if(a==='search') openPal(); else navigatePage(current==='bco-subject-index'?'bco':current); return; }
   const about = e.target.closest('[data-about]'); if(about){ navigatePage('about'); return; }
   const home = e.target.closest('[data-home]'); if(home){ navigatePage(''); return; }
   const bookLink = e.target.closest('.rail-back,.read-back,.entry,.hentry'); if(bookLink){ navigatePage(bookLink.dataset.book); return; }
