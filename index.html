@@ -1014,11 +1014,16 @@ function buildChapter(book, o){
     const subtitle = isChapter ? bc.title : "";
     if(bc.vacated) return {kicker, title, subtitle, railSub:[], provs:[{ref:null, body:BCO_EDITION.component.vacatedText||"This chapter has been vacated."}]};
     const provs = (bc.paras||[]).map(p=>({ref:null, body:p}))
-      .concat((bc.sections||[]).map(s=>Object.assign({ref:s.ref, body:s.body, blocks:s.blocks}, bc.part==='dow' ? {con:!!s.binding} : {})));
+      .concat((bc.sections||[]).flatMap(s=>{
+        const provision={ref:s.ref, body:s.body, blocks:s.blocks, con:bc.part==='dow'&&!!s.binding};
+        return s.heading ? [{ref:null,body:`<b>${s.heading}</b>`}, provision] : [provision];
+      }));
     if(o.ch==='appH'){
       const figure=BCO_APPENDIX_H_FIGURES[BCO_EDITION.lang]||BCO_APPENDIX_H_FIGURES.en;
       const image=`<img class="pack-figure" src="${figure.src}" alt="${figure.alt}">`;
-      if(provs[0]?.blocks?.length){
+      if(BCO_EDITION.lang==='en'){
+        provs.push({ref:null,body:image});
+      } else if(provs[0]?.blocks?.length){
         const [opening,...rest]=provs[0].blocks;
         provs[0]=Object.assign({},provs[0],{blocks:[opening,['p',0,image],...rest]});
       } else {

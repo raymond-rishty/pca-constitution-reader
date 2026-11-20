@@ -8,7 +8,7 @@ npm run build
 
 The authoritative Appendix H sources are the SVG files in `diagrams/source/`. The harness checks their XML and copies them verbatim to `diagrams/`, where the reader and content packs load them. They have fixed shapes, connector paths, and lettering; a graph layout engine does not rearrange them. The build can also run directly with `python build_site.py`.
 
-The built-in BCO Appendix H page embeds the active edition's SVG directly after the opening paragraph. The reader loads the local SVG as an in-page image.
+The built-in BCO Appendix H page embeds the active edition's SVG as an in-page image. The English chart follows the appendix text in the 2026 print order. The Spanish and Korean charts follow the opening paragraph.
 
 The English SVG preserves the original PDF's boxes, connectors, shadows, and arrowheads. All three SVGs use editable whole-line `<text>` or `<tspan>` elements. The English line positions and widths retain the printed layout; a single `textLength` per line preserves its width while the browser lays out the characters. The sources contain no individually placed PDF glyphs or glyph-outline definitions.
 
