@@ -22,7 +22,7 @@ window.BUNDLED_PACKS.push({
   ],
   "chapters": {
     "subjects": {
-      "title": "Subject index",
+      "title": "SUBJECT INDEX",
       "sections": [
         {
           "ref": "absentee-church-members-46-2",

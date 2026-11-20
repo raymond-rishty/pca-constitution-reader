@@ -24,7 +24,7 @@ window.BUNDLED_PACKS.push({
   ],
   "chapters": {
     "note": {
-      "title": "General Assembly note",
+      "title": "GENERAL ASSEMBLY NOTE",
       "sections": [
         {
           "ref": "General Assembly note",
@@ -40,7 +40,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "comity": {
-      "title": "NAPARC Golden Rule Comity Agreement",
+      "title": "NAPARC GOLDEN RULE COMITY AGREEMENT",
       "sections": [
         {
           "ref": "Comity",
@@ -105,7 +105,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "transfer": {
-      "title": "NAPARC Agreement on Transfer of Members",
+      "title": "NAPARC AGREEMENT ON TRANSFER OF MEMBERS",
       "sections": [
         {
           "ref": "Transfer",
