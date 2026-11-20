@@ -4,7 +4,7 @@ A personal study reader for the Presbyterian Church in America (PCA) constitutio
 
 The deployed reader is a single-page application. Its compact agent map is [`llms.txt`](llms.txt); this guide carries the longer usage and authority notes that do not belong in that index.
 
-For local study, generate the searchable BCO subject index and supplementary documents using the [content pack instructions](docs/content-packs.md#official-pca-texts-for-local-study).
+The reader includes a searchable BCO subject index and supplementary PCA documents. To refresh these texts from their official sources, follow the [content pack instructions](docs/content-packs.md#official-pca-supplementary-texts).
 
 ## Scope and authority
 

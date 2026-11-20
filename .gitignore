@@ -4,6 +4,3 @@ __pycache__/
 node_modules/
 *.pyc
 .claude/
-
-# PCA source text generated for local study
-/content/bco-supplements.js
