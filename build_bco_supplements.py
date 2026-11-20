@@ -110,6 +110,7 @@ def build(doc, source):
                 "transfer": chapter(text(rows[transfer]), rows[transfer + 1:], r"(\d+)\.", "Transfer."),
             }
     for data in chapters.values():
+        data["title"] = data["title"].upper()
         refs = [section["ref"] for section in data["sections"]]
         assert refs, (key, data["title"])
         seen = set()

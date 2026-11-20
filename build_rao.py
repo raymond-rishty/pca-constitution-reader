@@ -84,7 +84,7 @@ def build(source: str) -> dict:
         else:
             article_intro["body"] = ""
         sections.insert(0, article_intro)
-        chapters[article] = {"title": title, "sections": sections}
+        chapters[article] = {"title": title.upper(), "sections": sections}
         order.append(article)
 
     assert order == [str(n) for n in range(1, 21)], f"expected RAO articles 1–20, got {order}"

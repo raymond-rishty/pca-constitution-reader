@@ -41,7 +41,7 @@ window.BUNDLED_PACKS.push({
   ],
   "chapters": {
     "1": {
-      "title": "Organization of a General Assembly’s Meeting",
+      "title": "ORGANIZATION OF A GENERAL ASSEMBLY’S MEETING",
       "sections": [
         {
           "ref": "1",
@@ -101,7 +101,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "2": {
-      "title": "The Moderator",
+      "title": "THE MODERATOR",
       "sections": [
         {
           "ref": "2",
@@ -141,7 +141,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "3": {
-      "title": "The Stated Clerk",
+      "title": "THE STATED CLERK",
       "sections": [
         {
           "ref": "3",
@@ -1617,7 +1617,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "10": {
-      "title": "The Assembly Arrangements",
+      "title": "THE ASSEMBLY ARRANGEMENTS",
       "sections": [
         {
           "ref": "10",
@@ -1781,7 +1781,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "11": {
-      "title": "Communications and Overtures",
+      "title": "COMMUNICATIONS AND OVERTURES",
       "sections": [
         {
           "ref": "11",
@@ -1947,7 +1947,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "12": {
-      "title": "Reports to the General Assembly",
+      "title": "REPORTS TO THE GENERAL ASSEMBLY",
       "sections": [
         {
           "ref": "12",
@@ -1987,7 +1987,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "13": {
-      "title": "New Business",
+      "title": "NEW BUSINESS",
       "sections": [
         {
           "ref": "13",
@@ -2047,7 +2047,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "14": {
-      "title": "Committees of Commissioners for permanent committees and agencies",
+      "title": "COMMITTEES OF COMMISSIONERS FOR PERMANENT COMMITTEES AND AGENCIES",
       "sections": [
         {
           "ref": "14",
@@ -3565,7 +3565,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "18": {
-      "title": "Assembly Expenses",
+      "title": "ASSEMBLY EXPENSES",
       "sections": [
         {
           "ref": "18",
@@ -3610,7 +3610,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "19": {
-      "title": "Parliamentary Procedure",
+      "title": "PARLIAMENTARY PROCEDURE",
       "sections": [
         {
           "ref": "19",
@@ -3741,7 +3741,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "20": {
-      "title": "Amendment or Suspension of Rules",
+      "title": "AMENDMENT OR SUSPENSION OF RULES",
       "sections": [
         {
           "ref": "20",

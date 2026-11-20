@@ -31,7 +31,7 @@ window.BUNDLED_PACKS.push({
   ],
   "chapters": {
     "preface": {
-      "title": "Preface",
+      "title": "PREFACE",
       "sections": [
         {
           "ref": "preface",

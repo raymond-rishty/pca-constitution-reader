@@ -42,7 +42,7 @@ window.BUNDLED_PACKS.push({
   ],
   "chapters": {
     "preface": {
-      "title": "Preface",
+      "title": "PREFACE",
       "sections": [
         {
           "ref": "Preface",
@@ -2099,7 +2099,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "15": {
-      "title": "PROCEDURE FOR HEARING A REPORT ARISING OUT OF GENERAL REVIEW AND CONTROL (BCO 40; RAO 16-10.c)",
+      "title": "PROCEDURE FOR HEARING A REPORT ARISING OUT OF GENERAL REVIEW AND CONTROL (BCO 40; RAO 16-10.C)",
       "sections": [
         {
           "ref": "15.1",
