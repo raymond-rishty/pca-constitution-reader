@@ -1107,7 +1107,7 @@ const byId=id=>document.getElementById(id);
 const visitKey=()=>crypto.randomUUID?.() || Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
 function visitLabel(place){
   if(place.panel==='search') return 'search results';
-  if(place.panel==='drawer') return (COMPONENTS[current]?.abbr||current)+' '+place.drawer.ref;
+  if(place.panel==='drawer') return (COMPONENTS[current]?.abbr||current)+' '+provisionLabel(current,place.drawer.ref);
   if(place.panel==='packs') return 'Packs & Notes';
   if(!place.route) return 'Home';
   if(place.route==='about') return 'About & Sources';
@@ -1527,7 +1527,7 @@ function showChapter(book, o){
   const c = COMPONENTS[book];
   // rail
   let rail = `<a class="rail-back" data-book="${book}">‹ ${c.abbr} contents</a><p class="crumb">${ch.title}</p>`;
-  if(ch.railSub && ch.railSub.length) rail += `<ol class="sub">` + ch.railSub.map(r=>`<li><a class="jump" data-anchor="${r}">${r}</a></li>`).join('') + `</ol>`;
+  if(ch.railSub && ch.railSub.length) rail += `<ol class="sub">` + ch.railSub.map(r=>`<li><a class="jump" data-anchor="${r}">${provisionLabel(book,r)}</a></li>`).join('') + `</ol>`;
   document.getElementById('rail').innerHTML = rail;
   // doc
   let doc = `<a class="read-back" data-book="${book}">‹ ${c.name}</a>`
@@ -1544,19 +1544,20 @@ function showChapter(book, o){
       return;
     }  // prose (front/appendix); keep id if it has footnotes
     const d = dossierFor(p.ref), n = total(d);
-    const rl = (book==='bco'?'BCO ':book.toUpperCase()+' ')+p.ref;
+    const label = provisionLabel(book,p.ref);
+    const rl = (book==='bco'?'BCO ':book.toUpperCase()+' ')+label;
     const inline = n>0 ? `<a class="sig-inline" data-ref="${p.ref}" aria-hidden="true" tabindex="-1"><span class="dot"></span>${n}</a>` : '';
     const tag = (p.con===true)?`<span class="ptag bind">[ BINDING ]</span>`:'';
     if(ch.q){
       doc += `<div class="prov q" id="p-${p.ref}"><span class="body"><a class="n" data-ref="${p.ref}" ${nAttrs(rl,n)}>${p.ref}</a>${inline}${tag} ${p.q}</span><span class="ans">${p.body}</span></div>`;
     } else if(p.blocks){
-      const head = `<a class="n" data-ref="${p.ref}" ${nAttrs(rl,n)}>${p.ref}.</a>${inline}${tag}`;
+      const head = `<a class="n" data-ref="${p.ref}" ${nAttrs(rl,n)}>${label}.</a>${inline}${tag}`;
       doc += `<div class="prov${p.con===true?' binding':''}" id="p-${p.ref}"><div class="body">${renderBlocks(p.blocks, head)}</div></div>`;
     } else {
-      doc += `<div class="prov${p.con===true?' binding':''}" id="p-${p.ref}"><span class="body"><a class="n" data-ref="${p.ref}" ${nAttrs(rl,n)}>${p.ref}.</a>${inline}${tag} ${p.body}</span></div>`;
+      doc += `<div class="prov${p.con===true?' binding':''}" id="p-${p.ref}"><span class="body"><a class="n" data-ref="${p.ref}" ${nAttrs(rl,n)}>${label}.</a>${inline}${tag} ${p.body}</span></div>`;
     }
     gut += n>0
-      ? `<a class="sig" data-ref="${p.ref}" aria-hidden="true" tabindex="-1" title="${n} linked GA records for ${p.ref}"><span class="dot"></span>${n}</a>`
+      ? `<a class="sig" data-ref="${p.ref}" aria-hidden="true" tabindex="-1" title="${n} linked GA records for ${label}"><span class="dot"></span>${n}</a>`
       : `<a class="sig empty" data-ref="${p.ref}" aria-hidden="true" tabindex="-1" title="No linked GA records on file"><span class="dot"></span></a>`;
   });
   // footer pager (sequential nav) — flows across BCO parts, stops at component edges
@@ -1752,7 +1753,7 @@ function renderCommentarySections(sections,qNumber){
 function renderDrawer(packLabel){
   const ref=drawerRef, d=dossierFor(ref), n=total(d);
   const isCustom = !!(COMPONENTS[current] && COMPONENTS[current].custom);
-  const refLabel=(COMPONENTS[current].abbr||current.toUpperCase())+' '+ref;
+  const refLabel=(COMPONENTS[current].abbr||current.toUpperCase())+' '+provisionLabel(current,ref);
   document.getElementById('dEyebrow').textContent = COMPONENTS[current].name;
   document.getElementById('dRef').textContent = refLabel;
   document.getElementById('dQuote').textContent = '';
@@ -1900,6 +1901,9 @@ function hideDrawer(){
 /* Built lazily from the same provision data as the reader; installed books join this index. */
 let SEARCH=null;
 function _plain(html){ const d=document.createElement('div'); d.innerHTML=html||''; return (d.textContent||'').replace(/\s+/g,' ').trim(); }
+function provisionLabel(book, ref){
+  return book==='naparc' ? String(ref).replace(/^(?:Comity|Transfer)\.(?=\d+$)/, '') : ref;
+}
 function _searchRecord(book,ref,open,title,text,noDrawer=false,metadata={}){
   const label=(COMPONENTS[book]&&COMPONENTS[book].abbr)||book.toUpperCase();
   const bare=String(ref).replace(/^Q\.?\s*/i,'');
@@ -1908,7 +1912,7 @@ function _searchRecord(book,ref,open,title,text,noDrawer=false,metadata={}){
   if(book==='wlc') aliases.push(`Larger Catechism Q ${bare}`,`Larger Q ${bare}`);
   if(book==='wsc') aliases.push(`Shorter Catechism Q ${bare}`,`Shorter Q ${bare}`);
   if(book==='bco') aliases.push(`Book of Church Order ${ref}`);
-  return {book,ref,reference:`${label} ${ref}`,aliases,open,title:title||'',text:text||'',sub:title||'',txt:text||'',noDrawer,...metadata};
+  return {book,ref,reference:`${label} ${provisionLabel(book,ref)}`,aliases,open,title:title||'',text:text||'',sub:title||'',txt:text||'',noDrawer,...metadata};
 }
 function buildSearch(){
   const out=[];
