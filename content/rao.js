@@ -45,14 +45,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "1",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 1: Organization of a General Assembly’s Meeting. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "1-1",
@@ -111,14 +105,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "2",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 2: The Moderator. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "2-1",
@@ -157,14 +145,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "3",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 3: The Stated Clerk. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "3-1",
@@ -415,14 +397,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "4",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 4: COMMITTEES AND AGENCIES. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "4-1",
@@ -916,14 +892,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "5",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 5: ADMINISTRATIVE COMMITTEE OF GENERAL ASSEMBLY. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "5-1",
@@ -1056,14 +1026,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "6",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 6: PROGRAM COMMITTEES. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "6-1",
@@ -1112,14 +1076,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "7",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 7: THE COOPERATIVE MINISTRIES COMMITTEE. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "7-1",
@@ -1376,14 +1334,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "8",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 8: SPECIAL COMMITTEES. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "8-1",
@@ -1599,14 +1551,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "9",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 9: AD INTERIM COMMITTEES. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "9-1",
@@ -1675,14 +1621,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "10",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 10: The Assembly Arrangements. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "10-1",
@@ -1845,14 +1785,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "11",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 11: Communications and Overtures. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "11-1",
@@ -2017,14 +1951,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "12",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 12: Reports to the General Assembly. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "12-1",
@@ -2063,14 +1991,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "13",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 13: New Business. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "13-1",
@@ -2129,14 +2051,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "14",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 14: Committees of Commissioners for permanent committees and agencies. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "14-1",
@@ -2637,14 +2553,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "15",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 15: THE OVERTURES COMMITTEE. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "15-1",
@@ -3001,14 +2911,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "16",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 16: REVIEW OF PRESBYTERY RECORDS. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "16-1",
@@ -3525,14 +3429,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "17",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 17: STANDING JUDICIAL COMMISSION. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "17-1",
@@ -3671,14 +3569,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "18",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 18: Assembly Expenses. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "18-1",
@@ -3722,14 +3614,8 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "19",
-          "blocks": [
-            [
-              "p",
-              0,
-              "Article 19: Parliamentary Procedure. See the numbered provisions below."
-            ]
-          ],
-          "prose": true
+          "prose": true,
+          "body": ""
         },
         {
           "ref": "19-1",
@@ -3859,14 +3745,14 @@ window.BUNDLED_PACKS.push({
       "sections": [
         {
           "ref": "20",
+          "prose": true,
           "blocks": [
             [
               "p",
               0,
               "The Rules of Assembly Operations may be amended or suspended only by a two-thirds vote of those voting, which must also be a majority of the total enrollment of commissioners. A motion to amend is debatable. A motion to suspend is not debatable."
             ]
-          ],
-          "prose": true
+          ]
         }
       ]
     }
