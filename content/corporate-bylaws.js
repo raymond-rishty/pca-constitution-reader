@@ -52,7 +52,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "I": {
-      "title": "Article I. Name and Location",
+      "title": "ARTICLE I. NAME AND LOCATION",
       "sections": [
         {
           "ref": "I.1",
@@ -82,7 +82,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "II": {
-      "title": "Article II. Members and Meetings of the Corporation",
+      "title": "ARTICLE II. MEMBERS AND MEETINGS OF THE CORPORATION",
       "sections": [
         {
           "ref": "II.1",
@@ -147,7 +147,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "III": {
-      "title": "Article III. Board of Directors",
+      "title": "ARTICLE III. BOARD OF DIRECTORS",
       "sections": [
         {
           "ref": "III.1",
@@ -222,7 +222,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "IV": {
-      "title": "Article IV. Officers",
+      "title": "ARTICLE IV. OFFICERS",
       "sections": [
         {
           "ref": "IV.1",
@@ -267,7 +267,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "V": {
-      "title": "Article V. The Particular Permanent Committees",
+      "title": "ARTICLE V. THE PARTICULAR PERMANENT COMMITTEES",
       "sections": [
         {
           "ref": "V.A",
@@ -384,7 +384,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "VI": {
-      "title": "Article VI. Other Boards and Agencies",
+      "title": "ARTICLE VI. OTHER BOARDS AND AGENCIES",
       "sections": [
         {
           "ref": "VI",
@@ -505,7 +505,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "VII": {
-      "title": "Article VII. Fiscal Matters",
+      "title": "ARTICLE VII. FISCAL MATTERS",
       "sections": [
         {
           "ref": "VII.1",
@@ -540,7 +540,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "VIII": {
-      "title": "Article VIII. Ecclesiastical Matters",
+      "title": "ARTICLE VIII. ECCLESIASTICAL MATTERS",
       "sections": [
         {
           "ref": "VIII.1",
@@ -555,7 +555,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "IX": {
-      "title": "Article IX. Amendments to the Bylaws",
+      "title": "ARTICLE IX. AMENDMENTS TO THE BYLAWS",
       "sections": [
         {
           "ref": "IX",

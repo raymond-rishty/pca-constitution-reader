@@ -8,7 +8,7 @@ import subprocess
 
 from lxml import html as lxml_html
 
-from build_rao import HERE, block, heading_title_case, main as write_rao, text
+from build_rao import HERE, block, main as write_rao, text
 
 BASE = "https://www.pcaac.org/book-of-church-order/"
 DOCUMENTS = (
@@ -110,7 +110,6 @@ def build(doc, source):
                 "transfer": chapter(text(rows[transfer]), rows[transfer + 1:], r"(\d+)\.", "Transfer."),
             }
     for data in chapters.values():
-        data["title"] = heading_title_case(data["title"])
         refs = [section["ref"] for section in data["sections"]]
         assert refs, (key, data["title"])
         seen = set()

@@ -58,7 +58,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "1": {
-      "title": "Membership",
+      "title": "MEMBERSHIP",
       "sections": [
         {
           "ref": "1.1",
@@ -73,7 +73,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "2": {
-      "title": "Conduct of Commission Members",
+      "title": "CONDUCT OF COMMISSION MEMBERS",
       "sections": [
         {
           "ref": "2.1",
@@ -346,7 +346,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "3": {
-      "title": "Officers and Their Duties",
+      "title": "OFFICERS AND THEIR DUTIES",
       "sections": [
         {
           "ref": "3.1",
@@ -487,7 +487,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "4": {
-      "title": "Meetings",
+      "title": "MEETINGS",
       "sections": [
         {
           "ref": "4.1",
@@ -550,7 +550,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "5": {
-      "title": "Expenses",
+      "title": "EXPENSES",
       "sections": [
         {
           "ref": "5.1",
@@ -575,7 +575,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "6": {
-      "title": "Quorum",
+      "title": "QUORUM",
       "sections": [
         {
           "ref": "6.1",
@@ -600,7 +600,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "7": {
-      "title": "The Record of the Case",
+      "title": "THE RECORD OF THE CASE",
       "sections": [
         {
           "ref": "7.1",
@@ -866,7 +866,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "8": {
-      "title": "Briefs",
+      "title": "BRIEFS",
       "sections": [
         {
           "ref": "8.1",
@@ -1001,7 +1001,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "9": {
-      "title": "Administrative Procedure",
+      "title": "ADMINISTRATIVE PROCEDURE",
       "sections": [
         {
           "ref": "9.1",
@@ -1098,7 +1098,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "10": {
-      "title": "Judicial Panels",
+      "title": "JUDICIAL PANELS",
       "sections": [
         {
           "ref": "10.1",
@@ -1443,7 +1443,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "11": {
-      "title": "Hearing by the Full Commission",
+      "title": "HEARING BY THE FULL COMMISSION",
       "sections": [
         {
           "ref": "11.1",
@@ -1576,7 +1576,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "12": {
-      "title": "Procedure for Hearing a Judicial Reference Case (BCO 41)",
+      "title": "PROCEDURE FOR HEARING A JUDICIAL REFERENCE CASE (BCO 41)",
       "sections": [
         {
           "ref": "12.1",
@@ -1789,7 +1789,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "13": {
-      "title": "Procedure for Hearing an Appeal (BCO 42)",
+      "title": "PROCEDURE FOR HEARING AN APPEAL (BCO 42)",
       "sections": [
         {
           "ref": "13.1",
@@ -1952,7 +1952,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "14": {
-      "title": "Procedure for Hearing a Complaint (BCO 43)",
+      "title": "PROCEDURE FOR HEARING A COMPLAINT (BCO 43)",
       "sections": [
         {
           "ref": "14.1",
@@ -2099,7 +2099,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "15": {
-      "title": "Procedure for Hearing a Report Arising out of General Review and Control (BCO 40; RAO 16-10.c)",
+      "title": "PROCEDURE FOR HEARING A REPORT ARISING OUT OF GENERAL REVIEW AND CONTROL (BCO 40; RAO 16-10.c)",
       "sections": [
         {
           "ref": "15.1",
@@ -2270,7 +2270,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "16": {
-      "title": "Procedures for Assuming Original Jurisdiction Over a Minister (BCO 34-1)",
+      "title": "PROCEDURES FOR ASSUMING ORIGINAL JURISDICTION OVER A MINISTER (BCO 34-1)",
       "sections": [
         {
           "ref": "16.1",
@@ -2360,7 +2360,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "17": {
-      "title": "Decisions, Review and Rehearing Thereof",
+      "title": "DECISIONS, REVIEW AND REHEARING THEREOF",
       "sections": [
         {
           "ref": "17.1",
@@ -2682,7 +2682,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "18": {
-      "title": "Miscellaneous",
+      "title": "MISCELLANEOUS",
       "sections": [
         {
           "ref": "18.1",
@@ -3012,7 +3012,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "19": {
-      "title": "Reports",
+      "title": "REPORTS",
       "sections": [
         {
           "ref": "19.1",
@@ -3115,7 +3115,7 @@ window.BUNDLED_PACKS.push({
       ]
     },
     "20": {
-      "title": "Amendments, Use, and Distribution of Operating Manual",
+      "title": "AMENDMENTS, USE, AND DISTRIBUTION OF OPERATING MANUAL",
       "sections": [
         {
           "ref": "20.1",

@@ -24,7 +24,7 @@ window.BUNDLED_PACKS.push({
   ],
   "chapters": {
     "note": {
-      "title": "General Assembly Note",
+      "title": "General Assembly note",
       "sections": [
         {
           "ref": "General Assembly note",
