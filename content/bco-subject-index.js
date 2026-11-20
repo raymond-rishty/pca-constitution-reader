@@ -5,7 +5,7 @@ window.BUNDLED_PACKS.push({
   "version": 1,
   "kind": "book",
   "label": "Book of Church Order Index",
-  "notice": "Official PCA source: https://www.pcaac.org/book-of-church-order/women-in-the-church/",
+  "notice": "Official PCA source: https://www.pcaac.org/book-of-church-order/index/",
   "component": {
     "key": "bco-subject-index",
     "abbr": "BCO Index",
