@@ -1564,14 +1564,14 @@ function documentReferenceTarget(book, ref){
       if(anchor===ref){
         const sections=(chapter.sections||[]).filter(section=>section.ref===ref);
         if(sections.length===1) target=sections[0];
-      }else if(ch===ref && /^\d+$/.test(ref)){
+      }else if(ch===ref && (/^\d+$/.test(ref) || (book==='bco' && /^pref-[1-3]$/.test(ref)))){
         target={chapter:ch};
       }
     }
   }
   if(target && (target.chapter || target.blocks?.length || target.body?.trim())){
     const label=book==='bco' ? ({es:'LDO',ko:'교회헌법'}[BCO_EDITION.lang]||'BCO') : component.abbr;
-    return {...target, title:label+(target.chapter?' chapter ':' ')+ref, lang:book==='bco'?BCO_EDITION.lang:'en'};
+    return {...target, title:label+(/^pref-[1-3]$/.test(ref) ? ' Preface '+['I','II','III'][Number(ref.at(-1))-1] : (target.chapter?' chapter ':' ')+ref), lang:book==='bco'?BCO_EDITION.lang:'en'};
   }
 }
 function linkDocumentReferences(doc){
@@ -1593,7 +1593,7 @@ function linkDocumentReferences(doc){
     .map(name=>name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|');
   // Require a document name and a complete reference. Leave ranges and unsupported subpoints as text.
   const citation=new RegExp(
-    String.raw`(?<![\p{L}\p{N}_])(${prefixes})\s+((?:Q\.?\s*\d+|(?:\d+|[A-Z]+)[.:‑–-]\d+(?:\.[a-z0-9]+)*|\d+))(?![\w:‑–—-]|\.[a-z0-9]|\s*\([a-z0-9]+\)|\s*(?:[-‑–—]|through\b|to\s+\d))`,
+    String.raw`(?<![\p{L}\p{N}_])(${prefixes})\s+((?:Preface,?\s+(?:III|II|I)|Q\.?\s*\d+|(?:\d+|[A-Z]+)[.:‑–-]\d+[a-z]?(?:\.[a-z0-9]+)*(?:\([a-z0-9]+\))?|\d+))(?![\w:‑–—-]|\.[a-z0-9]|\s*\([a-z0-9]+\)|\s*(?:[-‑–—]|through\b|to\s+\d))`,
     'giu'
   );
   const walker=document.createTreeWalker(doc,NodeFilter.SHOW_TEXT);
@@ -1606,27 +1606,51 @@ function linkDocumentReferences(doc){
   for(const node of nodes){
     const previous=node.previousSibling;
     // The source often italicizes the abbreviation in a separate element.
-    const abbreviation=previous?.matches?.('i,em') && aliases.has(previous.textContent.toLowerCase()) ? previous.textContent : '';
+    const abbreviation=previous?.matches?.('i,em') && aliases.has(previous.textContent.replace(/^\s*\(?\s*|\s+$/g,'').toLowerCase()) ? previous.textContent : '';
     const value=abbreviation+node.data;
     let end=0;
     const fragment=document.createDocumentFragment();
-    for(const match of value.matchAll(citation)){
-      const book=aliases.get(match[1].toLowerCase());
-      let ref=match[2].replace(/[‑–]/g,'-');
+    const appendLink=(book,printedRef,label,offset)=>{
+      let ref=printedRef.replace(/[‑–]/g,'-');
       if(book==='wcf') ref=ref.replace(/[:-]/,'.');
       if(book==='wsc'||book==='wlc') ref=ref.replace(/^(?:Q\.?\s*)?(\d+)$/i,'Q.$1');
-      if(!documentReferenceTarget(book,ref)) continue;
-      const start=Math.max(0,match.index-abbreviation.length);
-      const finish=match.index+match[0].length-abbreviation.length;
+      if(book==='bco'){
+        const preface=/^Preface,?\s+(I{1,3})$/i.exec(ref);
+        if(preface) ref='pref-'+preface[1].length;
+        // A BCO item shares its provision's route. Check the marker in the displayed edition.
+        const item=/^(\d+-\d+)(?:\.?([a-z])|\.(\d+)|\(([a-z]|\d+)\))$/i.exec(ref);
+        if(item){
+          const provision=documentReferenceTarget(book,item[1]);
+          const marker=(item[2]||item[3]||item[4]).toLowerCase()+'.';
+          const exists=provision?.blocks?.some(([kind,,text])=>kind==='i'
+            ? text.toLowerCase()===marker
+            : /^\d+\.$/.test(marker) && _plain(text).startsWith(marker+' '));
+          if(!exists) return;
+          ref=item[1];
+        }
+      }
+      if(!documentReferenceTarget(book,ref)) return;
+      const finish=offset+label.length-abbreviation.length;
+      const start=offset<abbreviation.length ? finish-printedRef.length : offset-abbreviation.length;
       const link=document.createElement('a');
       link.id='cross-reference-'+index++;
       link.className='cross-reference';
       link.href='#'+book+'/'+encodeURIComponent(ref);
       link.setAttribute('aria-haspopup','dialog');
-      link.setAttribute('aria-label',match[0].trim());
+      link.setAttribute('aria-label',book==='bco' && label===printedRef ? 'BCO '+label : label.trim());
       link.textContent=node.data.slice(start,finish);
       fragment.append(node.data.slice(end,start),link);
       end=finish;
+    };
+    for(const match of value.matchAll(citation)){
+      const book=aliases.get(match[1].toLowerCase());
+      appendLink(book,match[2],match[0],match.index);
+      // An explicit BCO citation can govern a second complete provision in the same parentheses.
+      if(book==='bco' && ((abbreviation ? previous.previousSibling?.textContent||'' : '')+value.slice(0,match.index)).trimEnd().endsWith('(')){
+        const next=match.index+match[0].length;
+        const pair=/^\s+and\s+(\d{1,2}[-‑–]\d+[a-z]?)\s*\)/i.exec(value.slice(next));
+        if(pair) appendLink(book,pair[1],pair[1],next+pair[0].indexOf(pair[1]));
+      }
     }
     if(end) node.replaceWith(fragment,node.data.slice(end));
   }
