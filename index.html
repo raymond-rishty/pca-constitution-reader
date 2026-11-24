@@ -384,6 +384,8 @@
   .histtab .hrow b{color:var(--navy)}
   .hnote{font-size:.76rem; color:var(--muted); font-style:italic; margin-top:12px; font-family:var(--sans)}
   /* commentary (imported packs: Smith, Ramsay, …) — BCO dossier tab */
+  #chapterCommentary details{margin:0 0 1rem; font-family:var(--sans); font-size:.88rem}
+  #chapterCommentary summary{cursor:pointer; margin-bottom:.4rem}
   .commentary p{font-family:var(--sans); font-size:.88rem; line-height:1.6; color:var(--ink-soft); margin:0 0 11px}
   .commentary .fn-item{scroll-margin-top:14px; padding:4px 8px; margin-left:-8px; margin-right:-8px; border-radius:3px; transition:background .25s}
   .commentary .fn-item.on{background:var(--accent-soft)}   /* highlight the footnote you clicked */
@@ -843,7 +845,10 @@ const saveCommentaries = ()=>{ try{
   });
   localStorage.setItem("pcacon.commentaries", JSON.stringify(stored));
   localStorage.removeItem("pcacon.commentary");
-}catch(e){ throw e; } };
+}catch(e){ throw e; }
+  const chapterCommentary = document.getElementById("chapterCommentary");
+  if(view==="read" && chapterCommentary && cur.o) chapterCommentary.innerHTML = chapterCommentaryHtml(cur.o.ch);
+};
 const noteDate = ()=>{ try{ return new Date().toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}); }catch(e){ return ""; } };
 function packDownload(name, obj){ const u=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:"application/json"})); const a=document.createElement("a"); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u); }
 function exportNotes(){ packDownload("pca-constitution-notes.json", {format:PACK_FORMAT, version:1, kind:"notes", label:"My notes", exported:noteDate(), entries:NOTES}); }
@@ -1724,7 +1729,8 @@ function showChapter(book, o){
     + `<p class="kicker">${ch.kicker}</p><h1>${ch.title}</h1>`
     + (sourceUrl ? `<p class="subtitle">${esc(c.meta)} · <a href="${esc(sourceUrl)}">Official PCA source</a></p>` : '')
     + (ch.subtitle ? `<p class="subtitle">${ch.subtitle}</p>` : '')
-    + (ch.advisoryNote ? `<div class="advisory-note">${ch.advisoryNote}</div>` : '');
+    + (ch.advisoryNote ? `<div class="advisory-note">${ch.advisoryNote}</div>` : '')
+    + (book==='bco' ? `<div id="chapterCommentary">${chapterCommentaryHtml(o.ch)}</div>` : '');
   let gut = '';
   ch.provs.forEach(p=>{
     if(p.prose || !p.ref){
@@ -1892,13 +1898,32 @@ function commentarySectionMeta(s){
   const p=s.pages?('pp. '+s.pages.from+(s.pages.through===s.pages.from?'':'–'+s.pages.through)):'';
   return [q,printed,p].filter(Boolean).join(' · ');
 }
+function chapterCommentaryHtml(chapter){
+  return window.BCO_COMMENTARIES.filter(pack=>(pack.corpus||'bco')==='bco')
+    .map(pack=>{
+      const content=pack.entries?.[chapter];
+      return commentaryContentHasText(content)
+        ? `<details class="commentary"><summary>${esc(pack.label)}</summary>${commentaryContentHtml(content)}</details>`
+        : '';
+    }).join('');
+}
+function commentaryLinksHtml(links){
+  if(!Array.isArray(links)) return '';
+  return links.map(link=>{
+    if(typeof link?.label!=='string' || typeof link.url!=='string') return '';
+    const url=URL.canParse(link.url) ? new URL(link.url) : null;
+    if(url?.protocol!=='https:') return '';
+    return `<p><a href="${esc(url.href)}" target="_blank" rel="noopener">${esc(link.label)}</a></p>`;
+  }).join('');
+}
 function commentaryContentHasText(content){
   return Array.isArray(content)?content.length>0:!!(content&&
-    ((Array.isArray(content.blocks)&&content.blocks.length)||(Array.isArray(content.paragraphs)&&content.paragraphs.length)));
+    ((Array.isArray(content.blocks)&&content.blocks.length)||(Array.isArray(content.paragraphs)&&content.paragraphs.length)||commentaryLinksHtml(content.links)));
 }
 function commentaryContentHtml(content){
   if(Array.isArray(content)) return content.map(p=>'<p>'+esc(p)+'</p>').join('');
   if(!content||typeof content!=='object') return '';
+  const links=commentaryLinksHtml(content.links);
   const blocks=content.blocks;
   if(Array.isArray(blocks)&&blocks.length){
     return blocks.map(b=>{
@@ -1907,9 +1932,9 @@ function commentaryContentHtml(content){
       if(b[0]==='p') return '<p class="bpara d'+depth+'">'+esc(b[2]||'')+'</p>';
       if(b[0]==='i') return '<div class="li d'+depth+'"><span class="mk">'+esc(b[2]||'')+'</span> '+esc(b[3]||'')+'</div>';
       return '';
-    }).join('');
+    }).join('')+links;
   }
-  return (Array.isArray(content.paragraphs)?content.paragraphs:[]).map(p=>'<p>'+esc(p)+'</p>').join('');
+  return (Array.isArray(content.paragraphs)?content.paragraphs:[]).map(p=>'<p>'+esc(p)+'</p>').join('')+links;
 }
 function renderCommentarySections(sections,qNumber){
   const source=Array.isArray(sections)?sections:[];
