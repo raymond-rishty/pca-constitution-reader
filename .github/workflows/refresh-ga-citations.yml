@@ -17,6 +17,8 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    outputs:
+      pushed-commit: ${{ steps.commit.outputs.sha }}
     steps:
       - name: Check out Constitution Reader
         uses: actions/checkout@v4
@@ -81,6 +83,7 @@ jobs:
         run: git diff --check
 
       - name: Commit refreshed citations
+        id: commit
         run: |
           if git diff --quiet -- content/citations-counts.js content/cit; then
             echo "Citation assets are already current."
@@ -91,3 +94,14 @@ jobs:
           git add content/citations-counts.js content/cit
           git commit -m "Refresh GA citation assets"
           git push
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  build-apk:
+    needs: refresh
+    if: github.ref == 'refs/heads/main' && needs.refresh.outputs.pushed-commit != ''
+    permissions:
+      contents: read
+    # Pushes made with GITHUB_TOKEN do not trigger another workflow run.
+    uses: ./.github/workflows/build-android-apk.yml
+    with:
+      commit: ${{ needs.refresh.outputs.pushed-commit }}

@@ -30,8 +30,33 @@ Use the language tag before `.svg`:
 
 Each source publishes to the same filename in `diagrams/`. An authored SVG takes precedence over a DOT file with the same name. Spanish retains the printed wording and repeated appellant-record step. The embedded font subsets cover the chart's current characters; adding new text may require updating those subsets.
 
-This script is the manual build entry point and can host future static asset generation steps. It is intentionally not connected to GitHub Actions yet.
-
 ## Inline Scripture previews
 
 After changing built-in text or its Scripture citations, run `python build_inline_scripture.py` to refresh `content/inline-scripture.js`. The script downloads the public-domain Berean Standard Bible, or accepts a local tab-separated copy with `--bsb`.
+
+## Android debug APK
+
+The Android preview bundles the reader, the checked-in BCO translations, and
+the Appendix H diagrams. It uses the app ID `org.pcareader.preview`. The
+build requires Node.js 24, Python 3.12, JDK 21, and Android SDK Platform 36.
+
+From the repository root on Windows, with the toolchain on PATH and
+`JAVA_HOME` and `ANDROID_HOME` set:
+
+```powershell
+npm ci
+npm run build
+npm run android:sync
+Push-Location android
+.\gradlew.bat assembleDebug
+Pop-Location
+```
+
+The debug APK is at `android/app/build/outputs/apk/debug/app-debug.apk`. Run
+the site build and sync again after changing the reader or its assets.
+
+GitHub Actions builds and verifies a debug APK for each commit added directly
+to `main`, including multiple commits in one push. The citation-refresh
+workflow also builds the commit it pushes to `main`. Open the run in GitHub
+Actions and download `pca-reader-debug-<commit SHA>` under **Artifacts**.
+Artifacts are available for 14 days.
