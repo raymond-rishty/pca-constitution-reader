@@ -1,7 +1,6 @@
 """Stage the static reader and its offline assets for Capacitor."""
 
 import re
-from html import escape
 from html.parser import HTMLParser
 from pathlib import Path
 from shutil import copy2
@@ -30,7 +29,6 @@ def main():
     scripts.feed(html)
     assets = scripts.paths | {
         Path("manifest.webmanifest"),
-        Path("android-content-update.js"),
         Path("apple-touch-icon.png"),
         Path("icon-192.png"),
         Path("icon-512.png"),
@@ -61,25 +59,25 @@ def main():
         line for line in html.splitlines()
         if not line.startswith(('<link rel="preconnect" href="https://fonts.', '<link href="https://fonts.'))
     )
-    # The Android bootstrap restores cached data before running the bundled reader.
+    # Keep the executable reader in a local script so the WebView can block inline code.
     inline = re.search(r"(?ms)^<script>\s*(.*?)^</script>", html)
     if not inline:
         raise SystemExit("Missing inline reader script")
-    baseline = check_output(["node", "tools/build_android_content.cjs"], cwd=ROOT, text=True)
-    metadata = '<meta name="reader-content-baseline" content="' + escape(baseline) + '">'
     policy = (
         '<meta http-equiv="Content-Security-Policy" content="script-src \'self\'; '
         'object-src \'none\'; base-uri \'none\'; frame-src \'none\'; form-action \'none\'">'
     )
     html = (
         html[:inline.start()]
-        + '<script defer src="android-content-update.js"></script>'
+        + '<script defer src="android-reader.js"></script>'
         + html[inline.end():]
     )
-    html = html.replace("<head>", f"<head>\n{policy}\n{metadata}", 1)
-    (OUTPUT / "android-reader.js").write_text(inline.group(1), encoding="utf-8")
+    html = html.replace("<head>", f"<head>\n{policy}", 1)
+    (OUTPUT / "android-reader.js").write_text(inline.group(1) + "\nwindow.__pcaReaderReady = true;\n", encoding="utf-8")
     (OUTPUT / "index.html").write_text(html + "\n", encoding="utf-8")
-    print(f"Staged {len(assets) + 2} reader files in {OUTPUT.relative_to(ROOT)}")
+    timestamp = check_output(["git", "log", "-1", "--format=%ct"], cwd=ROOT, text=True).strip()
+    (OUTPUT / "reader-build-time.txt").write_text(timestamp, encoding="ascii")
+    print(f"Staged {len(assets) + 3} reader files in {OUTPUT.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

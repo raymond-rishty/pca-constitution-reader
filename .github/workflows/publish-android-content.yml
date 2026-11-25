@@ -34,8 +34,18 @@ jobs:
         with:
           node-version: 24
 
-      - name: Generate versioned reader data
-        run: node tools/build_android_content.cjs "$RUNNER_TEMP/android-reader-data"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Generate Android updates
+        run: |
+          npm ci
+          npm run build
+          python tools/stage_android_web.py
+          node --check build/android-web/android-reader.js
+          node tools/build_android_content.cjs "$RUNNER_TEMP/android-reader-data"
+          python tools/build_android_web_update.py "$RUNNER_TEMP/android-reader-data"
 
       - name: Publish changed reader data
         shell: bash
@@ -49,11 +59,16 @@ jobs:
             git worktree add --detach "$checkout" HEAD
             git -C "$checkout" switch --orphan "$feed_branch"
           fi
-          if cmp -s "$data/content-v1.json" "$checkout/content-v1.json"; then
+          if ! cmp -s "$data/content-v1.json" "$checkout/content-v1.json"; then
+            cp "$data/manifest-v1.json" "$data/content-v1.json" "$checkout/"
+          fi
+          if ! cmp -s "$data/reader-web-v1.zip" "$checkout/reader-web-v1.zip"; then
+            cp "$data/reader-web-v1.json" "$data/reader-web-v1.zip" "$checkout/"
+          fi
+          git -C "$checkout" add -- manifest-v1.json content-v1.json reader-web-v1.json reader-web-v1.zip
+          if git -C "$checkout" diff --cached --quiet; then
             exit 0
           fi
-          cp "$data/manifest-v1.json" "$data/content-v1.json" "$checkout/"
-          git -C "$checkout" add -- manifest-v1.json content-v1.json
           git -C "$checkout" -c user.name='github-actions[bot]' \
             -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
             commit -m "Publish Android reader content from $(git rev-parse --short HEAD)"
