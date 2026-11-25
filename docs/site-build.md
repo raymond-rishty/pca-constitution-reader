@@ -60,3 +60,26 @@ to `main`, including multiple commits in one push. The citation-refresh
 workflow also builds the commit it pushes to `main`. Open the run in GitHub
 Actions and download `pca-reader-debug-<commit SHA>` under **Artifacts**.
 Artifacts are available for 14 days.
+
+## Android content refresh
+
+Android builds include a complete offline copy of the reader. On each launch,
+the app checks the public content feed for a new snapshot in the background.
+It verifies the snapshot's SHA-256 checksum and format before saving it.
+The next launch uses the saved copy, including offline. Notes and imported
+packs stay in the reader's existing local storage.
+
+The feed can refresh text, translations, paragraph and list formatting,
+Scripture reference mappings and verse previews, and GA citations. Changes
+to reader behavior, stylesheets, diagram assets, or native Android code need
+an APK build.
+
+The publishing workflow generates JSON from the checked-in reader content
+and pushes it to the public `android-content-feed` branch. It runs after
+pushes to `main` and after the scheduled citation-refresh workflow. This
+keeps the feed available independently of GitHub Pages and APK artifacts.
+
+To generate a snapshot locally, run
+`node tools/build_android_content.cjs <output directory>`. Keep the
+version 1 data shape compatible with installed APKs. An incompatible
+change needs a new feed version and an APK that supports it.
