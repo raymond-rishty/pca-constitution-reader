@@ -523,7 +523,8 @@
     .bn svg{width:22px; height:22px}
     .bn:hover, .bn.on{color:var(--navy)}
   }
-  .cross-reference,#referencePreviewOpen{color:var(--accent-ink); text-decoration:underline; text-underline-offset:.15em}
+  .scripture-reference{display:inline; border:0; padding:0; background:none; font:inherit; cursor:pointer}
+  .cross-reference,.scripture-reference,#referencePreviewOpen{color:var(--accent-ink); text-decoration:underline; text-underline-offset:.15em}
   #referencePreview{width:min(38rem,calc(100% - 2rem)); max-height:80vh; padding:1.25rem; color:var(--ink); background:var(--paper); border:1px solid var(--line-2)}
   #referencePreview::backdrop{background:rgba(27,28,28,.48)}
   #referencePreview h2{margin:0 0 .75rem}
@@ -636,6 +637,7 @@
 <script src="content/bco-index.js"></script>
 <script src="content/proofs.js"></script>
 <script src="content/verses.js"></script>
+<script src="content/inline-scripture.js"></script>
 <script src="content/citations-counts.js"></script>
 <script src="content/ramsay.js"></script>
 <script src="content/rao.js"></script>
@@ -1331,7 +1333,7 @@ function showAbout(){
     <h2 class="about-h">Sources</h2>
     <ul class="about-list">
       <li><b>Westminster Standards &amp; proofs</b> — public domain; the American revision as received in 1788, with the PCA's official proof-text selection.</li>
-      <li><b>Scripture text</b> — verses shown for the proofs are from the <b>Berean Standard Bible</b> (BSB), bereanbible.com, dedicated to the public domain.</li>
+      <li><b>Scripture text</b> — verses shown in proof texts and inline previews are from the <b>Berean Standard Bible</b> (BSB), bereanbible.com, dedicated to the public domain.</li>
       <li><b>Book of Church Order</b> — © The Office of the Stated Clerk of the General Assembly of the PCA, all rights reserved. Included here for personal study; permission for wider use is being sought.</li>
       <li><b>General Assembly records</b> — drawn from the PCA <i>Minutes of the General Assembly</i> (cases, overtures, constitutional inquiries, Church Care and Discipleship Committee advice, and Review-of-Presbytery-Records exceptions) and linking to the source. BCO pages show high-confidence matches only.</li>
       <li><b>Commentary</b> — Ramsay's public-domain exposition is included; other commentaries load as separate import packs, to keep copyrighted text out of the app.</li>
@@ -1503,6 +1505,7 @@ function renderCatechism(book, anchor){
   docEl.removeAttribute('lang');
   docEl.innerHTML = doc;
   linkDocumentReferences(docEl);
+  linkScriptureReferences(docEl);
   document.getElementById('gutter').innerHTML = gut;
   alignGutter();
   if(anchor && document.getElementById('p-'+anchor)){
@@ -1660,6 +1663,64 @@ function linkDocumentReferences(doc){
     if(end) node.replaceWith(fragment,node.data.slice(end));
   }
 }
+const inlineScripture=window.INLINE_SCRIPTURE;
+const scriptureLabels=Object.keys(inlineScripture?.references||{}).sort((a,b)=>b.length-a.length);
+const scripturePattern=scriptureLabels.length ? new RegExp(
+  String.raw`(?<![\p{L}\p{N}_])(?:${scriptureLabels.map(label=>label
+    .replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/ /g,'\\s+')).join('|')})(?:(?<=절)|(?<=장)(?!\s*\d)|(?![\p{L}\p{N}_:]|\s*[:–—-]|\s*,\s*\d))`,
+  'giu'
+) : null;
+function linkScriptureReferences(doc){
+  if(!scripturePattern) return;
+  const walker=document.createTreeWalker(doc,NodeFilter.SHOW_TEXT);
+  const nodes=[];
+  while(walker.nextNode()){
+    const node=walker.currentNode;
+    if(node.parentElement.closest('.prov .body,.prov .ans') && !node.parentElement.closest('a,button,sup')) nodes.push(node);
+  }
+  for(const node of nodes){
+    const previous=node.previousSibling;
+    const prefix=previous?.matches?.('i,em,b,strong') ? previous.textContent : '';
+    const value=prefix+node.data;
+    const fragment=document.createDocumentFragment();
+    let end=0;
+    for(const match of value.matchAll(scripturePattern)){
+      const finish=match.index+match[0].length-prefix.length;
+      if(finish<=0) continue;
+      const start=Math.max(0,match.index-prefix.length);
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='scripture-reference';
+      button.dataset.scripture=match[0].toLowerCase().replace(/\s+/g,' ');
+      button.setAttribute('aria-haspopup','dialog');
+      button.setAttribute('aria-label',match[0]);
+      button.textContent=node.data.slice(start,finish);
+      fragment.append(node.data.slice(end,start),button);
+      end=finish;
+    }
+    if(end) node.replaceWith(fragment,node.data.slice(end));
+  }
+}
+function showScripturePreview(trigger){
+  const keys=inlineScripture.references[trigger.dataset.scripture];
+  if(!keys?.length) return;
+  const title=byId('referencePreviewTitle');
+  title.textContent=trigger.getAttribute('aria-label');
+  title.lang=byId('doc').lang||'en';
+  const text=byId('referencePreviewText');
+  text.lang='en';
+  text.innerHTML='<div class="body"><p><small>Berean Standard Bible</small></p>'+keys.map(key=>
+    '<p><strong>'+esc(key)+'</strong> '+esc(inlineScripture.verses[key])+'</p>'
+  ).join('')+'</div>';
+  byId('referencePreviewOpen').hidden=true;
+  openReferencePreview(trigger);
+}
+function openReferencePreview(trigger){
+  trigger.focus({preventScroll:true});
+  const dialog=byId('referencePreview');
+  dialog.showModal();
+  dialog.scrollTop=0;
+}
 function showReferencePreview(link){
   const [book,ref]=decodeURIComponent(link.hash.slice(1)).split('/');
   const target=documentReferenceTarget(book,ref);
@@ -1678,9 +1739,8 @@ function showReferencePreview(link){
   }).join('');
   text.innerHTML='<div class="body">'+question+body+'</div>';
   byId('referencePreviewOpen').href=link.href;
-  link.focus({preventScroll:true});
-  byId('referencePreview').showModal();
-  byId('referencePreview').scrollTop=0;
+  byId('referencePreviewOpen').hidden=false;
+  openReferencePreview(link);
 }
 function renderBcoIndexRows(blocks){
   const reference = /\b(?:([0-9]{1,2}-[0-9]+)(?:\([a-z0-9]+\)|\.[a-z0-9]+|[a-z])?|appendix\s+([a-j])\b|appendices\s+([a-j](?:(?:,\s*|\s+and\s+|,\s*and\s+)[a-j]\b)*)\b|preface\s+(iii|ii|i|[1-3])\b|chapter\s+(\d{1,2})\b)/gi;
@@ -1771,6 +1831,7 @@ function showChapter(book, o){
   if(book==='bco') docEl.lang=BCO_EDITION.lang; else docEl.removeAttribute('lang');
   docEl.innerHTML = doc;
   linkDocumentReferences(docEl);
+  linkScriptureReferences(docEl);
   document.getElementById('gutter').innerHTML = gut;
   if(o.anchor){
     const target = document.getElementById('p-' + o.anchor);
@@ -2322,6 +2383,8 @@ document.body.addEventListener('click', e=>{
     (nav.querySelector('[data-step="'+step.dataset.step+'"]:enabled')||nav.querySelector('[data-results]')).focus({preventScroll:true});
     return;
   }
+  const scripture=e.target.closest('.scripture-reference');
+  if(scripture){ showScripturePreview(scripture); return; }
   const crossReference=e.target.closest('.cross-reference,#referencePreviewOpen');
   if(crossReference && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey){
     e.preventDefault();
