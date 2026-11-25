@@ -36,6 +36,7 @@ jobs:
 
       - name: List commits added to main
         id: list
+        shell: bash
         env:
           BEFORE: ${{ github.event.before }}
           HEAD_SHA: ${{ inputs.commit || github.sha }}
@@ -46,7 +47,7 @@ jobs:
             fi
             shas=$(git rev-list --first-parent "$BEFORE..$HEAD_SHA")
           fi
-          printf '%s\n' "${shas:-$HEAD_SHA}" | jq -Rsc '"shas=" + (split("\n") | map(select(length > 0)) | tojson)' >> "$GITHUB_OUTPUT"
+          printf '%s\n' "${shas:-$HEAD_SHA}" | jq -Rrsc '"shas=" + (split("\n") | map(select(length > 0)) | tojson)' >> "$GITHUB_OUTPUT"
 
   apk:
     needs: commits
