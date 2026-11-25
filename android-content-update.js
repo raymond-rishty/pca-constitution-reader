@@ -22,6 +22,14 @@
         content.BUNDLED_PACKS.some(pack => !isRecord(pack) || typeof pack.kind !== 'string')) {
       throw new Error('Invalid Android reader content');
     }
+    const scripture = content.INLINE_SCRIPTURE;
+    for (const verses of Object.values(scripture.references)) {
+      if (!Array.isArray(verses) || !verses.length ||
+          verses.some(verse => typeof verse !== 'string' ||
+            !Object.hasOwn(scripture.verses, verse) || typeof scripture.verses[verse] !== 'string')) {
+        throw new Error('Invalid Android reader Scripture reference');
+      }
+    }
     for (const [key, count] of Object.entries(content.CIT_COUNTS)) {
       const [book, ref] = key.split('|');
       const file = book === 'bco' ? 'bco-' + ref?.split('-')[0] : book;
