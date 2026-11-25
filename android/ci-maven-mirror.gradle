@@ -1,0 +1,10 @@
+// Use the Google Cloud mirror for Maven Central downloads from hosted CI.
+gradle.beforeProject { project ->
+    [project.buildscript.repositories, project.repositories].each { repositories ->
+        repositories.withType(MavenArtifactRepository).configureEach { repository ->
+            if (repository.url == uri('https://repo.maven.apache.org/maven2/')) {
+                repository.url = uri('https://maven-central.storage-download.googleapis.com/maven2/')
+            }
+        }
+    }
+}
