@@ -1,0 +1,5 @@
+{
+  "appId": "org.pcareader.preview",
+  "appName": "PCA Constitution Preview",
+  "webDir": "build/android-web"
+}

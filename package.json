@@ -1,11 +1,16 @@
 {
   "scripts": {
-    "build": "python build_site.py"
+    "build": "python build_site.py",
+    "android:sync": "python tools/stage_android_web.py && cap sync android"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.6.2",
     "@hpcc-js/wasm-graphviz-cli": "1.11.3"
   },
   "dependencies": {
+    "@capacitor/android": "8.6.2",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.6.2",
     "minisearch": "7.2.0"
   }
 }
