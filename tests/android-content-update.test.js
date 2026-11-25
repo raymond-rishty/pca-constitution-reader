@@ -1,4 +1,4 @@
-﻿const assert = require('node:assert/strict');
+const assert = require('node:assert/strict');
 const { createHash, webcrypto } = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 const { mkdtempSync, readFileSync, rmSync } = require('node:fs');
@@ -17,10 +17,11 @@ const original = readFileSync(path.join(directory, 'content-v1.json'), 'utf8');
 const updater = readFileSync(path.join(root, 'android-content-update.js'), 'utf8');
 const notes = { 'bco|1-1': 'A local draft' };
 
-function revisedContent() {
+function revisedContent(verseText = 'An updated verse preview') {
   const data = JSON.parse(original);
   data.content.BCO['1'].sections[0].blocks = [['p', 0, '<b>Revised text</b>']];
   data.content.INLINE_SCRIPTURE.references['john 3:16'] = ['jn.3.16'];
+  data.content.INLINE_SCRIPTURE.verses['jn.3.16'] = verseText;
   const snapshot = JSON.stringify(data);
   const manifest = {
     ...baseline,
@@ -76,7 +77,13 @@ describe('Android content refresh', () => {
     const reopened = await launch({ saved });
     assert.equal(reopened.BCO['1'].sections[0].blocks[0][2], '<b>Revised text</b>');
     assert.equal(reopened.INLINE_SCRIPTURE.references['john 3:16'][0], 'jn.3.16');
+    assert.equal(reopened.INLINE_SCRIPTURE.verses['jn.3.16'], 'An updated verse preview');
     assert.deepEqual(reopened.NOTES, notes);
+  });
+
+  it('rejects invalid Scripture data even when its checksum matches', async () => {
+    const invalid = revisedContent(['Invalid verse']);
+    await assert.rejects(parseSnapshot(invalid.manifest, invalid.snapshot), /Invalid Android reader Scripture reference/);
   });
 
   it('falls back to the bundled assets if cached data is corrupt or predates the APK', async () => {
