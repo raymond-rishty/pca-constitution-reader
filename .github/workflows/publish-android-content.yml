@@ -1,0 +1,60 @@
+name: Publish Android reader content
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Refresh GA citations]
+    branches: [main]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-content-feed
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository))
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Generate versioned reader data
+        run: node tools/build_android_content.cjs "$RUNNER_TEMP/android-reader-data"
+
+      - name: Publish changed reader data
+        shell: bash
+        run: |
+          feed_branch=android-content-feed
+          checkout="$RUNNER_TEMP/android-content-feed"
+          data="$RUNNER_TEMP/android-reader-data"
+          if git show-ref --verify --quiet "refs/remotes/origin/$feed_branch"; then
+            git worktree add --detach "$checkout" "origin/$feed_branch"
+          else
+            git worktree add --detach "$checkout" HEAD
+            git -C "$checkout" switch --orphan "$feed_branch"
+          fi
+          if cmp -s "$data/content-v1.json" "$checkout/content-v1.json"; then
+            exit 0
+          fi
+          cp "$data/manifest-v1.json" "$data/content-v1.json" "$checkout/"
+          git -C "$checkout" add -- manifest-v1.json content-v1.json
+          git -C "$checkout" -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -m "Publish Android reader content from $(git rev-parse --short HEAD)"
+          git push origin "$(git -C "$checkout" rev-parse HEAD):refs/heads/$feed_branch"

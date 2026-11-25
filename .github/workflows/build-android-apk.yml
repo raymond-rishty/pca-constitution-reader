@@ -8,6 +8,9 @@ on:
     paths:
       - '.github/workflows/build-android-apk.yml'
       - 'android/**'
+      - android-content-update.js
+      - tests/android-content-update.test.js
+      - tools/build_android_content.cjs
       - capacitor.config.json
       - package.json
       - package-lock.json
@@ -77,6 +80,10 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: gradle
+
+      - name: Test Android content refresh
+        if: github.event_name == 'pull_request'
+        run: node --test tests/android-content-update.test.js
 
       - name: Build and sync reader assets
         run: |
