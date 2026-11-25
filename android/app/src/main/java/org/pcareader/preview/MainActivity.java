@@ -59,7 +59,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         startup.removeCallbacksAndMessages(null);
         super.onDestroy();
     }
