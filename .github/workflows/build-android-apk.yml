@@ -38,7 +38,7 @@ jobs:
         id: list
         shell: bash
         env:
-          BEFORE: ${{ github.event.before }}
+          BEFORE: ${{ github.event_name == 'push' && github.event.before || '' }}
           HEAD_SHA: ${{ inputs.commit || github.sha }}
         run: |
           if [[ -n "$BEFORE" && "$BEFORE" != 0000000000000000000000000000000000000000 ]]; then
