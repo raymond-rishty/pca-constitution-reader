@@ -86,6 +86,8 @@ Commentary packs attach one or more paragraphs to provisions in an existing corp
 | `corpus` | optional | Component key to which the references belong. Defaults to `"bco"`. |
 | `entries` | yes in practice | Object keyed by provision reference; each value is an array of commentary paragraphs or a structured object containing `paragraphs`, `blocks`, or `links`. |
 
+Commentary paragraph strings can include basic HTML formatting such as `<em>`, `<sup>`, and `<a href="https://example.com/">`. The reader also accepts entity-escaped versions of these tags. Use `<div class="commentary-footnotes">` with a `<p>` per note to display a footnote block.
+
 Use `blocks` when the source's paragraph and list structure should be preserved. A paragraph block is `["p", depth, text]`; a list-item block is `["i", depth, marker, text]`. Depth controls indentation from 0 to 4. `blocks` can stand alone; include `paragraphs` only when a plain-text fallback for older readers is useful. For example:
 
 ```json

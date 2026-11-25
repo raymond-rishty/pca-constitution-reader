@@ -386,7 +386,8 @@
   /* commentary (imported packs: Smith, Ramsay, …) — BCO dossier tab */
   #chapterCommentary details{margin:0 0 1rem; font-family:var(--sans); font-size:.88rem}
   #chapterCommentary summary{cursor:pointer; margin-bottom:.4rem}
-  .commentary p{font-family:var(--sans); font-size:.88rem; line-height:1.6; color:var(--ink-soft); margin:0 0 11px}
+  .commentary p,.commentary-entry{font-family:var(--sans); font-size:.88rem; line-height:1.6; color:var(--ink-soft); margin:0 0 11px; overflow-wrap:anywhere}
+  .commentary-footnotes{border-top:1px solid var(--line); margin-top:14px; padding-top:10px}
   .commentary .fn-item{scroll-margin-top:14px; padding:4px 8px; margin-left:-8px; margin-right:-8px; border-radius:3px; transition:background .25s}
   .commentary .fn-item.on{background:var(--accent-soft)}   /* highlight the footnote you clicked */
   .commentary-focus-section{margin:0 0 18px}
@@ -1987,8 +1988,44 @@ function commentaryContentHasText(content){
   return Array.isArray(content)?content.length>0:!!(content&&
     ((Array.isArray(content.blocks)&&content.blocks.length)||(Array.isArray(content.paragraphs)&&content.paragraphs.length)||commentaryLinksHtml(content.links)));
 }
+const commentaryTags = new Set('a b blockquote br cite div em i li ol p small span strong sub sup u ul'.split(' '));
+const escapedCommentaryTag = /(?:&lt;|&#0*60;|&#x0*3c;)\/?([a-z]+)\b[^<>]*?(?:&gt;|&#0*62;|&#x0*3e;)/gi;
+function commentaryParagraphHtml(text){
+  const source = document.createElement('template');
+  const entity = document.createElement('template');
+  source.innerHTML = String(text).replace(escapedCommentaryTag,(tag,name)=>{
+    if(!commentaryTags.has(name.toLowerCase())) return tag;
+    entity.innerHTML = tag;
+    return entity.content.textContent;
+  });
+  const entry = document.createElement('div');
+  entry.className = 'commentary-entry';
+
+  function appendFormatting(parent, nodes){
+    for(const node of nodes){
+      if(node.nodeType===Node.TEXT_NODE){
+        parent.append(node.textContent);
+        continue;
+      }
+      if(node.nodeType!==Node.ELEMENT_NODE || node.namespaceURI!=='http://www.w3.org/1999/xhtml') continue;
+      const tag = node.localName;
+      if(!commentaryTags.has(tag)) continue;
+      const element = document.createElement(tag);
+      if(tag==='div' && node.classList.contains('commentary-footnotes')) element.className = 'commentary-footnotes';
+      if(tag==='a'){
+        const href = (node.getAttribute('href')||'').trim();
+        if(/^(https?:\/\/|mailto:|#)/i.test(href)) element.setAttribute('href',href);
+      }
+      appendFormatting(element,node.childNodes);
+      parent.append(element);
+    }
+  }
+
+  appendFormatting(entry,source.content.childNodes);
+  return entry.outerHTML;
+}
 function commentaryContentHtml(content){
-  if(Array.isArray(content)) return content.map(p=>'<p>'+esc(p)+'</p>').join('');
+  if(Array.isArray(content)) return content.map(commentaryParagraphHtml).join('');
   if(!content||typeof content!=='object') return '';
   const links=commentaryLinksHtml(content.links);
   const blocks=content.blocks;
@@ -2001,7 +2038,7 @@ function commentaryContentHtml(content){
       return '';
     }).join('')+links;
   }
-  return (Array.isArray(content.paragraphs)?content.paragraphs:[]).map(p=>'<p>'+esc(p)+'</p>').join('')+links;
+  return (Array.isArray(content.paragraphs)?content.paragraphs:[]).map(commentaryParagraphHtml).join('')+links;
 }
 function renderCommentarySections(sections,qNumber){
   const source=Array.isArray(sections)?sections:[];
@@ -2119,10 +2156,10 @@ function renderDrawer(packLabel){
     if(selectedPack>=0) dCommSel=selectedPack;
     const sel = Math.min(Math.max(dCommSel,0), comms.length-1);
     if(comms.length>1)
-      body += `<div class="csubtabs">${comms.map((c,i)=>`<button class="csub${i===sel?' on':''}" data-csub="${i}">${c.label.split(' — ')[0]}</button>`).join('')}</div>`;
+      body += `<div class="csubtabs">${comms.map((c,i)=>`<button class="csub${i===sel?' on':''}" data-csub="${i}">${esc(c.label.split(' — ')[0])}</button>`).join('')}</div>`;
     const c = comms[sel];
     const sectionMarkup=renderCommentarySections(c.sections||[],qNumber);
-    body += `<div class="commentary">${commentaryContentHtml(c.content)}${sectionMarkup}<p class="cattrib">${c.attrib || (c.label + ' — imported pack, personal use.')}</p></div>`;
+    body += `<div class="commentary">${commentaryContentHtml(c.content)}${sectionMarkup}<p class="cattrib">${esc(c.attrib || (c.label + ' — imported pack, personal use.'))}</p></div>`;
   } else if(dTab==='fn'){
     body += `<div class="commentary">${fnotes.map((p,i)=>`<p class="fn-item${dFnSel===i+1?' on':''}" id="dfn-${i+1}"><sup class="fnref">${i+1}</sup> ${p}</p>`).join('')}<p class="cattrib">Footnotes from the source document.</p></div>`;
   } else if(dTab==='notes'){
