@@ -53,6 +53,6 @@ the site build and sync again after changing the reader or its assets.
 
 GitHub Actions builds and verifies a debug APK for each commit added directly
 to `main`, including multiple commits in one push. The citation-refresh
-workflow also builds the commit it pushes to `main`. Public repository runs keep the APK on the build runner to honor the
-personal-study terms in [NOTICE.md](../NOTICE.md). In a private repository,
-main builds are downloadable from the workflow run for 14 days.
+workflow also builds the commit it pushes to `main`. Open the run in GitHub
+Actions and download `pca-reader-debug-<commit SHA>` under **Artifacts**.
+Artifacts are available for 14 days.

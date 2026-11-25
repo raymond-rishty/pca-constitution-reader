@@ -92,8 +92,8 @@ jobs:
         run: |
           "${ANDROID_HOME}/build-tools/35.0.0/apksigner" verify android/app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Save APK for personal testing
-        if: github.event.repository.private && github.event_name != 'pull_request'
+      - name: Publish debug APK
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v7
         with:
           name: pca-reader-debug-${{ matrix.commit }}
