@@ -61,25 +61,28 @@ workflow also builds the commit it pushes to `main`. Open the run in GitHub
 Actions and download `pca-reader-debug-<commit SHA>` under **Artifacts**.
 Artifacts are available for 14 days.
 
-## Android content refresh
+## Android reader updates
 
-Android builds include a complete offline copy of the reader. On each launch,
-the app checks the public content feed for a new snapshot in the background.
-It verifies the snapshot's SHA-256 checksum and format before saving it.
-The next launch uses the saved copy, including offline. Notes and imported
-packs stay in the reader's existing local storage.
+Install the first APK with reader web updates to enable this feature. When
+the reader opens, it checks for a download in the background. Android
+checks the archive's byte count, SHA-256 checksum, and file layout before
+staging it. The next full launch tries the downloaded reader offline at the
+same app address. If startup fails, the app returns to the previous working
+reader or the copy bundled in the APK. Notes and imported packs use the
+same app storage across reader updates.
 
-The feed can refresh text, translations, paragraph and list formatting,
-Scripture reference mappings and verse previews, and GA citations. Changes
-to reader behavior, stylesheets, diagram assets, or native Android code need
-an APK build.
+The update includes the reader's HTML, CSS, JavaScript, diagrams, and
+content. For example, commentary-rendering fixes like PR #66 and changes to
+Scripture previews are eligible. Android resources, permissions, Capacitor
+plugins, and compiled code still need an APK build.
 
-The publishing workflow generates JSON from the checked-in reader content
-and pushes it to the public `android-content-feed` branch. It runs after
-pushes to `main` and after the scheduled citation-refresh workflow. This
-keeps the feed available independently of GitHub Pages and APK artifacts.
+The publishing workflow creates the web archive from the same staged assets
+as the APK and publishes it on the public `android-content-feed` branch.
+It also maintains the older JSON content feed for APKs that already use it.
+Publication runs after pushes to `main` and after the scheduled citation
+refresh. When a web change requires a new native interface, publish it to
+a new feed version and leave the existing compatible feed available.
 
-To generate a snapshot locally, run
-`node tools/build_android_content.cjs <output directory>`. Keep the
-version 1 data shape compatible with installed APKs. An incompatible
-change needs a new feed version and an APK that supports it.
+Build the web archive locally with `npm ci`, `npm run build`,
+`python tools/stage_android_web.py`, and
+`python tools/build_android_web_update.py <output directory>`.

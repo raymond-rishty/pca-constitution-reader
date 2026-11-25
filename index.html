@@ -2647,7 +2647,7 @@ async function shareApp(){
 }
 
 /* ── PWA: register the service worker (installable + full offline) ── */
-if('serviceWorker' in navigator){
+if('serviceWorker' in navigator && !window.Capacitor?.isNativePlatform?.()){
   const previousWorker=navigator.serviceWorker.controller;
   if(previousWorker){
     navigator.serviceWorker.addEventListener('controllerchange', ()=>{

@@ -7,6 +7,8 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/build-android-apk.yml'
+      - '.github/workflows/publish-android-content.yml'
+      - tools/build_android_web_update.py
       - 'android/**'
       - android-content-update.js
       - tests/android-content-update.test.js
@@ -90,6 +92,17 @@ jobs:
           npm ci
           npm run build
           npm run android:sync
+
+      - name: Test reader web update packaging
+        if: github.event_name == 'pull_request'
+        run: |
+          node --check build/android-web/android-reader.js
+          python tools/build_android_web_update.py "$RUNNER_TEMP/android-reader-data"
+
+      - name: Test Android reader updates
+        if: github.event_name == 'pull_request'
+        working-directory: android
+        run: ./gradlew --no-daemon --init-script ci-maven-mirror.gradle :app:testDebugUnitTest
 
       - name: Assemble the debug APK
         working-directory: android
