@@ -1,4 +1,4 @@
-﻿package org.pcareader.preview;
+package org.pcareader.preview;
 
 import android.content.Context;
 import android.content.SharedPreferences;

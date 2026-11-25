@@ -1,4 +1,4 @@
-﻿package org.pcareader.preview;
+package org.pcareader.preview;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;

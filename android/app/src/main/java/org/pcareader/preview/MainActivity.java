@@ -1,4 +1,4 @@
-﻿package org.pcareader.preview;
+package org.pcareader.preview;
 
 import android.os.Handler;
 import android.os.Looper;

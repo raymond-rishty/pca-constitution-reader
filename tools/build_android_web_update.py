@@ -1,4 +1,4 @@
-﻿"""Archive the same offline web assets used by the Android APK."""
+"""Archive the same offline web assets used by the Android APK."""
 
 import hashlib
 import json
