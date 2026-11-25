@@ -31,3 +31,7 @@ Use the language tag before `.svg`:
 Each source publishes to the same filename in `diagrams/`. An authored SVG takes precedence over a DOT file with the same name. Spanish retains the printed wording and repeated appellant-record step. The embedded font subsets cover the chart's current characters; adding new text may require updating those subsets.
 
 This script is the manual build entry point and can host future static asset generation steps. It is intentionally not connected to GitHub Actions yet.
+
+## Inline Scripture previews
+
+After changing built-in text or its Scripture citations, run `python build_inline_scripture.py` to refresh `content/inline-scripture.js`. The script downloads the public-domain Berean Standard Bible, or accepts a local tab-separated copy with `--bsb`.
